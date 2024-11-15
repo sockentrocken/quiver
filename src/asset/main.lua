@@ -23,33 +23,32 @@ function step()
     -- Toggle the debug window on F1 press.
     if get_board_press(INPUT_BOARD.KEY_F1) then
         -- Get debug window state.
-        local debug_state = get_debug()
+        local debug_state = get_debug_state()
 
         -- Set state.
-        set_debug(not debug_state)
-        set_mouse_active(not debug_state)
+        set_debug_state(not debug_state)
     end
 
     local x = math.sin(get_time())
     local z = math.cos(get_time())
 
     -- Begin the 3D draw mode.
-    begin_mode_3d(vector.create(x * 4.0, 4.0, z * 4.0, 0.0), vector.zero, vector.create(0.0, 1.0, 0.0, 0.0), 90.0)
+    begin_mode_3d(camera_3d:new(vector_3:new(x * 4.0, 4.0, z * 4.0), vector_3:zero(), vector_3:new(0.0, 1.0, 0.0), 90.0))
 
         -- Draw a grid.
         draw_grid(64.0, 1.0)
 
         -- Draw a cube.
-        draw_cube(vector.zero, vector.one, vector.create(1.0, 0.0, 0.0, 1.0))
+        draw_cube(vector_3:zero(), vector_3:one(), color:new(1.0, 0.0, 0.0, 1.0))
 
     -- Close the 3D draw mode.
     close_mode_3d()
 
     -- Begin the 2D draw mode.
-    begin_mode_2d(vector.zero, vector.zero, 0.0, 1.0)
+    begin_mode_2d(camera_2d:new(vector_2:zero(), vector_2:zero(), 0.0, 1.0))
 
         -- Draw text.
-        draw_text("Press [F1] to toggle the debug window.", vector.create(16.0, 16.0, 0.0, 0.0), 32.0, vector.create(1.0, 0.0, 0.0, 1.0))
+        draw_text("Press [F1] to toggle the debug window.", vector_2:new(16.0, 16.0), 32.0, color:new(1.0, 0.0, 0.0, 1.0))
 
     -- Close the 2D draw mode.
     close_mode_2d()

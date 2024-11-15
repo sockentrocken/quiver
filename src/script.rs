@@ -34,12 +34,16 @@ impl Script {
         window: WindowPointer,
     ) -> Result<Self, String> {
         let lua = {
+            /*
             if info.safe {
                 Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())
                     .expect("Error initializing Lua virtual machine.")
             } else {
                 unsafe { Lua::unsafe_new_with(LuaStdLib::ALL, LuaOptions::new()) }
             }
+            */
+
+            unsafe { Lua::unsafe_new_with(LuaStdLib::ALL, LuaOptions::new()) }
         };
 
         let mut script = Self::default();
@@ -86,7 +90,6 @@ impl Script {
         video::set_global(lua, &global, system)?;
         audio::set_global(lua, &global, system)?;
         input::set_global(lua, &global)?;
-        collision::set_global(lua, &global)?;
 
         Ok(())
     }

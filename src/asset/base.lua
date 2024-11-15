@@ -1,3 +1,210 @@
+---@class vector_2
+---@field x number
+---@field y number
+vector_2 = {
+    _type = "vector_2",
+    x = 0.0,
+    y = 0.0,
+}
+
+function vector_2:new(x, y)
+    local i = {}
+    setmetatable(i, {
+        __index = self,
+        __add = function(a, b) return vector_2:new(a.x + b.x, a.y + b.y) end,
+        __sub = function(a, b) return vector_2:new(a.x - b.x, a.y - b.y) end,
+        __mul = function(a, b) return vector_2:new(a.x * b.x, a.y * b.y) end,
+        __div = function(a, b) return vector_2:new(a.x / b.x, a.y / b.y) end,
+        __tostring = function(a) return "{ x:"..tostring(a.x).." y:"..tostring(a.y).." }"..tostring(a.z).." }" end
+    })
+    i.x = x
+    i.y = y
+    return i
+end
+
+function vector_2:x()
+    return vector_2:new(1.0, 0.0)
+end
+
+function vector_2:y()
+    return vector_2:new(0.0, 1.0)
+end
+
+function vector_2:one()
+    return vector_2:new(1.0, 1.0)
+end
+
+function vector_2:zero()
+    return vector_2:new(0.0, 0.0)
+end
+
+---@class vector_3
+---@field x number
+---@field y number
+---@field z number
+vector_3 = {
+    _type = "vector_3",
+    x = 0.0,
+    y = 0.0,
+    z = 0.0,
+}
+
+function vector_3:new(x, y, z)
+    local i = {}
+    setmetatable(i, {
+        __index = self,
+        __add = function(a, b) return vector_3:new(a.x + b.x, a.y + b.y, a.z + b.z) end,
+        __sub = function(a, b) return vector_3:new(a.x - b.x, a.y - b.y, a.z - b.z) end,
+        __mul = function(a, b) return vector_3:new(a.x * b.x, a.y * b.y, a.z * b.z) end,
+        __div = function(a, b) return vector_3:new(a.x / b.x, a.y / b.y, a.z / b.z) end,
+        __tostring = function(a) return "{ x:"..tostring(a.x).." y:"..tostring(a.y).." z:"..tostring(a.z).." }" end
+    })
+    i.x = x
+    i.y = y
+    i.z = z
+    return i
+end
+
+function vector_3:x()
+    return vector_3:new(1.0, 0.0, 0.0)
+end
+
+function vector_3:y()
+    return vector_3:new(0.0, 1.0, 0.0)
+end
+
+function vector_3:z()
+    return vector_3:new(0.0, 0.0, 1.0)
+end
+
+function vector_3:one()
+    return vector_3:new(1.0, 1.0, 1.0)
+end
+
+function vector_3:zero()
+    return vector_3:new(0.0, 0.0, 0.0)
+end
+
+---@class camera_2d
+---@field shift vector_2
+---@field focus vector_2
+---@field angle number
+---@field zoom  number
+camera_2d = {
+    _type = "camera_2d",
+    shift = vector_2:zero(),
+    focus = vector_2:zero(),
+    angle = 0.0,
+    zoom  = 0.0,
+}
+
+function camera_2d:new(shift, focus, angle, zoom)
+    local i = {}
+    setmetatable(i, {
+        __index = self
+    })
+    i.shift = shift
+    i.focus = focus
+    i.angle = angle
+    i.zoom = zoom
+    return i
+end
+
+---@class camera_3d
+---@field point vector_3
+---@field focus vector_3
+---@field angle vector_3
+---@field zoom  number
+camera_3d = {
+    _type = "camera_3d",
+    point = vector_3:zero(),
+    focus = vector_3:zero(),
+    angle = vector_3:zero(),
+    zoom  = 0.0,
+}
+
+function camera_3d:new(point, focus, angle, zoom)
+    local i = {}
+    setmetatable(i, {
+        __index = self
+    })
+    i.point = point
+    i.focus = focus
+    i.angle = angle
+    i.zoom = zoom
+    return i
+end
+
+---@class color
+---@field r number
+---@field g number
+---@field b number
+---@field a number
+color = {
+    r = 0.0,
+    g = 0.0,
+    b = 0.0,
+    a = 0.0,
+}
+
+function color:new(r, g, b, a)
+    local i = {}
+    setmetatable(i, {
+        __index = self
+    })
+    i.r = r
+    i.g = g
+    i.b = b
+    i.a = a
+    return i
+end
+
+function color:white()
+    return color:new(1.0, 1.0, 1.0, 1.0)
+end
+
+function color:black()
+    return color:new(0.0, 0.0, 0.0, 1.0)
+end
+
+---@class box_2
+---@field min vector_2
+---@field max vector_2
+box_2 = {
+    _type = "box_2",
+    min = vector_2:zero(),
+    max = vector_2:zero(),
+}
+
+function box_2:new(min, max)
+    local i = {}
+    setmetatable(i, {
+        __index = self
+    })
+    i.min = min
+    i.max = max
+    return i
+end
+
+---@class box_3
+---@field min vector_3
+---@field max vector_3
+box_3 = {
+    _type = "box_3",
+    min = vector_3:zero(),
+    max = vector_3:zero(),
+}
+
+function box_3:new(min, max)
+    local i = {}
+    setmetatable(i, {
+        __index = self
+    })
+    i.min = min
+    i.max = max
+    return i
+end
+
 ---@enum input_board
 INPUT_BOARD = {
     KEY_NULL = 0,
@@ -122,6 +329,21 @@ INPUT_MOUSE = {
     MOUSE_BUTTON_BACK = 6,
 }
 
+---@enum cursor_mouse
+CURSOR_MOUSE = {
+    MOUSE_CURSOR_DEFAULT       = 0,
+    MOUSE_CURSOR_ARROW         = 1,
+    MOUSE_CURSOR_IBEAM         = 2,
+    MOUSE_CURSOR_CROSSHAIR     = 3,
+    MOUSE_CURSOR_POINTING_HAND = 4,
+    MOUSE_CURSOR_RESIZE_EW     = 5,
+    MOUSE_CURSOR_RESIZE_NS     = 6,
+    MOUSE_CURSOR_RESIZE_NWSE   = 7,
+    MOUSE_CURSOR_RESIZE_NESW   = 8,
+    MOUSE_CURSOR_RESIZE_ALL    = 9,
+    MOUSE_CURSOR_NOT_ALLOWED   = 10
+}
+
 ---@enum input_pad
 INPUT_PAD = {
     GAMEPAD_BUTTON_UNKNOWN = 0,
@@ -144,17 +366,3 @@ INPUT_PAD = {
     GAMEPAD_BUTTON_RIGHT_THUMB = 17,
 }
 
----@enum cursor_mouse
-CURSOR_MOUSE = {
-    MOUSE_CURSOR_DEFAULT       = 0,
-    MOUSE_CURSOR_ARROW         = 1,
-    MOUSE_CURSOR_IBEAM         = 2,
-    MOUSE_CURSOR_CROSSHAIR     = 3,
-    MOUSE_CURSOR_POINTING_HAND = 4,
-    MOUSE_CURSOR_RESIZE_EW     = 5,
-    MOUSE_CURSOR_RESIZE_NS     = 6,
-    MOUSE_CURSOR_RESIZE_NWSE   = 7,
-    MOUSE_CURSOR_RESIZE_NESW   = 8,
-    MOUSE_CURSOR_RESIZE_ALL    = 9,
-    MOUSE_CURSOR_NOT_ALLOWED   = 10
-}

@@ -1,114 +1,209 @@
 ---@meta
 
----@class (exact) vector
----@field x number
----@field y number
----@field z number
----@field w number
----@field X number
----@field Y number
----@field Z number
----@field W number
----@field zero vector Constant vector with every component set to 0.
----@field one  vector Constant vector with every component set to 1.
----@field create    function
----@field magnitude function
----@field normalize function
----@field cross     function
----@field dot       function
----@field angle     function
----@field floor     function
----@field ceil      function
----@field abs       function
----@field sign      function
----@field clamp     function
----@field min       function
----@field max       function
-vector = {}
+---@class model
+local model = {}
 
----Create a new vector.
----@param x number The X component of the vector.
----@param y number The Y component of the vector.
----@param z number The Z component of the vector.
----@param w number The W component of the vector.
----@return vector # The new vector.
-function vector.create(x, y, z, w) end
+---An unique handle for a model in memory.
+---@param path string Path to file.
+---@return model # The user-data object.
+function Model(path) end
 
----Calculate the magnitude of a vector.
----@param vector vector The vector to calculate the magnitude of.
----@return number # The magnitude of the vector.
-function vector.magnitude(vector) end
+---@class texture
+---@field size vector_2 # Size of the texture.
+local texture = {}
 
----Normalize a vector.
----@param vector vector The vector to normalize.
----@return vector # The unit vector version of the vector.
-function vector.normalize(vector) end
+---Draw the texture.
+---@param point vector_2 The point of the texture.
+---@param angle number   The angle of the texture.
+---@param scale number   The scale of the texture.
+---@param color color    The color of the texture.
+function texture:draw(point, angle, scale, color) end
 
----Calculate the cross product between *vector_1* and *vector_2*.
----@param vector_1 vector Vector 1.
----@param vector_2 vector Vector 2.
----@return vector # The cross product.
-function vector.cross(vector_1, vector_2) end
+---Draw the texture (pro variant).
+---@param box_a box_2    The source rectangle of the texture.
+---@param box_b box_2    The target rectangle of the texture.
+---@param point vector_2 The point of the texture.
+---@param angle number   The angle of the texture.
+---@param color color    The color of the texture.
+function texture:draw_pro(box_a, box_b, point, angle, color) end
 
----Calculate the dot product between *vector_1* and *vector_2*.
----@param vector_1 vector Vector 1.
----@param vector_2 vector Vector 2.
----@return number # The dot product.
-function vector.dot(vector_1, vector_2) end
+---An unique handle for a texture in memory.
+---@param path string Path to file.
+---@return texture # The user-data object.
+function Texture(path) end
 
----Calculate the angle between *vector_1* and *vector_2*.
----@param vector_1 vector Vector 1.
----@param vector_2 vector Vector 2.
----@param axis? vector Axis vector. If set, will determine the sign of the angle.
----@return number # The radian angle.
-function vector.angle(vector_1, vector_2, axis) end
+---@class render_texture
+---@field size vector_2 # Size of the texture.
+local render_texture = {}
 
----Round a vector down.
----@param vector vector The vector to round down.
----@return vector # The vector, with *floor* set on every component.
-function vector.floor(vector) end
+---Draw the texture.
+---@param point vector_2 The point of the texture.
+---@param angle number   The angle of the texture.
+---@param scale number   The scale of the texture.
+---@param color color    The color of the texture.
+function render_texture:draw(point, angle, scale, color) end
 
----Round a vector up.
----@param vector vector The vector to round up.
----@return vector # The vector, with *ceil* set on every component.
-function vector.ceil(vector) end
+---Draw the texture (pro variant).
+---@param box_a box_2    The source rectangle of the texture.
+---@param box_b box_2    The target rectangle of the texture.
+---@param point vector_2 The point of the texture.
+---@param angle number   The angle of the texture.
+---@param color color    The color of the texture.
+function render_texture:draw_pro(box_a, box_b, point, angle, color) end
 
----Calculate the absolute value of a vector.
----@param vector vector The vector to calculate the absolute value of.
----@return vector # The vector, with *abs* set on every component.
-function vector.abs(vector) end
+---An unique handle for a render texture in memory.
+---@param path string Path to file.
+---@return render_texture # The user-data object.
+function RenderTexture(path) end
 
---- Calculate the sign of every component of a vector.
----@param vector vector The vector to calculate the sign of.
----@return vector # The vector, with *sign* set on every component.
-function vector.sign(vector) end
+---@class image
+---@field size vector_2 # Size of the texture.
+local image = {}
 
----Apply a minimum/maximum value to every component of a vector.
----@param vector vector The vector to clamp to a minimum/maximum value of.
----@param min vector Minimum value vector.
----@param max vector Maximum value vector.
----@return vector # The vector, with *clamp* set on every component.
-function vector.clamp(vector, min, max) end
+---An unique handle for an image in memory.
+---@param path string Path to file.
+---@return image # The user-data object.
+function Image(path) end
 
----Apply a maximum value to every component of a vector.
----@param vector vector The vector to clamp to a maximum value of.
----@param max vector Maximum value vector.
----@return vector # The vector, with *max* set on every component.
-function vector.max(vector, max) end
+---@class font
+local font = {}
 
----Apply a minimum value to every component of a vector.
----@param vector vector The vector to clamp to a maximum value of.
----@param min vector Minimum value vector.
----@return vector # The vector, with *min* set on every component.
-function vector.min(vector, min) end
+---Draw a font.
+---@param text  string   Text of font to draw.
+---@param point vector_2 Point of font to draw.
+---@param scale number   Scale of font to draw.
+---@param space number   Space of font to draw.
+---@param color color    Color of font to draw.
+function font:draw(text, point, scale, space, color) end
 
----@class (exact) file
+---An unique handle for a font in memory.
+---@param path string Path to file.
+---@return font # The user-data object.
+function Font(path) end
+
+---@class shader
+local shader = {}
+
+---Initialize the shader draw mode. **MUST** call *close* after shader drawing is done.
+function shader:begin() end
+
+---Finalize the shader draw mode.
+function shader:close() end
+
+---An unique handle for a shader in memory.
+---@param v_path? string Path to shader .vs file.
+---@param f_path? string Path to shader .fs file.
+---@return shader # The user-data object.
+function Shader(v_path, f_path) end
+
+---Clear the screen with a color.
+---@param color color Color to clear the screen with.
+function set_screen_color(color) end
+
+---Get the size of the screen.
+---@return vector_2 # Screen size.
+function get_window_shape() end
+
+---Get the state of the window (minimized).
+---@return boolean # True if minimized, false otherwise.
+function get_window_minimize() end
+
+---Get the state of the window (maximized).
+---@return boolean # True if maximized, false otherwise.
+function get_window_maximize() end
+
+---Get the state of the window (focused).
+---@return boolean # True if focused, false otherwise.
+function get_window_focus() end
+
+---Get the state of the window (resized).
+---@return boolean # True if resized, false otherwise.
+function get_window_resize() end
+
+---Initialize the 3D draw mode. **MUST** call *close_mode_3d* after 3D drawing is done.
+---@param camera camera_3d The 3D camera to use for drawing.
+function begin_mode_3d(camera) end
+
+---Finalize the 3D draw mode.
+function close_mode_3d() end
+
+---Draw a grid.
+---@param slice number The slice count of the grid.
+---@param space number The space shift of the grid.
+function draw_grid(slice, space) end
+
+---Draw a cube.
+---@param point vector_3 The point of the cube.
+---@param shape vector_3 The shape of the cube.
+---@param color color    The color of the cube.
+function draw_cube(point, shape, color) end
+
+---Draw a ball.
+---@param point vector_3 The point of the ball.
+---@param shape number   The shape of the ball.
+---@param color color    The color of the ball.
+function draw_ball(point, shape, color) end
+
+---Draw a 3D box.
+---@param box_3 box_3 Box to draw.
+---@param color color The color of the box to draw.
+function draw_ball(point, shape, color) end
+
+---Initialize the 2D draw mode. **MUST** call *close_mode_2d* after 2D drawing is done.
+---@param camera camera_2d The 2D camera to use for drawing.
+function begin_mode_2d(camera) end
+
+---Finalize the 2D draw mode.
+function close_mode_2d() end
+
+---Get the world-space point for a screen-space point.
+---@param point  vector_2  Screen-space point to convert from.
+---@param camera camera_2d Camera to convert from.
+---@return vector_2 # World-space point.
+function get_screen_to_world(point, camera) end
+
+---Get the screen-space point for a world-space point.
+---@param point  vector_2  World-space point to convert from.
+---@param camera camera_2d Camera to convert from.
+---@return vector_2 # Screen-space point.
+function get_world_to_screen(point, camera) end
+
+---Draw a 2D box.
+---@param shape box_2    Box to draw.
+---@param point vector_2 The point of the box.
+---@param angle number   The angle of the box.
+---@param color color    The color of the box.
+function draw_box_2(shape, point, angle, color) end
+
+---Draw text.
+---@param text  string   Text to draw.
+---@param point vector_2 Point for the text.
+---@param scale number   Scale for the text.
+---@param color color    Color for the text.
+function draw_text(text, point, scale, color) end
+
+---@class file
 local file = {}
 
 ---An unique file handle for a file in memory.
 ---@param path string Path to file.
 ---@return file # The user-data object.
 function File(path) end
+
+---@class watcher_info
+local watcher_info = {}
+
+---@class file_watcher
+local file_watcher = {}
+
+---Poll for a notification in the file watcher's directory.
+---@return watcher_info | nil # Will return a non-nil value on event.
+function file_watcher:update() end
+
+---An unique handle for a file watcher in memory.
+---@param path string Path to file/directory.
+---@return file_watcher # The user-data object.
+function FileWatcher(path) end
 
 ---Load the engine.
 function engine_load() end
@@ -117,18 +212,18 @@ function engine_load() end
 function engine_exit() end
 
 ---Get the current state of the debug window.
-function get_debug() end
+function get_debug_state() end
 
 ---Set the current state of the debug window.
 ---@param value boolean New state.
-function set_debug(value) end
+function set_debug_state(value) end
 
 ---Get the current state of the debug logger.
-function get_logger() end
+function get_logger_state() end
 
 ---Set the current state of the debug logger.
 ---@param value boolean New state.
-function set_logger(value) end
+function set_logger_state(value) end
 
 ---Wipe the debug logger text.
 function wipe_logger() end
@@ -138,8 +233,8 @@ function wipe_logger() end
 function show_logger(value) end
 
 ---Push a new string to the debug logger.
----@param label string Label for line to print.
----@param color? vector Color for line to print.
+---@param label  string Label for line to print.
+---@param color? color  Color for line to print.
 function push_logger(label, color) end
 
 ---Push a new method to the debug parser.
@@ -183,217 +278,39 @@ function json_to_table(value) end
 ---@return boolean # True if file does exist, false otherwise.
 function get_file_exist(path) end
 
----@class (exact) model
-local model = {}
-
----An unique handle for a model in memory.
----@param path string Path to file.
----@return model # The user-data object.
-function Model(path) end
-
----@class (exact) texture
-local texture = {}
-
----An unique handle for a texture in memory.
----@param path string Path to file.
----@return texture # The user-data object.
-function Texture(path) end
-
----Draw the texture.
----@param point The point of the texture.
----@param angle The point of the texture.
----@param scale The point of the texture.
----@param color The point of the texture.
-function texture:draw(point, angle, scale, color) end
-
----Draw the texture (pro variant).
----@param rec_a The "source" rectangle of the texture.
----@param rec_b The "target" rectangle of the texture.
----@param angle The point of the texture.
----@param scale The point of the texture.
----@param color The point of the texture.
-function texture:draw(point, angle, scale, color) end
-
----@class (exact) render_texture
-local render_texture = {}
-
----An unique handle for a render texture in memory.
----@param path string Path to file.
----@return render_texture # The user-data object.
-function RenderTexture(path) end
-
----@class (exact) image
-local image = {}
-
----An unique handle for an image in memory.
----@param path string Path to file.
----@return image # The user-data object.
-function Image(path) end
-
----@class (exact) font
-local font = {}
-
----An unique handle for a font in memory.
----@param path string Path to file.
----@return font # The user-data object.
-function Font(path) end
-
----@class (exact) shader
-local shader = {}
-
----An unique handle for a shader in memory.
----@param path string Path to file.
----@return shader # The user-data object.
-function Shader(path) end
-
----@class (exact) steam
-local steam = {}
-
----A handle into the Steam API.
----@return steam # The user-data object.
-function Steam() end
-
----Clear the screen with a color.
----@param color vector color to clear the screen with.
-function clear_screen(color) end
-
----Get the size of the screen.
----@return vector # Screen size.
-function get_window_shape() end
-
----Get the state of the window (minimized).
----@return boolean # True if minimized, false otherwise.
-function get_window_minimized() end
-
----Get the state of the window (maximized).
----@return boolean # True if maximized, false otherwise.
-function get_window_maximized() end
-
----Get the state of the window (focused).
----@return boolean # True if focused, false otherwise.
-function get_window_focused() end
-
----Get the state of the window (resized).
----@return boolean # True if resized, false otherwise.
-function get_window_resized() end
-
----Initialize the 3D draw mode. **MUST** call *close_mode_3d* after 3D drawing is done.
----@param point vector The point of the camera.
----@param focus vector The focus of the camera.
----@param up vector The direction pointing "up" of the camera.
----@param zoom number The zoom of the camera.
-function begin_mode_3d(point, focus, up, zoom) end
-
----Finalize the 3D draw mode.
-function close_mode_3d() end
-
----*3D mode operation.* Draw a grid.
----@param slice number The slice count of the grid.
----@param space number The space shift of the grid.
-function draw_grid(slice, space) end
-
----*3D mode operation.* Draw a cube.
----@param point vector The point of the cube.
----@param shape vector The shape of the cube.
----@param color vector The color of the cube.
-function draw_cube(point, shape, color) end
-
---- foo
-
---- foo
-
----Initialize the 2D draw mode. **MUST** call *close_mode_2d* after 2D drawing is done.
----@param point vector The point of the camera.
----@param focus vector The focus of the camera.
----@param angle number The angle of the camera.
----@param zoom number The zoom of the camera.
-function begin_mode_2d(point, focus, angle, zoom) end
-
----Finalize the 2D draw mode.
-function close_mode_2d() end
-
----*2D mode operation.* Get the world-space point for a screen-space point.
----@param point vector Screen-space point to convert from.
----@param c_point vector The point of the camera.
----@param c_focus vector The focus of the camera.
----@param c_angle number The angle of the camera.
----@param c_zoom number The zoom of the camera.
----@return vector # World-space point.
-function get_screen_to_world(point, c_point, c_focus, c_angle, c_zoom) end
-
----*2D mode operation.* Get the screen-space point for a world-space point.
----@param point vector World-space point to convert from.
----@param c_point vector The point of the camera.
----@param c_focus vector The focus of the camera.
----@param c_angle number The angle of the camera.
----@param c_zoom number The zoom of the camera.
----@return vector # Screen-space point.
-function get_world_to_screen(point, c_point, c_focus, c_angle, c_zoom) end
-
----*2D mode operation.* Draw a rectangle.
----@param shape vector Shape for the rectangle.
----@param point vector Point for the rectangle.
----@param angle vector Angle for the rectangle.
----@param color vector Color for the rectangle.
-function draw_rectangle(shape, point, angle, color) end
-
----*2D mode operation.* Draw text.
----@param text string Text to draw.
----@param point vector Point for the text.
----@param scale number Scale for the text.
----@param color vector Color for the text.
-function draw_text(text, point, scale, color) end
-
----@class (exact) sound
-local sound = {}
-
----An unique handle for sound in memory.
----@param path string Path to file.
----@return sound # The user-data object.
-function Sound(path) end
-
---- foo
-
----@class (exact) music
-local music = {}
-
----An unique handle for music in memory.
----@param path string Path to file.
----@return music # The user-data object.
-function Music(path) end
-
----Play music.
-function music:play() end
-
----Update music stream.
-function music:update() end
-
 ---Set the interface alpha.
 ---@param value number The alpha of the interface.
 function set_interface_alpha(value) end
 
 ---Draw an interface button.
----@param shape vector The shape of the button. X/Y for position, Z/W for width/height.
+---@param shape box_2  The shape of the button.
 ---@param label string The label of the button.
 ---@return boolean # True on button click.
 function interface_button(shape, label) end
 
 ---Draw an interface toggle.
----@param shape vector  The shape of the slider. X/Y for position, Z/W for width/height.
+---@param shape box_2   The shape of the slider.
 ---@param label string  The label of the slider.
 ---@param value boolean The value of the slider.
 ---@return boolean # The new value of *value*, if any.
 function interface_toggle(shape, label, value) end
 
 ---Draw an interface check box.
----@param shape vector  The shape of the check box. X/Y for position, Z/W for width/height.
+---@param shape box_2   The shape of the check box.
 ---@param label string  The label of the check box.
 ---@param value boolean The value of the check box.
 ---@return boolean # The new value of *value*, if any.
 function interface_check_box(shape, label, value) end
 
+---Draw an interface combo box.
+---@param shape box_2  The shape of the combo box.
+---@param label string The label of the combo box.
+---@param value number The value of the combo box.
+---@return number # The new value of *value*, if any.
+function interface_combo_box(shape, label, value) end
+
 ---Draw an interface spinner.
----@param shape vector  The shape of the spinner. X/Y for position, Z/W for width/height.
+---@param shape box_2   The shape of the spinner.
 ---@param label string  The label of the spinner.
 ---@param value number  The value of the spinner.
 ---@param min   number  The minimum value of the spinner.
@@ -402,15 +319,8 @@ function interface_check_box(shape, label, value) end
 ---@return number # The new value of *value*, if any.
 function interface_spinner(shape, label, value, min, max, edit) end
 
----Draw an interface combo box.
----@param shape vector The shape of the combo box. X/Y for position, Z/W for width/height.
----@param label string The label of the combo box.
----@param value number The value of the combo box.
----@return number # The new value of *value*, if any.
-function interface_combo_box(shape, label, value) end
-
 ---Draw an interface slider.
----@param shape   vector The shape of the slider. X/Y for position, Z/W for width/height.
+---@param shape   box_2  The shape of the slider.
 ---@param label_a string The label of the slider.
 ---@param label_b string The label of the slider.
 ---@param value   number The value of the slider.
@@ -420,7 +330,7 @@ function interface_combo_box(shape, label, value) end
 function interface_slider(shape, label_a, label_b, value, min, max) end
 
 ---Draw an interface slider bar.
----@param shape   vector The shape of the slider bar. X/Y for position, Z/W for width/height.
+---@param shape   box_2  The shape of the slider bar.
 ---@param label_a string The label of the slider bar.
 ---@param label_b string The label of the slider bar.
 ---@param value   number The value of the slider bar.
@@ -446,23 +356,23 @@ function get_mouse_hidden() end
 function get_mouse_screen() end
 
 ---Get the current point of the mouse.
----@return vector # The point of the mouse.
+---@return vector_2 # The point of the mouse.
 function get_mouse_point() end
 
 ---Get the current delta (i.e. mouse movement) of the mouse.
----@return vector # The delta of the mouse.
+---@return vector_2 # The delta of the mouse.
 function get_mouse_delta() end
 
 ---Set the current point of the mouse.
----@param value vector New point.
+---@param value vector_2 New point.
 function set_mouse_point(value) end
 
 ---Set the current shift of the mouse.
----@param value vector New shift.
+---@param value vector_2 New shift.
 function set_mouse_shift(value) end
 
 ---Set the current scale of the mouse.
----@param value vector New scale.
+---@param value vector_2 New scale.
 function set_mouse_scale(value) end
 
 ---Set the current cursor of the mouse.
@@ -470,7 +380,7 @@ function set_mouse_scale(value) end
 function set_mouse_cursor(value) end
 
 ---Get the current delta (i.e. mouse wheel movement) of the mouse wheel.
----@return vector # The delta of the mouse wheel.
+---@return vector_2 # The delta of the mouse wheel.
 function get_mouse_wheel() end
 
 ---Get the state of an input (up).
@@ -505,6 +415,31 @@ function get_board_press(value) end
 ---@param value input_board The input to check for.
 function get_board_release(value) end
 
+---Get the state of a pad.
+---@param index integer The index of the pad to check for.
+---@return boolean # True if pad is available, false otherwise.
+function get_pad_state(index) end
+
+---Get the name of a pad.
+---@param index integer The index of the pad to check for.
+---@return string # The name of the pad.
+function get_pad_name(index) end
+
+---Get the last pad button pressed.
+---@return input_pad # The last pad button pressed.
+function get_pad_queue() end
+
+---Get the axis count of a pad.
+---@param index integer The index of the pad to check for.
+---@return number # The axis count of the pad.
+function get_pad_axis_count(index) end
+
+---Get the axis state of a pad.
+---@param index integer The index of the pad to check for.
+---@param axis  integer The axis of the pad to check for.
+---@return number # The axis state of the pad.
+function get_pad_axis_state(index, axis) end
+
 ---Get the state of an input (up).
 ---@param index integer The index of the pad to check for.
 ---@param value input_pad The input to check for.
@@ -524,4 +459,89 @@ function get_pad_press(index, value) end
 ---@param index integer The index of the pad to check for.
 ---@param value input_pad The input to check for.
 function get_pad_release(index, value) end
+
+---@class sound
+local sound = {}
+
+---Play sound.
+function sound:play() end
+
+---Get if sound is playing.
+function sound:get_playing() end
+
+---Stop sound.
+function sound:stop() end
+
+---Pause sound.
+function sound:pause() end
+
+---Resume sound.
+function sound:resume() end
+
+---Set volume for sound. (range: 0.0 - 1.0)
+---@param value number The volume for the sound.
+function sound:volume(value) end
+
+---Set pitch for sound.
+---@param value number The pitch for the sound.
+function sound:pitch(value) end
+
+---Set pan for sound. (range: 0.0 - 1.0; 0.5 is center)
+---@param value number The pan for the sound.
+function sound:pan(value) end
+
+---An unique handle for sound in memory.
+---@param path string Path to file.
+---@return sound # The user-data object.
+function Sound(path) end
+
+---@class music
+local music = {}
+
+---Play music.
+function music:play() end
+
+---Get if music is playing.
+function music:get_playing() end
+
+---Stop music.
+function music:stop() end
+
+---Pause music.
+function music:pause() end
+
+---Resume music.
+function music:resume() end
+
+---Set volume for music. (range: 0.0 - 1.0)
+---@param value number The volume for the music.
+function music:volume(value) end
+
+---Set pitch for music.
+---@param value number The pitch for the music.
+function music:pitch(value) end
+
+---Set pan for music. (range: 0.0 - 1.0; 0.5 is center)
+---@param value number The pan for the music.
+function music:pan(value) end
+
+---Update music stream.
+function music:update() end
+
+---Set position for music.
+---@param value number The position for the music.
+function music:seek() end
+
+---Get time length of music.
+---@return number # The length of the music.
+function music:length() end
+
+---Get time played of music.
+---@return number # The time played of the music.
+function music:played() end
+
+---An unique handle for music in memory.
+---@param path string Path to file.
+---@return music # The user-data object.
+function Music(path) end
 
