@@ -5,12 +5,13 @@
 */
 
 use crate::engine::*;
-use crate::script::*;
+use crate::module::*;
 use crate::status::*;
 
 //================================================================
 
 use imgui::InputTextCallbackHandler;
+use raylib::texture::Texture2D;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -25,6 +26,7 @@ pub struct Window {
     pub logger: Logger,
     pub parser: Parser,
     pub wizard: Wizard,
+    pub icon: Option<Texture2D>,
 }
 
 impl Window {
@@ -392,11 +394,22 @@ impl<'a> InputTextCallbackHandler for ParserCallback<'a> {
 
 //================================================================
 
+#[derive(Default, Clone)]
+pub enum WizardState {
+    #[default]
+    Main,
+    NewModule,
+    NewSystem,
+    NewWindow,
+    LoadModule,
+}
+
 #[derive(Default)]
 pub struct Wizard {
     pub warn: String,
     pub path: String,
     pub info: InfoModule,
+    pub state: WizardState,
 }
 
 use crate::utility::*;
@@ -410,7 +423,13 @@ impl Wizard {
     pub const NAME_META: &'static str = "meta.lua";
     pub const NAME_BASE: &'static str = "base.lua";
 
-    pub fn draw(engine: &Engine, interface: &imgui::Ui) {
+    pub fn draw(engine: &Engine, interface: &mut imgui::Ui) {
+        let size = interface.io().display_size;
+
+        let window = interface.push_style_var(imgui::StyleVar::WindowRounding(4.0));
+        let frame = interface.push_style_var(imgui::StyleVar::FrameRounding(4.0));
+        let grab = interface.push_style_var(imgui::StyleVar::GrabRounding(4.0));
+
         interface
             .window("Engine Wizard")
             .flags(
@@ -419,89 +438,182 @@ impl Wizard {
                     | imgui::WindowFlags::NO_DECORATION,
             )
             .position([0.0, 0.0], imgui::Condition::Always)
-            .size(interface.io().display_size, imgui::Condition::Always)
+            .size(size, imgui::Condition::Always)
             .build(|| {
-                interface.text("Welcome to the Quick Start Wizard for Quiver. Fill out the following information to create a new module.");
+                interface.set_window_font_scale(1.25);
 
-                interface.child_window("Wizard").size([0.0, -46.0]).border(true).build(|| {
-                    let wizard = &mut engine.window.borrow_mut().wizard;
+                //interface.set_window_font_scale(2.0);
 
-                    interface.text("Module Data");
+                let state = engine.window.borrow().wizard.state.clone();
+                let wizard = &mut engine.window.borrow_mut().wizard;
 
-                    interface.input_text("Module Path", &mut wizard.path).hint("my_module").build();
-                    interface.input_text("Module Name", &mut wizard.info.name).hint("My Module.").build();
-                    interface.input_text("Module Info", &mut wizard.info.info).hint("A module for Quiver.").build();
+                match state {
+                    WizardState::Main => {
+                        interface.set_cursor_pos([8.0, size[1] - 160.0]);
 
-                    interface.separator();
+                        interface.separator();
+                        interface.spacing();
 
-                    interface.text("System Data");
-                    interface.text("The following data will alter the availability of an engine sub-system.");
+                        if interface.button("New Module") {
+                            wizard.state = WizardState::NewModule;
+                        }
+                        if interface.button("Load Module") {
+                            use rfd::FileDialog;
 
-                    if let Some(system) = &mut wizard.info.system {
-                        interface.checkbox("Model",   &mut system.model);
-                        interface.checkbox("Texture", &mut system.texture);
-                        interface.checkbox("Image",   &mut system.image);
-                        interface.checkbox("Sound",   &mut system.sound);
-                        interface.checkbox("Music",   &mut system.music);
-                        interface.checkbox("Font",    &mut system.font);
-                        interface.checkbox("Shader",  &mut system.shader);
+                            let current = std::env::current_dir().unwrap();
+                            let current = current.to_str().unwrap();
+
+                            if let Some(folder) =
+                                FileDialog::new().set_directory(current).pick_folders()
+                            {
+                                let folder = folder
+                                    .iter()
+                                    .map(|p| p.to_str().unwrap().to_string())
+                                    .collect();
+
+                                let info = InfoEngine {
+                                    safe: true,
+                                    path: folder,
+                                };
+
+                                info.dump("./").unwrap();
+
+                                Status::set_restart(engine);
+                            }
+                        }
+                        if interface.button("Exit Quiver") {
+                            Status::set_closure(engine);
+                        }
+                        if interface.button("GitHub") {
+                            Status::set_closure(engine);
+                        }
+                        if interface.button("Discord") {
+                            Status::set_closure(engine);
+                        }
+                        interface.text("Version: 1.0.0");
                     }
+                    WizardState::NewModule => {
+                        interface.text("Module Data");
 
-                    interface.separator();
+                        interface
+                            .input_text("Module Path", &mut wizard.path)
+                            .hint("my_module")
+                            .build();
+                        interface
+                            .input_text("Module Name", &mut wizard.info.name)
+                            .hint("My Module.")
+                            .build();
+                        interface
+                            .input_text("Module Info", &mut wizard.info.info)
+                            .hint("A module for Quiver.")
+                            .build();
 
-                    interface.text("Window Data");
-                    interface.text("The following data will alter the behaviour of the window.");
+                        interface.set_cursor_pos([8.0, size[1] - 58.0]);
 
-                    if let Some(window) = &mut wizard.info.window {
-                        interface.checkbox("Full-Screen", &mut window.fullscreen);
-                        interface.checkbox("Border-Less", &mut window.borderless);
-                        interface.checkbox("Vertical-Sync", &mut window.sync);
-                        interface.checkbox("MSAA", &mut window.msaa);
-                        interface.checkbox("Resize", &mut window.resize);
-                        interface.checkbox("Hidden", &mut window.hidden);
-                        interface.checkbox("Minimized", &mut window.minimize);
-                        interface.checkbox("Maximized", &mut window.maximize);
-                        interface.checkbox("No-Decor", &mut window.no_decor);
-                        interface.checkbox("No-Focus", &mut window.no_focus);
-                        interface.checkbox("On-Front", &mut window.on_front);
-                        interface.checkbox("Run Hidden", &mut window.run_hidden);
-                        interface.checkbox("Mouse Pass", &mut window.mouse_pass);
-                        interface.checkbox("Draw Alpha", &mut window.draw_alpha);
-                        interface.checkbox("High Scale", &mut window.high_scale);
-                        interface.input_text("Window Name", &mut window.name).hint("My Module").build();
-                        //interface.checkbox("", &mut window.icon);
-                        interface.slider("Window Rate", 60, 240, &mut window.rate);
-                        //interface.checkbox("", &mut window.point);
-                        //interface.checkbox("", &mut window.shape);
-                        //interface.checkbox("", &mut window.shape_min);
-                        //interface.checkbox("", &mut window.shape_max);
-                        //interface.checkbox("", &mut window.alpha);
+                        interface.separator();
+                        interface.spacing();
+
+                        if interface.button("Next") {
+                            wizard.state = WizardState::NewSystem;
+                        }
+                        if interface.button("Back") {
+                            wizard.state = WizardState::Main;
+                        }
                     }
-                });
+                    WizardState::NewSystem => {
+                        interface.text("System Data");
 
+                        if let Some(system) = &mut wizard.info.system {
+                            interface.checkbox("Model", &mut system.model);
+                            interface.checkbox("Texture", &mut system.texture);
+                            interface.checkbox("Image", &mut system.image);
+                            interface.checkbox("Sound", &mut system.sound);
+                            interface.checkbox("Music", &mut system.music);
+                            interface.checkbox("Font", &mut system.font);
+                            interface.checkbox("Shader", &mut system.shader);
+                        }
+
+                        interface.set_cursor_pos([8.0, size[1] - 58.0]);
+
+                        interface.separator();
+                        interface.spacing();
+
+                        if interface.button("Next") {
+                            wizard.state = WizardState::NewWindow;
+                        }
+                        if interface.button("Back") {
+                            wizard.state = WizardState::NewModule;
+                        }
+                    }
+                    WizardState::NewWindow => {
+                        interface.text("Window Data");
+
+                        if let Some(window) = &mut wizard.info.window {
+                            interface.checkbox("Full-Screen", &mut window.fullscreen);
+                            interface.checkbox("Border-Less", &mut window.borderless);
+                            interface.checkbox("Vertical-Sync", &mut window.sync);
+                            interface.checkbox("MSAA", &mut window.msaa);
+                            interface.checkbox("Resize", &mut window.resize);
+                            interface.checkbox("Hidden", &mut window.hidden);
+                            interface.checkbox("Minimized", &mut window.minimize);
+                            interface.checkbox("Maximized", &mut window.maximize);
+                            interface.checkbox("No-Decor", &mut window.no_decor);
+                            interface.checkbox("No-Focus", &mut window.no_focus);
+                            interface.checkbox("On-Front", &mut window.on_front);
+                            interface.checkbox("Run Hidden", &mut window.run_hidden);
+                            interface.checkbox("Mouse Pass", &mut window.mouse_pass);
+                            interface.checkbox("Draw Alpha", &mut window.draw_alpha);
+                            interface.checkbox("High Scale", &mut window.high_scale);
+                            interface
+                                .input_text("Window Name", &mut window.name)
+                                .hint("My Module")
+                                .build();
+                            //interface.checkbox("", &mut window.icon);
+                            interface.slider("Window Rate", 60, 240, &mut window.rate);
+                            //interface.checkbox("", &mut window.point);
+                            //interface.checkbox("", &mut window.shape);
+                            //interface.checkbox("", &mut window.shape_min);
+                            //interface.checkbox("", &mut window.shape_max);
+                            //interface.checkbox("", &mut window.alpha);
+                        }
+
+                        interface.set_cursor_pos([8.0, size[1] - 58.0]);
+
+                        interface.separator();
+                        interface.spacing();
+
+                        if interface.button("Make Module") {}
+                        if interface.button("Back") {
+                            wizard.state = WizardState::NewSystem;
+                        }
+                    }
+                    WizardState::LoadModule => todo!(),
+                }
+
+                /*
                 if interface.button("Make Module") {
                     let result = engine.window.borrow().wizard.make();
 
                     match result {
                         Ok(_) => Status::set_restart(engine),
                         Err(error) => {
-                             engine.window.borrow_mut().wizard.warn = error;
-                             interface.open_popup("Error");
-                         }
+                            engine.window.borrow_mut().wizard.warn = error;
+                            interface.open_popup("Error");
+                        }
                     }
                 }
 
-                if interface.button("Exit Engine") {
-                    Status::set_closure(engine);
-                }
+                interface
+                    .modal_popup_config("Error")
+                    .always_auto_resize(true)
+                    .build(|| {
+                        interface.text(&engine.window.borrow().wizard.warn);
 
-                interface.modal_popup_config("Error").always_auto_resize(true).build(|| {
-                    interface.text(&engine.window.borrow().wizard.warn);
-
-                    if interface.button("Close") {
-                        interface.close_current_popup();
-                    }
-                });
+                        if interface.button("Close") {
+                            interface.close_current_popup();
+                        }
+                    });
+                */
             });
     }
 
@@ -580,10 +692,7 @@ impl Wizard {
             path: vec![self.path.clone()],
         };
 
-        file::write(
-            InfoEngine::FILE_NAME,
-            serde_json::to_string(&info).map_err(|e| e.to_string())?,
-        )?;
+        info.dump("./")?;
 
         raylib::core::misc::open_url(&self.path);
 

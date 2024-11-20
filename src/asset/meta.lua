@@ -278,6 +278,17 @@ function json_to_table(value) end
 ---@return boolean # True if file does exist, false otherwise.
 function get_file_exist(path) end
 
+---@class steam
+local steam = {}
+
+---Play sound.
+function sound:play() end
+
+---An unique handle for the Steam API. Creating more than one handle will result in an error.
+---@param app? number App ID. If nil, it will resort to the default (480) SpaceWar example.
+---@return steam # The user-data object.
+function Steam(app) end
+
 ---Set the interface alpha.
 ---@param value number The alpha of the interface.
 function set_interface_alpha(value) end

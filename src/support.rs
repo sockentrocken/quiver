@@ -40,9 +40,16 @@ impl RaylibImguiSupport {
         let mut context = imgui::Context::create();
         context.set_ini_filename(None);
         context.set_log_filename(None);
+        /*
         context
             .fonts()
             .add_font(&[imgui::FontSource::DefaultFontData { config: None }]);
+        */
+        context.fonts().add_font(&[imgui::FontSource::TtfData {
+            data: include_bytes!("asset/font.ttf"),
+            size_pixels: 64.0,
+            config: None,
+        }]);
 
         if let Some(support) = ClipboardSupport::init() {
             context.set_clipboard_backend(support);

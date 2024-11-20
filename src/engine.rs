@@ -26,6 +26,7 @@ pub struct Engine {
 
 impl Engine {
     pub const BUILD: i32 = 1;
+    pub const ICON: &'static [u8] = include_bytes!("asset/card.png");
     pub const LOGO: [&'static [u8]; 3] = [
         include_bytes!("asset/logo_512.png"),
         include_bytes!("asset/logo_256.png"),
@@ -68,7 +69,11 @@ impl Engine {
     pub fn window(
         &mut self,
     ) -> Result<(RaylibHandle, RaylibThread, RaylibAudio, RaylibImguiSupport), String> {
-        let window = &self.script.window;
+        let window = &mut self.script.window.clone();
+
+        if matches!(&*self.status.borrow(), Status::Wizard) {
+            window.shape = (1024, 768);
+        }
 
         let (mut handle, thread) = raylib::init()
             .title(&window.name)
@@ -144,6 +149,14 @@ impl Engine {
 
         let interface = RaylibImguiSupport::setup(&mut handle, &thread);
 
+        let icon = Image::load_image_from_mem(".png", Self::ICON).map_err(|e| e.to_string())?;
+
+        self.window.borrow_mut().icon = Some(
+            handle
+                .load_texture_from_image(&thread, &icon)
+                .map_err(|e| e.to_string())?,
+        );
+
         Ok((handle, thread, audio, interface))
     }
 }
@@ -184,5 +197,14 @@ impl InfoEngine {
         } else {
             Err(InfoResult::Missing)
         }
+    }
+
+    pub fn dump(&self, path: &str) -> Result<(), String> {
+        crate::utility::file::write(
+            &format!("{}{}", path, InfoEngine::FILE_NAME),
+            serde_json::to_string(self).map_err(|e| e.to_string())?,
+        )?;
+
+        Ok(())
     }
 }

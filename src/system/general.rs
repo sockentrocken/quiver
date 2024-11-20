@@ -1,4 +1,3 @@
-use crate::script::*;
 use crate::status::*;
 use crate::window::*;
 
@@ -7,7 +6,6 @@ use crate::window::*;
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::ffi::CString;
 use std::sync::Mutex;
 
 //================================================================
@@ -514,145 +512,145 @@ impl FileWatcher {
 //================================================================
 
 #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, global: &mlua::Table, status: StatusPointer, window : WindowPointer) -> mlua::Result<()> {
-        /* meta
-        ---Load the engine.
-        function engine_load() end
-        */
-        let clone = status.clone();
-        global.set("engine_load", lua.create_function(move |_, _ : ()| {
-            *clone.borrow_mut() = Status::Restart;
-            Ok(())
-        })?)?;
+pub fn set_global(lua: &Lua, global: &mlua::Table, status: StatusPointer, window: WindowPointer) -> mlua::Result<()> {
+    /* meta
+    ---Load the engine.
+    function engine_load() end
+    */
+    let clone = status.clone();
+    global.set("engine_load", lua.create_function(move |_, _ : ()| {
+        *clone.borrow_mut() = Status::Restart;
+        Ok(())
+    })?)?;
 
-        /* meta
-        ---Exit the engine.
-        function engine_exit() end
-        */
-        let clone = status.clone();
-        global.set("engine_exit", lua.create_function(move |_, _ : ()| {
-            *clone.borrow_mut() = Status::Closure;
-            Ok(())
-        })?)?;
+    /* meta
+    ---Exit the engine.
+    function engine_exit() end
+    */
+    let clone = status.clone();
+    global.set("engine_exit", lua.create_function(move |_, _ : ()| {
+        *clone.borrow_mut() = Status::Closure;
+        Ok(())
+    })?)?;
 
-        /* meta
-       ---Get the current state of the debug window.
-        function get_debug_state() end
-        */
-        let clone = window.clone();
-        global.set("get_debug_state", lua.create_function(move |_, _ : ()| {
-            Ok(clone.borrow().active)
-        })?)?;
+    /* meta
+   ---Get the current state of the debug window.
+    function get_debug_state() end
+    */
+    let clone = window.clone();
+    global.set("get_debug_state", lua.create_function(move |_, _ : ()| {
+        Ok(clone.borrow().active)
+    })?)?;
 
-        /* meta
-        ---Set the current state of the debug window.
-        ---@param value boolean New state.
-        function set_debug_state(value) end
-        */
-        let clone = window.clone();
-        global.set("set_debug_state", lua.create_function(move |_, value : bool| {
-            let mut clone = clone.borrow_mut();
-            clone.active = value;
-            clone.parser.dirty = value;
-
-            Ok(())
-        })?)?;
-
-        /* meta
-        ---Get the current state of the debug logger.
-        function get_logger_state() end
-        */
-        let clone = window.clone();
-        global.set("get_logger_state", lua.create_function(move |_, _ : ()| {
-            Ok(clone.borrow_mut().logger.active)
-        })?)?;
-
-        /* meta
-        ---Set the current state of the debug logger.
-        ---@param value boolean New state.
-        function set_logger_state(value) end
-        */
-        let clone = window.clone();
-        global.set("set_logger_state", lua.create_function(move |_, value : bool| {
-            clone.borrow_mut().logger.active = value;
-            Ok(())
-        })?)?;
-
-        /* meta
-        ---Wipe the debug logger text.
-        function wipe_logger() end
-        */
-        let clone = window.clone();
-        global.set("wipe_logger", lua.create_function(move |_, _ : ()| {
-            Logger::wipe(&mut clone.borrow_mut().logger);
-            Ok(())
-        })?)?;
-
-        /* meta
-        ---Show the debug logger text.
-        ---@param value boolean New state.
-        function show_logger(value) end
-        */
-        let clone = window.clone();
-        global.set("show_logger", lua.create_function(move |_, value: bool| {
-            Logger::show(&mut clone.borrow_mut().logger, value);
-            Ok(())
-        })?)?;
-
-        /* meta
-        ---Push a new string to the debug logger.
-        ---@param label  string Label for line to print.
-        ---@param color? color  Color for line to print.
-        function push_logger(label, color) end
-        */
-        let clone = window.clone();
-        global.set("push_logger", lua.create_function(move |lua: &Lua, (label, color) : (String, Option<LuaValue>)| {
-            println!("{label}");
-
-            let color : Color = {
-                if let Some(color) = color {
-                    lua.from_value(color)?
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 1.0)
-                }
-            };
-            clone.borrow_mut().logger.push(LogLine::new(label, [color.r, color.g, color.b, color.a]));
-            Ok(())
-        })?)?;
-
-        /* meta
-        ---Push a new method to the debug parser.
-        ---@param name string Name for method to push.
-        ---@param info string Info for method to push.
-        ---@param call function Function call-back for method to push.
-        function push_parser(name, info, call) end
-        */
-        let clone = window.clone();
-        global.set("push_parser", lua.create_function(move |_, (name, info, call) : (String, String, mlua::Function)| {
-            clone.borrow_mut().parser.method.insert(name, ParserMethod { call, info });
-            Ok(())
-        })?)?;
-
-        global.set("File",           lua.create_function(self::File::new)?)?;
-        global.set("FileWatcher",    lua.create_function(self::FileWatcher::new)?)?;
-        //global.set("Automation",    lua.create_function(self::Automation::new)?)?;
-
-        global.set("get_file_exist",   lua.create_function(self::get_file_exist)?)?;
-        global.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
-        global.set("get_time",       lua.create_function(self::get_time)?)?;
-        global.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
-        global.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
-        global.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
-        global.set("json_to_table",  lua.create_function(self::json_to_table)?)?;
-        global.set("table_to_json",  lua.create_function(self::table_to_json)?)?;
-        //global.set("open_link",  lua.create_function(self::open_link)?)?;
-        //global.set("compress_data",  lua.create_function(self::compress_data)?)?;
-        //global.set("decompress_data",  lua.create_function(self::decompress_data)?)?;
-        //global.set("encode_data_base64",  lua.create_function(self::encode_data_base64)?)?;
-        //global.set("decode_data_base64",  lua.create_function(self::decode_data_base64)?)?;
+    /* meta
+    ---Set the current state of the debug window.
+    ---@param value boolean New state.
+    function set_debug_state(value) end
+    */
+    let clone = window.clone();
+    global.set("set_debug_state", lua.create_function(move |_, value : bool| {
+        let mut clone = clone.borrow_mut();
+        clone.active = value;
+        clone.parser.dirty = value;
 
         Ok(())
-    }
+    })?)?;
+
+    /* meta
+    ---Get the current state of the debug logger.
+    function get_logger_state() end
+    */
+    let clone = window.clone();
+    global.set("get_logger_state", lua.create_function(move |_, _ : ()| {
+        Ok(clone.borrow_mut().logger.active)
+    })?)?;
+
+    /* meta
+    ---Set the current state of the debug logger.
+    ---@param value boolean New state.
+    function set_logger_state(value) end
+    */
+    let clone = window.clone();
+    global.set("set_logger_state", lua.create_function(move |_, value : bool| {
+        clone.borrow_mut().logger.active = value;
+        Ok(())
+    })?)?;
+
+    /* meta
+    ---Wipe the debug logger text.
+    function wipe_logger() end
+    */
+    let clone = window.clone();
+    global.set("wipe_logger", lua.create_function(move |_, _ : ()| {
+        Logger::wipe(&mut clone.borrow_mut().logger);
+        Ok(())
+    })?)?;
+
+    /* meta
+    ---Show the debug logger text.
+    ---@param value boolean New state.
+    function show_logger(value) end
+    */
+    let clone = window.clone();
+    global.set("show_logger", lua.create_function(move |_, value: bool| {
+        Logger::show(&mut clone.borrow_mut().logger, value);
+        Ok(())
+    })?)?;
+
+    /* meta
+    ---Push a new string to the debug logger.
+    ---@param label  string Label for line to print.
+    ---@param color? color  Color for line to print.
+    function push_logger(label, color) end
+    */
+    let clone = window.clone();
+    global.set("push_logger", lua.create_function(move |lua: &Lua, (label, color) : (String, Option<LuaValue>)| {
+        println!("{label}");
+
+        let color : crate::system::general::Color = {
+            if let Some(color) = color {
+                lua.from_value(color)?
+            } else {
+                crate::system::general::Color::new(1.0, 1.0, 1.0, 1.0)
+            }
+        };
+        clone.borrow_mut().logger.push(LogLine::new(label, [color.r, color.g, color.b, color.a]));
+        Ok(())
+    })?)?;
+
+    /* meta
+    ---Push a new method to the debug parser.
+    ---@param name string Name for method to push.
+    ---@param info string Info for method to push.
+    ---@param call function Function call-back for method to push.
+    function push_parser(name, info, call) end
+    */
+    let clone = window.clone();
+    global.set("push_parser", lua.create_function(move |_, (name, info, call) : (String, String, mlua::Function)| {
+        clone.borrow_mut().parser.method.insert(name, ParserMethod { call, info });
+        Ok(())
+    })?)?;
+
+    global.set("File",           lua.create_function(self::File::new)?)?;
+    global.set("FileWatcher",    lua.create_function(self::FileWatcher::new)?)?;
+    //global.set("Automation",    lua.create_function(self::Automation::new)?)?;
+
+    global.set("get_file_exist",   lua.create_function(self::get_file_exist)?)?;
+    global.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
+    global.set("get_time",       lua.create_function(self::get_time)?)?;
+    global.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
+    global.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
+    global.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
+    global.set("json_to_table",  lua.create_function(self::json_to_table)?)?;
+    global.set("table_to_json",  lua.create_function(self::table_to_json)?)?;
+    //global.set("open_link",  lua.create_function(self::open_link)?)?;
+    //global.set("compress_data",  lua.create_function(self::compress_data)?)?;
+    //global.set("decompress_data",  lua.create_function(self::decompress_data)?)?;
+    //global.set("encode_data_base64",  lua.create_function(self::encode_data_base64)?)?;
+    //global.set("decode_data_base64",  lua.create_function(self::decode_data_base64)?)?;
+
+    Ok(())
+}
 
 //================================================================
 

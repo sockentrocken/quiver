@@ -4,6 +4,11 @@ require "example/suite/audio"
 require "example/suite/input"
 require "example/suite/debug"
 require "example/suite/interface"
+require "example/suite/steam"
+require "example/suite/discord"
+require "example/suite/request"
+require "example/suite/parry"
+require "example/suite/rapier"
 
 ---@enum example_suite
 EXAMPLE_SUITE = {
@@ -13,11 +18,18 @@ EXAMPLE_SUITE = {
     INPUT = 3,
     DEBUG = 4,
     INTERFACE = 5,
+    STEAM = 6,
+    DISCORD = 7,
+    REQUEST = 8,
+    PARRY = 9,
+    RAPIER = 10,
 }
 
 current_suite = EXAMPLE_SUITE.NONE
 
 function main()
+    --discord = Discord()
+    --steam = Steam()
 end
 
 function step()
@@ -58,8 +70,8 @@ function step()
         if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Input Suite")     then current_suite = EXAMPLE_SUITE.INPUT     end y = y + 1
         if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Debug Suite")     then current_suite = EXAMPLE_SUITE.DEBUG     end y = y + 1
         if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Interface Suite") then current_suite = EXAMPLE_SUITE.INTERFACE end y = y + 1
-        if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Steam Suite")     then current_suite = EXAMPLE_SUITE.INTERFACE end y = y + 1
-        if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Discord Suite")   then current_suite = EXAMPLE_SUITE.INTERFACE end y = y + 1
+        if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Steam Suite")     then current_suite = EXAMPLE_SUITE.STEAM end y = y + 1
+        if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Discord Suite")   then current_suite = EXAMPLE_SUITE.DISCORD end y = y + 1
         if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Request Suite")   then current_suite = EXAMPLE_SUITE.INTERFACE end y = y + 1
         if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Parry Suite")     then current_suite = EXAMPLE_SUITE.INTERFACE end y = y + 1
         if interface_button(box_2:new(vector_2:new(8.0, 20.0 + 18.0 * y), vector_2:new(96.0, 16.0)), "Rapier Suite")    then current_suite = EXAMPLE_SUITE.INTERFACE end y = y + 1
@@ -76,6 +88,16 @@ function step()
         step_debug()
     elseif current_suite == EXAMPLE_SUITE.INTERFACE then
         step_interface()
+    elseif current_suite == EXAMPLE_SUITE.STEAM then
+        step_steam()
+    elseif current_suite == EXAMPLE_SUITE.DISCORD then
+        --step_discord()
+    elseif current_suite == EXAMPLE_SUITE.REQUEST then
+        --step_request()
+    elseif current_suite == EXAMPLE_SUITE.PARRY then
+        --step_parry()
+    elseif current_suite == EXAMPLE_SUITE.RAPIER then
+        --step_rapier()
     end
 
     if not (current_suite == EXAMPLE_SUITE.NONE) then

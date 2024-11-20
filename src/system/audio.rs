@@ -1,14 +1,10 @@
-use crate::script::*;
-use crate::status::*;
-use crate::window::*;
+use crate::module::*;
 
 //================================================================
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use serde::{Deserialize, Serialize};
 use std::ffi::CString;
-use std::sync::Mutex;
 
 type RLSound = ffi::Sound;
 type RLMusic = ffi::Music;
@@ -297,9 +293,9 @@ impl Drop for Music {
 //================================================================
 
 #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, global: &mlua::Table, system: &ModuleSystem) -> mlua::Result<()> {
-        if system.sound { global.set("Sound", lua.create_function(self::Sound::new)?)?; }
-        if system.music { global.set("Music", lua.create_function(self::Music::new)?)?; }
+pub fn set_global(lua: &Lua, global: &mlua::Table, system: &ModuleSystem) -> mlua::Result<()> {
+    if system.sound { global.set("Sound", lua.create_function(self::Sound::new)?)?; }
+    if system.music { global.set("Music", lua.create_function(self::Music::new)?)?; }
 
-        Ok(())
-    }
+    Ok(())
+}
