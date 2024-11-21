@@ -1,8 +1,8 @@
 use crate::engine::*;
+use crate::module::*;
 use crate::status::*;
 use crate::system::*;
 use crate::window::*;
-use crate::module::*;
 
 //================================================================
 
@@ -85,26 +85,21 @@ impl Script {
         audio::set_global(lua, &global, system)?;
         input::set_global(lua, &global)?;
         interface::set_global(lua, &global)?;
-        discord::set_global(lua, &global)?;
-        steam::set_global(lua, &global)?;
-        request::set_global(lua, &global)?;
         parry::set_global(lua, &global)?;
         rapier::set_global(lua, &global)?;
 
         Ok(())
     }
 
-    pub async fn main(&mut self) -> Result<(), String> {
+    pub fn main(&mut self) -> Result<(), String> {
         let global = self.lua.globals();
 
         for module in &self.module {
             if let Some(entry) = &module.info.entry {
-                let file = crate::utility::file::read(&format!("{}/{}.lua", module.path, entry.file))?;
+                let file =
+                    crate::utility::file::read(&format!("{}/{}.lua", module.path, entry.file))?;
 
-                self.lua
-                    .load(file)
-                    .exec()
-                    .map_err(|e| e.to_string())?;
+                self.lua.load(file).exec().map_err(|e| e.to_string())?;
             }
 
             if let Some(entry) = &module.info.entry {
@@ -123,10 +118,7 @@ impl Script {
         }
 
         for main in &self.main {
-            main.call
-                .call_async::<()>(())
-                .await
-                .map_err(|e| e.to_string())?;
+            main.call.call::<()>(()).map_err(|e| e.to_string())?;
         }
 
         Ok(())

@@ -6,7 +6,6 @@ use crate::window::*;
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::sync::Mutex;
 
 //================================================================
 
@@ -368,10 +367,7 @@ impl Into<ffi::BoundingBox> for Box3 {
 ---@class file
 local file = {}
 */
-use std::{
-    io::{BufRead, BufReader, BufWriter, Read, Write},
-    sync::Arc,
-};
+use std::io::{BufRead, BufReader, BufWriter, Read, Write};
 
 pub struct File {
     pub reader: BufReader<std::fs::File>,
@@ -423,89 +419,6 @@ impl File {
             reader: BufReader::new(file.try_clone().unwrap()),
             writer: BufWriter::new(file.try_clone().unwrap()),
         })
-    }
-}
-
-//================================================================
-
-use notify::{Config, Event, PollWatcher, RecursiveMode, Watcher};
-use std::path::Path;
-
-/* meta
----@class watcher_info
-local watcher_info = {}
-
----@class file_watcher
-local file_watcher = {}
-*/
-pub struct FileWatcher(PollWatcher, Arc<Mutex<Option<Event>>>);
-
-impl mlua::UserData for FileWatcher {
-    fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
-
-    fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
-        /* meta
-        ---Poll for a notification in the file watcher's directory.
-        ---@return watcher_info | nil # Will return a non-nil value on event.
-        function file_watcher:update() end
-        */
-        method.add_method("update", |lua: &Lua, this, _: ()| {
-            this.0
-                .poll()
-                .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-            let mut lock = this
-                .1
-                .lock()
-                .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-            if let Some(event) = lock.as_mut() {
-                let result = event.clone();
-
-                *lock = None;
-
-                Ok(lua.to_value(&result)?)
-            } else {
-                Ok(mlua::Nil)
-            }
-        });
-    }
-}
-
-impl FileWatcher {
-    /* meta
-    ---An unique handle for a file watcher in memory.
-    ---@param path string Path to file/directory.
-    ---@return file_watcher # The user-data object.
-    function FileWatcher(path) end
-    */
-    pub fn new(_: &Lua, path: String) -> mlua::Result<Self> {
-        let (tx, rx) = std::sync::mpsc::channel();
-        let mut watcher = PollWatcher::new(tx, Config::default().with_manual_polling())
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-        watcher
-            .watch(Path::new(&path), RecursiveMode::Recursive)
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-        let value = Arc::new(Mutex::new(None));
-        let clone = value.clone();
-
-        std::thread::spawn(move || {
-            for res in rx {
-                match res {
-                    Ok(event) => {
-                        let mut lock = clone
-                            .lock()
-                            .expect("FileWatcher::new(): Error awaiting lock.");
-
-                        *lock = Some(event);
-                    }
-                    Err(event) => println!("{:?}", event),
-                }
-            }
-        });
-
-        Ok(Self(watcher, value.clone()))
     }
 }
 
@@ -632,7 +545,6 @@ pub fn set_global(lua: &Lua, global: &mlua::Table, status: StatusPointer, window
     })?)?;
 
     global.set("File",           lua.create_function(self::File::new)?)?;
-    global.set("FileWatcher",    lua.create_function(self::FileWatcher::new)?)?;
     //global.set("Automation",    lua.create_function(self::Automation::new)?)?;
 
     global.set("get_file_exist",   lua.create_function(self::get_file_exist)?)?;

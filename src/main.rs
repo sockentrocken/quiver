@@ -15,12 +15,11 @@ use crate::status::*;
 //================================================================
 
 #[rustfmt::skip]
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), String> {
+fn main() -> Result<(), String> {
     let mut engine = Engine::new();
     let (mut handle, thread, _audio, mut window) = engine.window().map_err(|e| { crate::utility::panic_window(&e); e })?;
 
-    if let Err(error) = engine.script.main().await {
+    if let Err(error) = engine.script.main() {
         Status::set_failure(&engine, error);
     }
 
@@ -36,7 +35,7 @@ async fn main() -> Result<(), String> {
                 Status::wizard(&mut engine, &mut handle, &thread, &mut window),
             Status::Restart => {
                 drop(window);
-                window = Status::restart(&mut engine, &mut handle, &thread).await;
+                window = Status::restart(&mut engine, &mut handle, &thread);
             }
             Status::Closure =>
                 break,

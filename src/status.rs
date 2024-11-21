@@ -111,7 +111,7 @@ impl Status {
         window.end_frame(&mut draw);
     }
 
-    pub async fn restart(
+    pub fn restart(
         engine: &mut Engine,
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
@@ -122,7 +122,7 @@ impl Status {
 
         *engine = Engine::new();
 
-        if let Err(error) = engine.script.main().await {
+        if let Err(error) = engine.script.main() {
             Status::set_failure(engine, error);
         }
 
