@@ -1,9 +1,3 @@
-/*
-* ================================================================
-* utility.rs
-* ================================================================
-*/
-
 pub mod file {
     pub fn write<T: AsRef<[u8]>>(path: &str, content: T) -> Result<(), String> {
         std::fs::write(path, content).map_err(|_| format!("Could not write \"{path}\"."))?;

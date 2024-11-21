@@ -1,9 +1,3 @@
-/*
-* ================================================================
-* status.rs
-* ================================================================
-*/
-
 use crate::engine::*;
 use crate::support::*;
 use crate::window::*;
@@ -109,30 +103,12 @@ impl Status {
     ) {
         let interface = window.start_frame(handle);
 
-
-        let size = interface.io().display_size;
-
         let mut draw = handle.begin_drawing(thread);
         draw.clear_background(Color::BLACK);
 
         Wizard::draw(engine, interface);
 
         window.end_frame(&mut draw);
-
-        if matches!(engine.window.borrow().wizard.state, WizardState::Main) {
-            if let Some(icon) = &engine.window.borrow().icon {
-                draw.draw_texture_ex(
-                    icon,
-                    Vector2::new(
-                        size[0] * 0.5 - (icon.width as f32 * 0.5),
-                        size[1] * 0.5 - (icon.height as f32 * 0.5) - 48.0,
-                    ),
-                    0.0,
-                    1.0,
-                    Color::WHITE,
-                );
-            }
-        }
     }
 
     pub async fn restart(

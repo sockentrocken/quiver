@@ -4,7 +4,10 @@ use crate::module::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
+use std::ffi::CStr;
 use std::ffi::CString;
+
+use super::general;
 
 type RLModel = raylib::core::models::Model;
 type RLModelAnimation = raylib::core::models::ModelAnimation;
@@ -15,6 +18,88 @@ type RLFont = raylib::core::text::Font;
 type RLShader = raylib::core::shaders::Shader;
 
 //================================================================
+
+#[rustfmt::skip]
+pub fn set_global(lua: &Lua, global: &mlua::Table, system : &ModuleSystem) -> mlua::Result<()> {
+    if system.model {
+        global.set("Model",          lua.create_function(self::Model::new)?)?;
+        global.set("ModelAnimation", lua.create_function(self::ModelAnimation::new)?)?;
+    }
+
+    if system.texture {
+        global.set("Texture",        lua.create_function(self::Texture::new)?)?;
+        global.set("RenderTexture",  lua.create_function(self::RenderTexture::new)?)?;
+    }
+
+    if system.image {
+        global.set("Image",  lua.create_function(self::Image::new)?)?;
+    }
+
+    if system.font   { global.set("Font",   lua.create_function(self::Font::new)?)?;   }
+    if system.shader { global.set("Shader", lua.create_function(self::Shader::new)?)?; }
+
+    global.set("set_screen_image", lua.create_function(self::set_screen_image)?)?;
+    global.set("set_screen_color", lua.create_function(self::set_screen_color)?)?;
+
+    global.set("set_window_fullscreen", lua.create_function(self::set_window_fullscreen)?)?;
+    global.set("set_window_borderless", lua.create_function(self::set_window_borderless)?)?;
+    global.set("set_window_minimize", lua.create_function(self::set_window_minimize)?)?;
+    global.set("set_window_maximize", lua.create_function(self::set_window_maximize)?)?;
+    global.set("set_window_focus", lua.create_function(self::set_window_focus)?)?;
+    global.set("set_window_restore", lua.create_function(self::set_window_restore)?)?;
+    //global.set("set_window_icon", lua.create_function(self::set_window_icon)?)?;
+    global.set("set_window_name", lua.create_function(self::set_window_name)?)?;
+    global.set("set_window_monitor", lua.create_function(self::set_window_monitor)?)?;
+    global.set("set_window_shape", lua.create_function(self::set_window_shape)?)?;
+    global.set("set_window_shape_min", lua.create_function(self::set_window_shape_min)?)?;
+    global.set("set_window_shape_max", lua.create_function(self::set_window_shape_max)?)?;
+    global.set("set_window_alpha", lua.create_function(self::set_window_alpha)?)?;
+    global.set("set_window_point", lua.create_function(self::set_window_point)?)?;
+
+    global.set("get_window_fullscreen", lua.create_function(self::get_window_fullscreen)?)?;
+    global.set("get_window_minimize", lua.create_function(self::get_window_minimize)?)?;
+    global.set("get_window_maximize", lua.create_function(self::get_window_maximize)?)?;
+    global.set("get_window_focus", lua.create_function(self::get_window_focus)?)?;
+    global.set("get_window_resize", lua.create_function(self::get_window_resize)?)?;
+    global.set("get_window_hidden", lua.create_function(self::get_window_hidden)?)?;
+    global.set("get_window_shape", lua.create_function(self::get_window_shape)?)?;
+    global.set("get_window_point", lua.create_function(self::get_window_point)?)?;
+    global.set("get_window_scale", lua.create_function(self::get_window_scale)?)?;
+
+    global.set("get_render_shape", lua.create_function(self::get_render_shape)?)?;
+
+    global.set("get_monitor_amount", lua.create_function(self::get_monitor_amount)?)?;
+    global.set("get_monitor_active", lua.create_function(self::get_monitor_active)?)?;
+    global.set("get_monitor_rate", lua.create_function(self::get_monitor_rate)?)?;
+    global.set("get_monitor_name", lua.create_function(self::get_monitor_name)?)?;
+    global.set("get_monitor_shape", lua.create_function(self::get_monitor_shape)?)?;
+    global.set("get_monitor_shape_physical", lua.create_function(self::get_monitor_shape_physical)?)?;
+    global.set("get_monitor_point", lua.create_function(self::get_monitor_point)?)?;
+
+    global.set("begin_mode_3d", lua.create_function(self::begin_mode_3d)?)?;
+    global.set("close_mode_3d", lua.create_function(self::close_mode_3d)?)?;
+    global.set("draw_grid", lua.create_function(self::draw_grid)?)?;
+    global.set("draw_cube", lua.create_function(self::draw_cube)?)?;
+    global.set("draw_ball", lua.create_function(self::draw_ball)?)?;
+    global.set("draw_box_3", lua.create_function(self::draw_box_3)?)?;
+
+    global.set("begin_mode_2d", lua.create_function(self::begin_mode_2d)?)?;
+    global.set("close_mode_2d", lua.create_function(self::close_mode_2d)?)?;
+    global.set("get_screen_to_world", lua.create_function(self::get_screen_to_world)?)?;
+    global.set("get_world_to_screen", lua.create_function(self::get_world_to_screen)?)?;
+    global.set("draw_box_2", lua.create_function(self::draw_box_2)?)?;
+    global.set("draw_text", lua.create_function(self::draw_text)?)?;
+
+    //global.set("begin_blend_mode", lua.create_function(self::begin_blend_mode)?)?;
+    //global.set("close_blend_mode", lua.create_function(self::close_blend_mode)?)?;
+    //global.set("begin_clip_mode", lua.create_function(self::begin_clip_mode)?)?;
+    //global.set("close_clip_mode", lua.create_function(self::close_clip_mode)?)?;
+
+    //global.set("update_camera", lua.create_function(self::update_camera)?)?;
+    //global.set("update_camera_pro", lua.create_function(self::update_camera_pro)?)?;
+
+    Ok(())
+}
 
 /* meta
 ---@class model
@@ -620,89 +705,19 @@ impl Shader {
 
 //================================================================
 
-#[rustfmt::skip]
-    pub fn set_global(lua: &Lua, global: &mlua::Table, system : &ModuleSystem) -> mlua::Result<()> {
-        if system.model {
-            global.set("Model",          lua.create_function(self::Model::new)?)?;
-            global.set("ModelAnimation", lua.create_function(self::ModelAnimation::new)?)?;
-        }
+/* meta
+---Take a screen-shot.
+---@param path string Path to save the screen-shot to. Extension will define format (foo.png/foo.jpg).
+function set_screen_image(path) end
+*/
+fn set_screen_image(_: &Lua, path: String) -> mlua::Result<()> {
+    let path = CString::new(path).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
-        if system.texture {
-            global.set("Texture",        lua.create_function(self::Texture::new)?)?;
-            global.set("RenderTexture",  lua.create_function(self::RenderTexture::new)?)?;
-        }
-
-        if system.image {
-            global.set("Image",  lua.create_function(self::Image::new)?)?;
-        }
-
-        if system.font   { global.set("Font",   lua.create_function(self::Font::new)?)?;   }
-        if system.shader { global.set("Shader", lua.create_function(self::Shader::new)?)?; }
-
-        //global.set("set_screen_image", lua.create_function(self::set_screen_image)?)?;
-        global.set("set_screen_color", lua.create_function(self::set_screen_color)?)?;
-
-        //global.set("set_window_fullscreen", lua.create_function(self::set_window_fullscreen)?)?;
-        //global.set("set_window_borderless", lua.create_function(self::set_window_borderless)?)?;
-        //global.set("set_window_minimize", lua.create_function(self::set_window_minimize)?)?;
-        //global.set("set_window_maximize", lua.create_function(self::set_window_maximize)?)?;
-        //global.set("set_window_focus", lua.create_function(self::set_window_focus)?)?;
-        //global.set("set_window_restore", lua.create_function(self::set_window_restore)?)?;
-        //global.set("set_window_icon", lua.create_function(self::set_window_icon)?)?;
-        //global.set("set_window_name", lua.create_function(self::set_window_name)?)?;
-        //global.set("set_window_monitor", lua.create_function(self::set_window_monitor)?)?;
-        //global.set("set_window_shape_min", lua.create_function(self::set_window_shape_min)?)?;
-        //global.set("set_window_shape_max", lua.create_function(self::set_window_shape_max)?)?;
-        //global.set("set_window_point", lua.create_function(self::set_window_point)?)?;
-        //global.set("set_window_shape", lua.create_function(self::set_window_shape)?)?;
-        //global.set("set_window_alpha", lua.create_function(self::set_window_alpha)?)?;
-
-        //global.set("get_window_fullscreen", lua.create_function(self::get_window_fullscreen)?)?;
-        global.set("get_window_minimize", lua.create_function(self::get_window_minimize)?)?;
-        global.set("get_window_maximize", lua.create_function(self::get_window_maximize)?)?;
-        global.set("get_window_focus", lua.create_function(self::get_window_focus)?)?;
-        global.set("get_window_resize", lua.create_function(self::get_window_resize)?)?;
-        //global.set("get_window_hidden", lua.create_function(self::get_window_hidden)?)?;
-        //global.set("get_window_point", lua.create_function(self::get_window_point)?)?;
-        global.set("get_window_shape", lua.create_function(self::get_window_shape)?)?;
-        //global.set("get_window_scale", lua.create_function(self::get_window_scale)?)?;
-
-        //global.set("get_render_shape", lua.create_function(self::get_render_shape)?)?;
-
-        //global.set("get_monitor_count", lua.create_function(self::get_monitor_count)?)?;
-        //global.set("get_monitor_active", lua.create_function(self::get_monitor_active)?)?;
-        //global.set("get_monitor_rate", lua.create_function(self::get_monitor_rate)?)?;
-        //global.set("get_monitor_name", lua.create_function(self::get_monitor_name)?)?;
-        //global.set("get_monitor_point", lua.create_function(self::get_monitor_point)?)?;
-        //global.set("get_monitor_shape", lua.create_function(self::get_monitor_shape)?)?;
-        //global.set("get_monitor_shape_physical", lua.create_function(self::get_monitor_shape_physical)?)?;
-
-        global.set("begin_mode_3d", lua.create_function(self::begin_mode_3d)?)?;
-        global.set("close_mode_3d", lua.create_function(self::close_mode_3d)?)?;
-        global.set("draw_grid", lua.create_function(self::draw_grid)?)?;
-        global.set("draw_cube", lua.create_function(self::draw_cube)?)?;
-        global.set("draw_ball", lua.create_function(self::draw_ball)?)?;
-        global.set("draw_box_3", lua.create_function(self::draw_box_3)?)?;
-
-        global.set("begin_mode_2d", lua.create_function(self::begin_mode_2d)?)?;
-        global.set("close_mode_2d", lua.create_function(self::close_mode_2d)?)?;
-        global.set("get_screen_to_world", lua.create_function(self::get_screen_to_world)?)?;
-        global.set("get_world_to_screen", lua.create_function(self::get_world_to_screen)?)?;
-        global.set("draw_box_2", lua.create_function(self::draw_box_2)?)?;
-        global.set("draw_text", lua.create_function(self::draw_text)?)?;
-
-        //global.set("begin_blend_mode", lua.create_function(self::begin_blend_mode)?)?;
-        //global.set("close_blend_mode", lua.create_function(self::close_blend_mode)?)?;
-        //global.set("begin_clip_mode", lua.create_function(self::begin_clip_mode)?)?;
-        //global.set("close_clip_mode", lua.create_function(self::close_clip_mode)?)?;
-
-        //global.set("update_camera", lua.create_function(self::update_camera)?)?;
-        //global.set("update_camera_pro", lua.create_function(self::update_camera_pro)?)?;
-
+    unsafe {
+        ffi::TakeScreenshot(path.as_ptr());
         Ok(())
     }
-
-//================================================================
+}
 
 /* meta
 ---Clear the screen with a color.
@@ -719,17 +734,172 @@ fn set_screen_color(lua: &Lua, color: LuaValue) -> mlua::Result<()> {
 }
 
 /* meta
----Get the size of the screen.
----@return vector_2 # Screen size.
-function get_window_shape() end
+---Set the window to full-screen mode.
+function set_window_fullscreen() end
 */
-fn get_window_shape(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+fn set_window_fullscreen(_: &Lua, _: ()) -> mlua::Result<()> {
     unsafe {
-        lua.to_value(&crate::system::general::Vector2::new(
-            ffi::GetScreenWidth() as f32,
-            ffi::GetScreenHeight() as f32,
-        ))
+        ffi::ToggleFullscreen();
+        Ok(())
     }
+}
+
+/* meta
+---Set the window to border-less mode.
+function set_window_borderless() end
+*/
+fn set_window_borderless(_: &Lua, _: ()) -> mlua::Result<()> {
+    unsafe {
+        ffi::ToggleBorderlessWindowed();
+        Ok(())
+    }
+}
+
+/* meta
+---Minimize the window.
+function set_window_minimize() end
+*/
+fn set_window_minimize(_: &Lua, _: ()) -> mlua::Result<()> {
+    unsafe {
+        ffi::MinimizeWindow();
+        Ok(())
+    }
+}
+
+/* meta
+---Maximize the window.
+function set_window_maximize() end
+*/
+fn set_window_maximize(_: &Lua, _: ()) -> mlua::Result<()> {
+    unsafe {
+        ffi::MaximizeWindow();
+        Ok(())
+    }
+}
+
+/* meta
+---Focus the window.
+function set_window_focus() end
+*/
+fn set_window_focus(_: &Lua, _: ()) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetWindowFocused();
+        Ok(())
+    }
+}
+
+/* meta
+---Restore the window.
+function set_window_restore() end
+*/
+fn set_window_restore(_: &Lua, _: ()) -> mlua::Result<()> {
+    unsafe {
+        ffi::RestoreWindow();
+        Ok(())
+    }
+}
+
+/* meta
+---Set the window name.
+function set_window_name() end
+*/
+fn set_window_name(_: &Lua, text: String) -> mlua::Result<()> {
+    let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+    unsafe {
+        ffi::SetWindowTitle(text.as_ptr());
+        Ok(())
+    }
+}
+
+/* meta
+---Set the window monitor.
+function set_window_monitor() end
+*/
+fn set_window_monitor(_: &Lua, index: i32) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetWindowMonitor(index);
+        Ok(())
+    }
+}
+
+/* meta
+---Set the current window size.
+---@param shape vector_2 # Current size of the window.
+function set_window_shape(shape) end
+*/
+fn set_window_shape(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
+    let shape: general::Vector2 = lua.from_value(shape)?;
+
+    unsafe {
+        ffi::SetWindowSize(shape.x as i32, shape.y as i32);
+        Ok(())
+    }
+}
+
+/* meta
+---Set the minimum window size.
+---@param shape vector_2 # Minimum size of the window.
+function set_window_shape_min(shape) end
+*/
+fn set_window_shape_min(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
+    let shape: general::Vector2 = lua.from_value(shape)?;
+
+    unsafe {
+        ffi::SetWindowMinSize(shape.x as i32, shape.y as i32);
+        Ok(())
+    }
+}
+
+/* meta
+---Set the maximum window size.
+---@param shape vector_2 # Maximum size of the window.
+function set_window_shape_max(shape) end
+*/
+fn set_window_shape_max(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
+    let shape: general::Vector2 = lua.from_value(shape)?;
+
+    unsafe {
+        ffi::SetWindowMaxSize(shape.x as i32, shape.y as i32);
+        Ok(())
+    }
+}
+
+/* meta
+---Set the window alpha.
+---@param alpha number # Alpha of the window.
+function set_window_alpha(alpha) end
+*/
+fn set_window_alpha(_: &Lua, alpha: f32) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetWindowOpacity(alpha);
+        Ok(())
+    }
+}
+
+/* meta
+---Set the current window point.
+---@param point vector_2 # Current point of the window.
+function set_window_point(point) end
+*/
+fn set_window_point(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
+    let shape: general::Vector2 = lua.from_value(shape)?;
+
+    unsafe {
+        ffi::SetWindowPosition(shape.x as i32, shape.y as i32);
+        Ok(())
+    }
+}
+
+//================================================================
+
+/* meta
+---Get the state of the window (full-screen).
+---@return bool # True if in full-screen, false otherwise.
+function get_window_fullscreen() end
+*/
+fn get_window_fullscreen(lua: &Lua, _: ()) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsWindowFullscreen()) }
 }
 
 /* meta
@@ -766,6 +936,154 @@ function get_window_resize() end
 */
 fn get_window_resize(_: &Lua, _: ()) -> mlua::Result<bool> {
     unsafe { Ok(ffi::IsWindowResized()) }
+}
+
+/* meta
+---Get the state of the window (hidden).
+---@return bool # True if hidden, false otherwise.
+function get_window_fullscreen() end
+*/
+fn get_window_hidden(_: &Lua, _: ()) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsWindowHidden()) }
+}
+
+/* meta
+---Get the size of the screen.
+---@return vector_2 # Window size.
+function get_window_shape() end
+*/
+fn get_window_shape(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+    unsafe {
+        lua.to_value(&crate::system::general::Vector2::new(
+            ffi::GetScreenWidth() as f32,
+            ffi::GetScreenHeight() as f32,
+        ))
+    }
+}
+
+/* meta
+---Get the point of the window.
+---@return vector_2 # Window point.
+function get_window_point() end
+*/
+fn get_window_point(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+    unsafe {
+        let value = ffi::GetWindowPosition();
+
+        lua.to_value(&crate::system::general::Vector2::new(value.x, value.y))
+    }
+}
+
+/* meta
+---Get the DPI scale of the window.
+---@return vector_2 # Window scale.
+function get_window_scale() end
+*/
+fn get_window_scale(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+    unsafe {
+        let value = ffi::GetWindowScaleDPI();
+
+        lua.to_value(&crate::system::general::Vector2::new(value.x, value.y))
+    }
+}
+
+/* meta
+---Get the size of the current render view.
+---@return vector_2 # Render size.
+function get_render_shape() end
+*/
+fn get_render_shape(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+    unsafe {
+        lua.to_value(&crate::system::general::Vector2::new(
+            ffi::GetRenderWidth() as f32,
+            ffi::GetRenderHeight() as f32,
+        ))
+    }
+}
+
+/* meta
+---Get the total monitor amount.
+---@return number # Total monitor amount.
+function get_monitor_amount() end
+*/
+fn get_monitor_amount(_: &Lua, _: ()) -> mlua::Result<i32> {
+    unsafe { Ok(ffi::GetMonitorCount()) }
+}
+
+/* meta
+---Get the current monitor index.
+---@return number # Current monitor index.
+function get_monitor_amount() end
+*/
+fn get_monitor_active(_: &Lua, _: ()) -> mlua::Result<i32> {
+    unsafe { Ok(ffi::GetCurrentMonitor()) }
+}
+
+/* meta
+---Get the refresh rate of a monitor.
+---@param index number Index for the monitor.
+---@return number # Monitor refresh rate.
+function get_monitor_rate() end
+*/
+fn get_monitor_rate(_: &Lua, index: i32) -> mlua::Result<i32> {
+    unsafe { Ok(ffi::GetMonitorRefreshRate(index)) }
+}
+
+/* meta
+---Get the name of a monitor.
+---@param index number Index for the monitor.
+---@return string # Monitor name.
+function get_monitor_name() end
+*/
+fn get_monitor_name(_: &Lua, index: i32) -> mlua::Result<String> {
+    unsafe {
+        let name = ffi::GetMonitorName(index);
+        Ok(CStr::from_ptr(name).to_str().unwrap().to_string())
+    }
+}
+
+/* meta
+---Get the size of a monitor.
+---@param index number Index for the monitor.
+---@return vector_2 # Monitor size.
+function get_monitor_shape() end
+*/
+fn get_monitor_shape(lua: &Lua, index: i32) -> mlua::Result<LuaValue> {
+    unsafe {
+        lua.to_value(&crate::system::general::Vector2::new(
+            ffi::GetMonitorWidth(index) as f32,
+            ffi::GetMonitorHeight(index) as f32,
+        ))
+    }
+}
+
+/* meta
+---Get the physical size of a monitor.
+---@param index number Index for the monitor.
+---@return vector_2 # Physical monitor size.
+function get_monitor_shape_physical() end
+*/
+fn get_monitor_shape_physical(lua: &Lua, index: i32) -> mlua::Result<LuaValue> {
+    unsafe {
+        lua.to_value(&crate::system::general::Vector2::new(
+            ffi::GetMonitorPhysicalWidth(index) as f32,
+            ffi::GetMonitorPhysicalHeight(index) as f32,
+        ))
+    }
+}
+
+/* meta
+---Get the point of a monitor.
+---@param index number Index for the monitor.
+---@return vector_2 # Monitor point.
+function get_monitor_point() end
+*/
+fn get_monitor_point(lua: &Lua, index: i32) -> mlua::Result<LuaValue> {
+    unsafe {
+        let value = ffi::GetMonitorPosition(index);
+
+        lua.to_value(&crate::system::general::Vector2::new(value.x, value.y))
+    }
 }
 
 //================================================================

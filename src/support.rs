@@ -1,9 +1,3 @@
-/*
-* ================================================================
-* support.rs
-* ================================================================
-*/
-
 use copypasta::{ClipboardContext, ClipboardProvider};
 use imgui::{ClipboardBackend, Io};
 
@@ -46,8 +40,8 @@ impl RaylibImguiSupport {
             .add_font(&[imgui::FontSource::DefaultFontData { config: None }]);
         */
         context.fonts().add_font(&[imgui::FontSource::TtfData {
-            data: include_bytes!("asset/font.ttf"),
-            size_pixels: 64.0,
+            data: include_bytes!("asset/video/font.ttf"),
+            size_pixels: 20.0,
             config: None,
         }]);
 

@@ -1,9 +1,3 @@
-/*
-* ================================================================
-* engine.rs
-* ================================================================
-*/
-
 use crate::script::*;
 use crate::status::*;
 use crate::support::*;
@@ -26,11 +20,11 @@ pub struct Engine {
 
 impl Engine {
     pub const BUILD: i32 = 1;
-    pub const ICON: &'static [u8] = include_bytes!("asset/card.png");
+    pub const ICON: &'static [u8] = include_bytes!("asset/video/card.png");
     pub const LOGO: [&'static [u8]; 3] = [
-        include_bytes!("asset/logo_512.png"),
-        include_bytes!("asset/logo_256.png"),
-        include_bytes!("asset/logo_128.png"),
+        include_bytes!("asset/video/logo_512.png"),
+        include_bytes!("asset/video/logo_256.png"),
+        include_bytes!("asset/video/logo_128.png"),
     ];
 
     pub fn new() -> Self {

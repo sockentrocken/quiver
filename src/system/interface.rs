@@ -4,7 +4,12 @@ use std::ffi::CString;
 
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, global: &mlua::Table) -> mlua::Result<()> {
+    global.set("set_interface_active",  lua.create_function(self::set_interface_active)?)?;
+    global.set("set_interface_lock",  lua.create_function(self::set_interface_lock)?)?;
+    global.set("get_interface_lock",  lua.create_function(self::get_interface_lock)?)?;
     global.set("set_interface_alpha",  lua.create_function(self::set_interface_alpha)?)?;
+    global.set("set_interface_state",  lua.create_function(self::set_interface_state)?)?;
+    global.set("get_interface_state",  lua.create_function(self::get_interface_state)?)?;
     global.set("interface_button",     lua.create_function(self::interface_button)?)?;
     global.set("interface_toggle",     lua.create_function(self::interface_toggle)?)?;
     global.set("interface_check_box",  lua.create_function(self::interface_check_box)?)?;
@@ -17,12 +22,77 @@ pub fn set_global(lua: &Lua, global: &mlua::Table) -> mlua::Result<()> {
 }
 
 /* meta
+---Set the interface active state.
+---@param value boolean The active state of the interface.
+function set_interface_active(value) end
+*/
+fn set_interface_active(_: &Lua, value: bool) -> mlua::Result<()> {
+    unsafe {
+        if value {
+            ffi::GuiEnable();
+        } else {
+            ffi::GuiDisable();
+        }
+        Ok(())
+    }
+}
+
+/* meta
+---Set the interface lock state.
+---@param value boolean The lock state of the interface.
+function set_interface_lock(value) end
+*/
+fn set_interface_lock(_: &Lua, value: bool) -> mlua::Result<()> {
+    unsafe {
+        if value {
+            ffi::GuiLock();
+        } else {
+            ffi::GuiUnlock();
+        }
+        Ok(())
+    }
+}
+
+/* meta
+---Get the interface lock state.
+---@return boolean # The lock state of the interface.
+function set_interface_lock(value) end
+*/
+fn get_interface_lock(_: &Lua, _: ()) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::GuiIsLocked()) }
+}
+
+/* meta
+---Set the interface state.
+---@param state number The state of the interface.
+function set_interface_lock(value) end
+*/
+fn set_interface_state(_: &Lua, state: i32) -> mlua::Result<()> {
+    unsafe {
+        ffi::GuiSetState(state);
+        Ok(())
+    }
+}
+
+/* meta
+---Get the interface state.
+---@return number # The state of the interface.
+function set_interface_lock(value) end
+*/
+fn get_interface_state(_: &Lua, _: ()) -> mlua::Result<i32> {
+    unsafe { Ok(ffi::GuiGetState()) }
+}
+
+/* meta
 ---Set the interface alpha.
 ---@param value number The alpha of the interface.
 function set_interface_alpha(value) end
 */
 fn set_interface_alpha(_: &Lua, value: f32) -> mlua::Result<()> {
-    unsafe { Ok(ffi::GuiSetAlpha(value)) }
+    unsafe {
+        ffi::GuiSetAlpha(value);
+        Ok(())
+    }
 }
 
 /* meta

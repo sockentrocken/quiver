@@ -1,9 +1,3 @@
-/*
-* ================================================================
-* window.rs
-* ================================================================
-*/
-
 use crate::engine::*;
 use crate::module::*;
 use crate::status::*;
@@ -415,10 +409,10 @@ pub struct Wizard {
 use crate::utility::*;
 
 impl Wizard {
-    pub const FILE_INFO: &'static str = include_str!("asset/info.lua");
-    pub const FILE_MAIN: &'static str = include_str!("asset/main.lua");
-    pub const FILE_META: &'static str = include_str!("asset/meta.lua");
-    pub const FILE_BASE: &'static str = include_str!("asset/base.lua");
+    pub const FILE_INFO: &'static str = include_str!("asset/module/info.lua");
+    pub const FILE_MAIN: &'static str = include_str!("asset/module/main.lua");
+    pub const FILE_META: &'static str = include_str!("asset/module/meta.lua");
+    pub const FILE_BASE: &'static str = include_str!("asset/module/base.lua");
     pub const NAME_MAIN: &'static str = "main.lua";
     pub const NAME_META: &'static str = "meta.lua";
     pub const NAME_BASE: &'static str = "base.lua";
@@ -440,16 +434,29 @@ impl Wizard {
             .position([0.0, 0.0], imgui::Condition::Always)
             .size(size, imgui::Condition::Always)
             .build(|| {
-                interface.set_window_font_scale(1.25);
+                let image_size: [f32; 2];
 
-                //interface.set_window_font_scale(2.0);
+                let image = {
+                    let tex = engine.window.borrow();
+                    let tex = tex.icon.as_ref().unwrap();
+                    let id = imgui::TextureId::new(tex.id as usize);
+                    image_size = [tex.width as f32, tex.height as f32];
+                    imgui::Image::new(id, image_size)
+                };
 
                 let state = engine.window.borrow().wizard.state.clone();
                 let wizard = &mut engine.window.borrow_mut().wizard;
 
                 match state {
                     WizardState::Main => {
-                        interface.set_cursor_pos([8.0, size[1] - 160.0]);
+                        interface.set_cursor_pos([
+                            size[0] * 0.5 - image_size[0] * 0.5,
+                            size[1] * 0.5 - image_size[1] * 0.5 - 88.0,
+                        ]);
+
+                        image.build(interface);
+
+                        interface.set_cursor_pos([8.0, size[1] - 184.0]);
 
                         interface.separator();
                         interface.spacing();
@@ -485,15 +492,17 @@ impl Wizard {
                             Status::set_closure(engine);
                         }
                         if interface.button("GitHub") {
-                            Status::set_closure(engine);
+                            raylib::misc::open_url("https://github.com/sockentrocken/quiver");
                         }
                         if interface.button("Discord") {
-                            Status::set_closure(engine);
+                            raylib::misc::open_url("https://discord.gg");
                         }
-                        interface.text("Version: 1.0.0");
+                        interface.text("1.0.0");
                     }
                     WizardState::NewModule => {
                         interface.text("Module Data");
+                        interface.separator();
+                        interface.spacing();
 
                         interface
                             .input_text("Module Path", &mut wizard.path)
@@ -508,7 +517,7 @@ impl Wizard {
                             .hint("A module for Quiver.")
                             .build();
 
-                        interface.set_cursor_pos([8.0, size[1] - 58.0]);
+                        interface.set_cursor_pos([8.0, size[1] - 72.0]);
 
                         interface.separator();
                         interface.spacing();
@@ -522,6 +531,8 @@ impl Wizard {
                     }
                     WizardState::NewSystem => {
                         interface.text("System Data");
+                        interface.separator();
+                        interface.spacing();
 
                         if let Some(system) = &mut wizard.info.system {
                             interface.checkbox("Model", &mut system.model);
@@ -533,7 +544,7 @@ impl Wizard {
                             interface.checkbox("Shader", &mut system.shader);
                         }
 
-                        interface.set_cursor_pos([8.0, size[1] - 58.0]);
+                        interface.set_cursor_pos([8.0, size[1] - 72.0]);
 
                         interface.separator();
                         interface.spacing();
@@ -547,6 +558,8 @@ impl Wizard {
                     }
                     WizardState::NewWindow => {
                         interface.text("Window Data");
+                        interface.separator();
+                        interface.spacing();
 
                         if let Some(window) = &mut wizard.info.window {
                             interface.checkbox("Full-Screen", &mut window.fullscreen);
@@ -577,12 +590,33 @@ impl Wizard {
                             //interface.checkbox("", &mut window.alpha);
                         }
 
-                        interface.set_cursor_pos([8.0, size[1] - 58.0]);
+                        interface.set_cursor_pos([8.0, size[1] - 72.0]);
 
                         interface.separator();
                         interface.spacing();
 
-                        if interface.button("Make Module") {}
+                        if interface.button("Make Module") {
+                            let result = wizard.make();
+
+                            match result {
+                                Ok(_) => Status::set_restart(engine),
+                                Err(error) => {
+                                    wizard.warn = error;
+                                    interface.open_popup("Error");
+                                }
+                            }
+                        }
+
+                        interface
+                            .modal_popup_config("Error")
+                            .always_auto_resize(true)
+                            .build(|| {
+                                interface.text(&wizard.warn);
+
+                                if interface.button("Close") {
+                                    interface.close_current_popup();
+                                }
+                            });
                         if interface.button("Back") {
                             wizard.state = WizardState::NewSystem;
                         }
@@ -591,29 +625,7 @@ impl Wizard {
                 }
 
                 /*
-                if interface.button("Make Module") {
-                    let result = engine.window.borrow().wizard.make();
-
-                    match result {
-                        Ok(_) => Status::set_restart(engine),
-                        Err(error) => {
-                            engine.window.borrow_mut().wizard.warn = error;
-                            interface.open_popup("Error");
-                        }
-                    }
-                }
-
-                interface
-                    .modal_popup_config("Error")
-                    .always_auto_resize(true)
-                    .build(|| {
-                        interface.text(&engine.window.borrow().wizard.warn);
-
-                        if interface.button("Close") {
-                            interface.close_current_popup();
-                        }
-                    });
-                */
+                 */
             });
     }
 
