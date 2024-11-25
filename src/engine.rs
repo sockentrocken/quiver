@@ -1,3 +1,4 @@
+use crate::interface::*;
 use crate::script::*;
 use crate::status::*;
 use crate::support::*;
@@ -20,7 +21,9 @@ pub struct Engine {
 
 impl Engine {
     pub const BUILD: i32 = 1;
-    pub const ICON: &'static [u8] = include_bytes!("asset/video/card.png");
+    pub const CHECK: &'static [u8] = include_bytes!("asset/video/check.png");
+    pub const FONT: &'static [u8] = include_bytes!("asset/video/font.ttf");
+    pub const CARD: &'static [u8] = include_bytes!("asset/video/card.png");
     pub const LOGO: [&'static [u8]; 3] = [
         include_bytes!("asset/video/logo_512.png"),
         include_bytes!("asset/video/logo_256.png"),
@@ -72,6 +75,7 @@ impl Engine {
         let (mut handle, thread) = raylib::init()
             .title(&window.name)
             .size(window.shape.0, window.shape.1)
+            .msaa_4x()
             .build();
 
         handle.set_window_state(
@@ -91,7 +95,8 @@ impl Engine {
                 .set_window_highdpi(window.high_scale),
         );
 
-        handle.set_target_fps(window.rate);
+        //handle.set_target_fps(window.rate);
+        handle.set_target_fps(144);
 
         let mut list: Vec<ffi::Image> = Vec::new();
 
@@ -143,7 +148,7 @@ impl Engine {
 
         let interface = RaylibImguiSupport::setup(&mut handle, &thread);
 
-        let icon = Image::load_image_from_mem(".png", Self::ICON).map_err(|e| e.to_string())?;
+        let icon = Image::load_image_from_mem(".png", Self::CARD).map_err(|e| e.to_string())?;
 
         self.window.borrow_mut().icon = Some(
             handle

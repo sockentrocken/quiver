@@ -1,4 +1,5 @@
 use crate::engine::*;
+use crate::interface::*;
 use crate::support::*;
 use crate::window::*;
 
@@ -21,6 +22,10 @@ pub enum Status {
     Restart,
     Closure,
 }
+
+static mut test_tog: bool = false;
+static mut test_sli: f32 = 1.0;
+static mut test_rec: String = String::new();
 
 impl Status {
     pub fn success(
@@ -95,20 +100,65 @@ impl Status {
         window.end_frame(&mut draw);
     }
 
+
+
+    #[rustfmt::skip]
     pub fn wizard(
         engine: &mut Engine,
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
-        window: &mut RaylibImguiSupport,
+        interface: &mut Interface,
     ) {
-        let interface = window.start_frame(handle);
+        //let interface = window.start_frame(handle);
+
+        interface.begin();
 
         let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::BLACK);
+        draw.clear_background(Color::new(223, 223, 223, 255));
 
-        Wizard::draw(engine, interface);
+        /*
+        let card_y = 160;
 
-        window.end_frame(&mut draw);
+        draw.draw_rectangle_rec(Rectangle::new(0.0, 0.0, draw.get_screen_width() as f32, (draw.get_screen_height() - card_y) as f32), Interface::COLOR_PRIMARY);
+
+        draw.draw_rectangle_gradient_v(0, draw.get_screen_height() - card_y, draw.get_screen_width(), 8, Color::new(0, 0, 0, 66), Color::new(0, 0, 0, 0));
+
+        interface.point(Vector2::new(16.0, (draw.get_screen_height() - card_y + 24) as f32));
+        interface.button(&mut draw, "New Module");
+        interface.button(&mut draw, "Load Module");
+        interface.button(&mut draw, "Exit Quiver");
+
+        draw.draw_texture_v(&interface.card, Vector2::new(draw.get_screen_width() as f32 * 0.5 - interface.card.width as f32 * 0.5, draw.get_screen_height() as f32 * 0.5 - interface.card.height as f32 * 0.5 - card_y as f32 * 0.5), Color::WHITE);
+        */
+
+
+        let size = draw.get_screen_width();
+
+        interface.card_sharp(&mut draw, Rectangle::new(0.0, 0.0, size as f32, 48.0));
+
+        interface.point(Vector2::new(16.0, 12.0));
+        interface.text(&mut draw, "New Module");
+
+        unsafe {
+            interface.point(Vector2::new(16.0, 72.0));
+            interface.record(&mut draw, "Module Path", &mut test_rec);
+            interface.record(&mut draw, "Module Name", &mut test_rec);
+            interface.record(&mut draw, "Module Info", &mut test_rec);
+
+            //interface.toggle(&mut draw, "Texture", &mut test_tog);
+            //interface.toggle(&mut draw, "Sound",   &mut test_tog);
+            //interface.toggle(&mut draw, "Music",   &mut test_tog);
+            //interface.toggle(&mut draw, "Font",    &mut test_tog);
+        }
+
+        /*
+        unsafe {
+            interface.button(&mut draw, "Button");
+            interface.toggle(&mut draw, "Toggle", &mut test_tog);
+            interface.slider(&mut draw, "Slider", &mut test_sli, -1.0, 1.0);
+            interface.record(&mut draw, "Record", &mut test_rec);
+        }
+        */
     }
 
     pub fn restart(

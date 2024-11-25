@@ -28,21 +28,19 @@ impl Script {
         window: WindowPointer,
     ) -> Result<Self, String> {
         let lua = {
-            /*
             if info.safe {
                 Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())
                     .expect("Error initializing Lua virtual machine.")
             } else {
                 unsafe { Lua::unsafe_new_with(LuaStdLib::ALL, LuaOptions::new()) }
             }
-            */
-
-            unsafe { Lua::unsafe_new_with(LuaStdLib::ALL, LuaOptions::new()) }
         };
 
         let mut script = Self::default();
 
-        general::set_global(&lua, &lua.globals(), status, window).map_err(|e| e.to_string())?;
+        let quiver = lua.create_table().map_err(|e| e.to_string())?;
+
+        general::set_global(&lua, &quiver, status, window).map_err(|e| e.to_string())?;
 
         for name in &info.path {
             let module = Module::new(&lua, name).map_err(|e| e.to_string())?;
@@ -71,22 +69,26 @@ impl Script {
             script.module.push(module);
         }
 
-        Self::standard(&lua, &script.system).map_err(|e| e.to_string())?;
+        Self::standard(&lua, &quiver, &script.system).map_err(|e| e.to_string())?;
+
+        lua.globals()
+            .set("quiver", quiver)
+            .map_err(|e| e.to_string())?;
 
         script.lua = lua;
 
         Ok(script)
     }
 
-    fn standard(lua: &Lua, system: &ModuleSystem) -> mlua::Result<()> {
-        let global = lua.globals();
-
-        video::set_global(lua, &global, system)?;
-        audio::set_global(lua, &global, system)?;
-        input::set_global(lua, &global)?;
-        interface::set_global(lua, &global)?;
-        parry::set_global(lua, &global)?;
-        rapier::set_global(lua, &global)?;
+    fn standard(lua: &Lua, table: &mlua::Table, system: &ModuleSystem) -> mlua::Result<()> {
+        draw_3d::set_global(lua, table, system)?;
+        draw_2d::set_global(lua, table, system)?;
+        input::set_global(lua, table, system)?;
+        window::set_global(lua, table, system)?;
+        font::set_global(lua, table, system)?;
+        music::set_global(lua, table, system)?;
+        sound::set_global(lua, table, system)?;
+        texture::set_global(lua, table, system)?;
 
         Ok(())
     }

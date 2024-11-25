@@ -1,15 +1,17 @@
 mod engine;
+mod interface;
+mod module;
 mod script;
 mod status;
 mod support;
 mod system;
 mod utility;
 mod window;
-mod module;
 
 //================================================================
 
 use crate::engine::*;
+use crate::interface::*;
 use crate::status::*;
 
 //================================================================
@@ -18,6 +20,7 @@ use crate::status::*;
 fn main() -> Result<(), String> {
     let mut engine = Engine::new();
     let (mut handle, thread, _audio, mut window) = engine.window().map_err(|e| { crate::utility::panic_window(&e); e })?;
+    let mut interface = Interface::new(&mut handle, &thread);
 
     if let Err(error) = engine.script.main() {
         Status::set_failure(&engine, error);
@@ -32,7 +35,7 @@ fn main() -> Result<(), String> {
             Status::Failure(ref text) =>
                 Status::failure(&mut engine, &mut handle, &thread, &mut window, text),
             Status::Wizard =>
-                Status::wizard(&mut engine, &mut handle, &thread, &mut window),
+                Status::wizard(&mut engine, &mut handle, &thread, &mut interface),
             Status::Restart => {
                 drop(window);
                 window = Status::restart(&mut engine, &mut handle, &thread);
