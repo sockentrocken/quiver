@@ -101,14 +101,23 @@ impl Status {
         thread: &RaylibThread,
         window: &mut RaylibImguiSupport,
     ) {
-        let interface = window.start_frame(handle);
+        //let interface = window.start_frame(handle);
+
+        engine.interface.begin(&handle);
 
         let mut draw = handle.begin_drawing(thread);
         draw.clear_background(Color::BLACK);
 
-        Wizard::draw(engine, interface);
+        if engine
+            .interface
+            .button(&mut draw, "foo", Rectangle::new(8.0, 8.0, 128.0, 32.0))
+        {
+            println!("foo");
+        }
 
-        window.end_frame(&mut draw);
+        //Wizard::draw(engine, interface);
+
+        //window.end_frame(&mut draw);
     }
 
     pub fn restart(

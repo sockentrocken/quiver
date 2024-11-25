@@ -1,3 +1,4 @@
+use crate::interface::*;
 use crate::script::*;
 use crate::status::*;
 use crate::support::*;
@@ -15,6 +16,7 @@ pub struct Engine {
     pub info: InfoEngine,
     pub status: StatusPointer,
     pub window: WindowPointer,
+    pub interface: Interface,
     pub script: Script,
 }
 
@@ -72,6 +74,7 @@ impl Engine {
         let (mut handle, thread) = raylib::init()
             .title(&window.name)
             .size(window.shape.0, window.shape.1)
+            .msaa_4x()
             .build();
 
         handle.set_window_state(

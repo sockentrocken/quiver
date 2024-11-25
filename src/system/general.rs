@@ -363,105 +363,73 @@ impl Into<ffi::BoundingBox> for Box3 {
     }
 }
 
-/* meta
----@class file
-local file = {}
-*/
-use std::io::{BufRead, BufReader, BufWriter, Read, Write};
-
-pub struct File {
-    pub reader: BufReader<std::fs::File>,
-    pub writer: BufWriter<std::fs::File>,
-}
-
-impl mlua::UserData for File {
-    fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
-
-    fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
-        method.add_method_mut("get_all_string", |_: &Lua, this, _: ()| {
-            let mut data = String::new();
-            this.reader.read_to_string(&mut data)?;
-
-            Ok(data)
-        });
-
-        method.add_method_mut("get_string", |_: &Lua, this, _: ()| {
-            let mut data = String::new();
-            this.reader.read_line(&mut data)?;
-
-            Ok(data)
-        });
-
-        method.add_method_mut("set_string", |_: &Lua, this, data: String| {
-            this.writer.write_all(data.as_bytes())?;
-            this.writer.flush()?;
-
-            Ok(())
-        });
-    }
-}
-
-impl File {
-    /* meta
-    ---An unique file handle for a file in memory.
-    ---@param path string Path to file.
-    ---@return file # The user-data object.
-    function File(path) end
-    */
-    pub fn new(_: &Lua, path: String) -> mlua::Result<Self> {
-        if !std::path::Path::new(&path).exists() {
-            std::fs::File::create(&path)?;
-        }
-
-        let file = std::fs::File::options().read(true).write(true).open(path)?;
-
-        Ok(Self {
-            reader: BufReader::new(file.try_clone().unwrap()),
-            writer: BufWriter::new(file.try_clone().unwrap()),
-        })
-    }
-}
-
 //================================================================
 
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, global: &mlua::Table, status: StatusPointer, window: WindowPointer) -> mlua::Result<()> {
-    /* meta
-    ---Load the engine.
-    function engine_load() end
+pub fn set_global(lua: &Lua, table: &mlua::Table, status: StatusPointer, window: WindowPointer) -> mlua::Result<()> {
+    /* class
+    { "name": "quiver.engine", "info": "The engine API." }
+    */
+    let engine = lua.create_table()?;
+
+    /* function
+    { "name": "quiver.engine.load", "info": "Load the engine." }
     */
     let clone = status.clone();
-    global.set("engine_load", lua.create_function(move |_, _ : ()| {
+    engine.set("load", lua.create_function(move |_, _ : ()| {
         *clone.borrow_mut() = Status::Restart;
         Ok(())
     })?)?;
 
-    /* meta
-    ---Exit the engine.
-    function engine_exit() end
+    /* function
+    { "name": "quiver.engine.exit", "info": "Exit the engine." }
     */
     let clone = status.clone();
-    global.set("engine_exit", lua.create_function(move |_, _ : ()| {
+    engine.set("exit", lua.create_function(move |_, _ : ()| {
         *clone.borrow_mut() = Status::Closure;
         Ok(())
     })?)?;
 
-    /* meta
-   ---Get the current state of the debug window.
-    function get_debug_state() end
+    engine.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
+    engine.set("get_time",       lua.create_function(self::get_time)?)?;
+    engine.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
+    engine.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
+    engine.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
+
+    table.set("engine", engine)?;
+
+    //================================================================
+
+    /* class
+    { "name": "quiver.debug", "info": "The debug window API." }
+    */
+    let debug = lua.create_table()?;
+
+    /* function
+    {
+        "name": "quiver.debug.get_state",
+        "info": "Get the current state of the debug window.",
+        "return": [
+            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
+        ]
+    }
     */
     let clone = window.clone();
-    global.set("get_debug_state", lua.create_function(move |_, _ : ()| {
+    debug.set("get_state", lua.create_function(move |_, _ : ()| {
         Ok(clone.borrow().active)
     })?)?;
 
-    /* meta
-    ---Set the current state of the debug window.
-    ---@param value boolean New state.
-    function set_debug_state(value) end
+    /* function
+    {
+        "name": "quiver.debug.set_state",
+        "info": "Set the current state of the debug window.",
+        "parameter": [
+            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
+        ]
+    }
     */
     let clone = window.clone();
-    global.set("set_debug_state", lua.create_function(move |_, value : bool| {
+    debug.set("set_state", lua.create_function(move |_, value : bool| {
         let mut clone = clone.borrow_mut();
         clone.active = value;
         clone.parser.dirty = value;
@@ -469,55 +437,80 @@ pub fn set_global(lua: &Lua, global: &mlua::Table, status: StatusPointer, window
         Ok(())
     })?)?;
 
-    /* meta
-    ---Get the current state of the debug logger.
-    function get_logger_state() end
+    table.set("debug", debug)?;
+
+    //================================================================
+
+    /* class
+    { "name": "quiver.logger", "info": "The debug logger API." }
+    */
+    let logger = lua.create_table()?;
+
+    /* function
+    {
+        "name": "quiver.logger.get_state",
+        "info": "Get the current state of the debug logger.",
+        "return": [
+            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
+        ]
+    }
     */
     let clone = window.clone();
-    global.set("get_logger_state", lua.create_function(move |_, _ : ()| {
+    logger.set("get_state", lua.create_function(move |_, _ : ()| {
         Ok(clone.borrow_mut().logger.active)
     })?)?;
 
-    /* meta
-    ---Set the current state of the debug logger.
-    ---@param value boolean New state.
-    function set_logger_state(value) end
+    /* function
+    {
+        "name": "quiver.logger.set_state",
+        "info": "Set the current state of the debug logger.",
+        "parameter": [
+            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
+        ]
+    }
     */
     let clone = window.clone();
-    global.set("set_logger_state", lua.create_function(move |_, value : bool| {
+    logger.set("set_state", lua.create_function(move |_, value : bool| {
         clone.borrow_mut().logger.active = value;
         Ok(())
     })?)?;
 
-    /* meta
-    ---Wipe the debug logger text.
-    function wipe_logger() end
+    /* function
+    { "name": "quiver.logger.wipe", "info": "Wipe the debug logger text." }
     */
     let clone = window.clone();
-    global.set("wipe_logger", lua.create_function(move |_, _ : ()| {
+    logger.set("wipe", lua.create_function(move |_, _ : ()| {
         Logger::wipe(&mut clone.borrow_mut().logger);
         Ok(())
     })?)?;
 
-    /* meta
-    ---Show the debug logger text.
-    ---@param value boolean New state.
-    function show_logger(value) end
+    /* function
+    {
+        "name": "quiver.logger.show",
+        "info": "Show the debug logger text.",
+        "parameter": [
+            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
+        ]
+    }
     */
     let clone = window.clone();
-    global.set("show_logger", lua.create_function(move |_, value: bool| {
+    logger.set("show", lua.create_function(move |_, value: bool| {
         Logger::show(&mut clone.borrow_mut().logger, value);
         Ok(())
     })?)?;
 
-    /* meta
-    ---Push a new string to the debug logger.
-    ---@param label  string Label for line to print.
-    ---@param color? color  Color for line to print.
-    function push_logger(label, color) end
+    /* function
+    {
+        "name": "quiver.logger.push",
+        "info": "Push a new string to the debug logger.",
+        "parameter": [
+            { "optional": false, "name": "label", "info": "Label for line to print.", "type": "string" },
+            { "optional": true,  "name": "color", "info": "Color for line to print.", "type": "color"  }
+        ]
+    }
     */
     let clone = window.clone();
-    global.set("push_logger", lua.create_function(move |lua: &Lua, (label, color) : (String, Option<LuaValue>)| {
+    logger.set("push", lua.create_function(move |lua: &Lua, (label, color) : (String, Option<LuaValue>)| {
         println!("{label}");
 
         let color : crate::system::general::Color = {
@@ -531,45 +524,47 @@ pub fn set_global(lua: &Lua, global: &mlua::Table, status: StatusPointer, window
         Ok(())
     })?)?;
 
-    /* meta
-    ---Push a new method to the debug parser.
-    ---@param name string Name for method to push.
-    ---@param info string Info for method to push.
-    ---@param call function Function call-back for method to push.
-    function push_parser(name, info, call) end
+    table.set("logger", logger)?;
+
+    //================================================================
+
+    /* class
+    { "name": "quiver.parser", "info": "The debug parser API." }
+    */
+    let parser = lua.create_table()?;
+
+    /* function
+    {
+        "name": "quiver.parser.push",
+        "info": "Push a new method to the debug parser.",
+        "parameter": [
+            { "optional": false, "name": "name", "info": "Name for method to push.",               "type": "string"   },
+            { "optional": false, "name": "info", "info": "Info for method to push.",               "type": "string"   },
+            { "optional": false, "name": "call", "info": "Function call-back for method to push.", "type": "function" }
+        ]
+    }
     */
     let clone = window.clone();
-    global.set("push_parser", lua.create_function(move |_, (name, info, call) : (String, String, mlua::Function)| {
+    parser.set("push_parser", lua.create_function(move |_, (name, info, call) : (String, String, mlua::Function)| {
         clone.borrow_mut().parser.method.insert(name, ParserMethod { call, info });
         Ok(())
     })?)?;
 
-    global.set("File",           lua.create_function(self::File::new)?)?;
-    //global.set("Automation",    lua.create_function(self::Automation::new)?)?;
-
-    global.set("get_file_exist",   lua.create_function(self::get_file_exist)?)?;
-    global.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
-    global.set("get_time",       lua.create_function(self::get_time)?)?;
-    global.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
-    global.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
-    global.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
-    global.set("json_to_table",  lua.create_function(self::json_to_table)?)?;
-    global.set("table_to_json",  lua.create_function(self::table_to_json)?)?;
-    //global.set("open_link",  lua.create_function(self::open_link)?)?;
-    //global.set("compress_data",  lua.create_function(self::compress_data)?)?;
-    //global.set("decompress_data",  lua.create_function(self::decompress_data)?)?;
-    //global.set("encode_data_base64",  lua.create_function(self::encode_data_base64)?)?;
-    //global.set("decode_data_base64",  lua.create_function(self::decode_data_base64)?)?;
+    table.set("parser", parser)?;
 
     Ok(())
 }
 
 //================================================================
 
-/* meta
----Set a key to exit Quiver.
----@param key input_board Key to exit Quiver with.
-function set_exit_key(key) end
+/* function
+{
+    "name": "quiver.engine.set_exit_key",
+    "info": "Set a key to exit Quiver.",
+    "parameter": [
+        { "optional": false, "name": "key", "info": "Key to exit Quiver with.", "type": "input_board" }
+    ]
+}
 */
 fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
     if (crate::system::input::BOARD_RANGE_LOWER..=crate::system::input::BOARD_RANGE_UPPER)
@@ -584,76 +579,57 @@ fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
     }
 }
 
-/* meta
----Get the current time. Will count up since the initialization of the window.
----@return number # Current time.
-function get_time() end
+/* function
+{
+    "name": "quiver.engine.get_time",
+    "info": "Get the current time. Will count up since the initialization of the window.",
+    "return": [
+        { "optional": false, "name": "time", "info": "Current time.", "type": "number" }
+    ]
+}
 */
 fn get_time(_: &Lua, _: ()) -> mlua::Result<f64> {
     unsafe { Ok(ffi::GetTime()) }
 }
 
-/* meta
----Get the current frame time.
----@return number # Current frame time.
-function get_frame_time() end
+/* function
+{
+    "name": "quiver.engine.get_frame_time",
+    "info": "Get the current frame time.",
+    "return": [
+        { "optional": false, "name": "frame_time", "info": "Current frame time.", "type": "number" }
+    ]
+}
 */
 fn get_frame_time(_: &Lua, _: ()) -> mlua::Result<f32> {
     unsafe { Ok(ffi::GetFrameTime()) }
 }
 
-/* meta
----Get the current frame rate.
----@return number # Current frame rate.
-function get_frame_rate() end
+/* function
+{
+    "name": "quiver.engine.get_frame_rate",
+    "info": "Get the current frame rate.",
+    "return": [
+        { "optional": false, "name": "frame_rate", "info": "Current frame rate.", "type": "number" }
+    ]
+}
 */
 fn get_frame_rate(_: &Lua, _: ()) -> mlua::Result<i32> {
     unsafe { Ok(ffi::GetFPS()) }
 }
 
-/* meta
----Set the current frame rate.
----@param value number Value to set the frame rate to.
-function set_frame_rate(value) end
+/* function
+{
+    "name": "quiver.engine.set_frame_rate",
+    "info": "set the current frame rate.",
+    "parameter": [
+        { "optional": false, "name": "frame_rate", "info": "Current frame rate.", "type": "number" }
+    ]
+}
 */
 fn set_frame_rate(_: &Lua, rate: i32) -> mlua::Result<()> {
     unsafe {
         ffi::SetTargetFPS(rate);
         Ok(())
     }
-}
-
-/* meta
----Convert a table to a JSON string.
----@param value table Table to convert to a JSON string.
----@return string # JSON conversion of table.
-function table_to_json(value) end
-*/
-fn json_to_table(lua: &Lua, data: String) -> mlua::Result<LuaValue> {
-    let json: serde_json::Value =
-        serde_json::from_str(&data).map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-    lua.to_value(&json)
-}
-
-/* meta
----Convert a JSON string to a table.
----@param value string JSON string to convert to a table.
----@return table # Table conversion of a JSON string.
-function json_to_table(value) end
-*/
-fn table_to_json(_: &Lua, data: LuaValue) -> mlua::Result<String> {
-    let json = serde_json::to_string(&data).map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-    Ok(json)
-}
-
-/* meta
----Check if a file does exist in disk.
----@param path string Path for file to check.
----@return boolean # True if file does exist, false otherwise.
-function get_file_exist(path) end
-*/
-fn get_file_exist(_: &Lua, path: String) -> mlua::Result<bool> {
-    Ok(std::path::Path::new(&path).exists())
 }
