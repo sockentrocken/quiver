@@ -69,7 +69,7 @@ fn texture_pro_draw(
     "name": "texture",
     "info": "An unique handle for a texture in memory.",
     "field": [
-        { "name": "shape", "info": "Shape of the texture.", "type": "vector_2" }
+        { "name": "shape", "info": "Shape of the texture.", "kind": "vector_2" }
     ]
 }
 */
@@ -131,15 +131,15 @@ impl mlua::UserData for Texture {
 }
 
 impl Texture {
-    /* function
+    /* entry
     {
         "name": "quiver.texture.new",
         "info": "Create a new texture resource.",
-        "parameter": [
-            { "optional": false, "name": "path", "info": "Path to texture file.", "type": "string" }
+        "member": [
+            { "name": "path", "info": "Path to texture file.", "kind": "string" }
         ],
-        "return": [
-            { "optional": false, "name": "texture", "info": "Texture resource.", "type": "texture" }
+        "result": [
+            { "name": "texture", "info": "Texture resource.", "kind": "texture" }
         ]
     }
     */

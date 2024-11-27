@@ -33,14 +33,19 @@ mod draw_2d {
         Ok(())
     }
 
-    /* function
+    /* entry
     {
         "name": "quiver.draw_2d.begin",
         "info": "Initialize the 2D draw mode. **MUST** call *quiver.draw_2d.close* after 2D drawing is done.",
-        "parameter": [
-            { "optional": false, "name": "camera", "info": "The 2D camera to use for drawing.", "type": "camera_2d" }
+        "member": [
+            { "name": "camera", "info": "The 2D camera to use for drawing.", "kind": "camera_2d" }
         ]
     }
+    example
+    local camera_2d = Camera2D:new(Vector2:zero(), Vector2:zero(), 0.0, 1.0)
+    quiver.draw_2d.begin(camera_2d)
+    [...]
+    quiver.draw_2d.close()
     */
     fn begin(lua: &Lua, camera: LuaValue) -> mlua::Result<()> {
         let value: crate::system::general::Camera2D = lua.from_value(camera)?;
@@ -51,7 +56,7 @@ mod draw_2d {
         }
     }
 
-    /* function
+    /* entry
     { "name": "quiver.draw_2d.close", "info": "Finalize the 2D draw mode." }
     */
     fn close(_: &Lua, _: ()) -> mlua::Result<()> {
@@ -61,15 +66,15 @@ mod draw_2d {
         }
     }
 
-    /* function
+    /* entry
     {
         "name": "quiver.draw_2d.draw_box_2",
         "info": "Draw 2D box.",
-        "parameter": [
-            { "optional": false, "name": "shape", "info": "The shape of the box.", "type": "box_2"    },
-            { "optional": false, "name": "point", "info": "The point of the box.", "type": "vector_2" },
-            { "optional": false, "name": "angle", "info": "The angle of the box.", "type": "number"   },
-            { "optional": false, "name": "color", "info": "The color of the box.", "type": "color"    }
+        "member": [
+            { "name": "shape", "info": "The shape of the box.", "kind": "box_2"    },
+            { "name": "point", "info": "The point of the box.", "kind": "vector_2" },
+            { "name": "angle", "info": "The angle of the box.", "kind": "number"   },
+            { "name": "color", "info": "The color of the box.", "kind": "color"    }
         ]
     }
     */
@@ -87,15 +92,15 @@ mod draw_2d {
         }
     }
 
-    /* function
+    /* entry
     {
         "name": "quiver.draw_2d.draw_text",
         "info": "Draw text.",
-        "parameter": [
-            { "optional": false, "name": "label", "info": "The label of the text.", "type": "string"   },
-            { "optional": false, "name": "point", "info": "The point of the text.", "type": "vector_2" },
-            { "optional": false, "name": "scale", "info": "The angle of the text.", "type": "number"   },
-            { "optional": false, "name": "color", "info": "The color of the text.", "type": "color"    }
+        "member": [
+            { "name": "label", "info": "The label of the text.", "kind": "string"   },
+            { "name": "point", "info": "The point of the text.", "kind": "vector_2" },
+            { "name": "scale", "info": "The angle of the text.", "kind": "number"   },
+            { "name": "color", "info": "The color of the text.", "kind": "color"    }
         ]
     }
     */
@@ -142,12 +147,12 @@ mod draw_3d {
         Ok(())
     }
 
-    /* function
+    /* entry
     {
         "name": "quiver.draw_3d.begin",
         "info": "Initialize the 3D draw mode. **MUST** call *quiver.draw_3d.close* after 3D drawing is done.",
-        "parameter": [
-            { "optional": false, "name": "camera", "info": "The 3D camera to use for drawing.", "type": "camera_3d" }
+        "member": [
+            { "name": "camera", "info": "The 3D camera to use for drawing.", "kind": "camera_3d" }
         ]
     }
     */
@@ -160,7 +165,7 @@ mod draw_3d {
         }
     }
 
-    /* function
+    /* entry
     { "name": "quiver.draw_3d.close", "info": "Finalize the 3D draw mode." }
     */
     fn close(_: &Lua, _: ()) -> mlua::Result<()> {
@@ -170,13 +175,13 @@ mod draw_3d {
         }
     }
 
-    /* function
+    /* entry
     {
         "name": "quiver.draw_3d.draw_grid",
         "info": "Draw a grid.",
-        "parameter": [
-            { "optional": false, "name": "slice", "info": "The slice count of the grid.", "type": "number" },
-            { "optional": false, "name": "space", "info": "The space shift of the grid.", "type": "number" }
+        "member": [
+            { "name": "slice", "info": "The slice count of the grid.", "kind": "number" },
+            { "name": "space", "info": "The space shift of the grid.", "kind": "number" }
         ]
     }
     */
@@ -187,14 +192,14 @@ mod draw_3d {
         }
     }
 
-    /* function
+    /* entry
     {
         "name": "quiver.draw_3d.draw_cube",
         "info": "Draw a cube.",
-        "parameter": [
-            { "optional": false, "name": "point", "info": "The point of the cube.", "type": "vector_3" },
-            { "optional": false, "name": "shape", "info": "The shape of the cube.", "type": "vector_3" },
-            { "optional": false, "name": "color", "info": "The color of the cube.", "type": "color"    }
+        "member": [
+            { "name": "point", "info": "The point of the cube.", "kind": "vector_3" },
+            { "name": "shape", "info": "The shape of the cube.", "kind": "vector_3" },
+            { "name": "color", "info": "The color of the cube.", "kind": "color"    }
         ]
     }
     */
@@ -212,14 +217,14 @@ mod draw_3d {
         }
     }
 
-    /* function
+    /* entry
     {
         "name": "quiver.draw_3d.draw_cube",
         "info": "Draw a ball.",
-        "parameter": [
-            { "optional": false, "name": "point", "info": "The point of the ball.", "type": "vector_3" },
-            { "optional": false, "name": "shape", "info": "The shape of the ball.", "type": "number"   },
-            { "optional": false, "name": "color", "info": "The color of the ball.", "type": "color"    }
+        "member": [
+            { "name": "point", "info": "The point of the ball.", "kind": "vector_3" },
+            { "name": "shape", "info": "The shape of the ball.", "kind": "number"   },
+            { "name": "color", "info": "The color of the ball.", "kind": "color"    }
         ]
     }
     */
@@ -233,13 +238,13 @@ mod draw_3d {
         }
     }
 
-    /* function
+    /* entry
     {
         "name": "quiver.draw_3d.draw_box_3",
         "info": "Draw a 3D box.",
-        "parameter": [
-            { "optional": false, "name": "shape", "info": "The shape of the ball.", "type": "box_3" },
-            { "optional": false, "name": "color", "info": "The color of the ball.", "type": "color" }
+        "member": [
+            { "name": "shape", "info": "The shape of the ball.", "kind": "box_3" },
+            { "name": "color", "info": "The color of the ball.", "kind": "color" }
         ]
     }
     */

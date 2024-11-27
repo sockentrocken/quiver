@@ -8,25 +8,12 @@ use raylib::prelude::*;
 //================================================================
 
 pub struct Window {
-    data: [Widget; 64],
+    data: [widget::Data; 64],
     font: Font,
-    pub card: Texture2D,
+    logo: Texture2D,
     point: Vector2,
     focus: Option<i32>,
     count: i32,
-}
-
-#[derive(Default, Debug)]
-pub struct State {
-    hover: bool,
-    focus: bool,
-    click: bool,
-}
-
-#[derive(Copy, Clone, Default)]
-pub struct Widget {
-    hover: f32,
-    focus: f32,
 }
 
 impl Window {
@@ -39,9 +26,9 @@ impl Window {
 
     //================================================================
 
-    const GRADIENT_POINT_Y: f32 = 12.0;
+    const GRADIENT_POINT_Y: f32 = 4.0;
     const GRADIENT_SHAPE_Y: i32 = 6;
-    const GRADIENT_COLOR_MAX: Color = Color::new(0, 0, 0, 66);
+    const GRADIENT_COLOR_MAX: Color = Color::new(0, 0, 0, 99);
     const GRADIENT_COLOR_MIN: Color = Color::new(0, 0, 0, 0);
 
     //================================================================
@@ -57,7 +44,7 @@ impl Window {
 
     //================================================================
 
-    const BUTTON_SHAPE: Vector2 = Vector2::new(96.0, 24.0);
+    const BUTTON_SHAPE: Vector2 = Vector2::new(160.0, 32.0);
     const BUTTON_TEXT_SHIFT: Vector2 = Vector2::new(8.0, 4.0);
     const BUTTON_SHIFT: f32 = 8.0;
 
@@ -68,226 +55,192 @@ impl Window {
 
     //================================================================
 
-    const SLIDER_SHAPE: Vector2 = Vector2::new(96.0, 24.0);
+    const SLIDER_CIRCLE_SHAPE: f32 = 8.0;
+    const SLIDER_FOCUS_POINT: Vector2 = Vector2::new(0.0, -32.0);
+    const SLIDER_FOCUS_SHAPE: f32 = 20.0;
+    const SLIDER_SHAPE_MAX: Vector2 = Vector2::new(160.0, 24.0);
+    const SLIDER_SHAPE_MIN: Vector2 = Vector2::new(160.0, 4.0);
     const SLIDER_SHIFT: f32 = 8.0;
 
     //================================================================
 
-    const RECORD_SHAPE: Vector2 = Vector2::new(96.0, 24.0);
+    const RECORD_SHAPE_MAX: Vector2 = Vector2::new(320.0, 24.0);
+    const RECORD_SHAPE_MIN: Vector2 = Vector2::new(320.0, 4.0);
+    const RECORD_SHAPE_CARET: Vector2 = Vector2::new(2.0, 16.0);
     const RECORD_SHIFT: f32 = 8.0;
 
     //================================================================
 
+    const WIDGET_COUNT: usize = 64;
+
+    //================================================================
+
+    /// Create a new Window instance.
     pub fn new(handle: &mut RaylibHandle, thread: &RaylibThread) -> Self {
+        // Load the font.
         let font = handle
-            .load_font_from_memory(&thread, ".ttf", Engine::FONT, Self::TEXT_SHAPE as i32, None)
-            .expect("window::new(): Could not load default font.");
+            .load_font_from_memory(thread, ".ttf", Engine::FONT, Self::TEXT_SHAPE as i32, None)
+            .expect("Window::new(): Could not load default font.");
+        // Load the logo.
+        let logo = handle
+            .load_texture_from_image(
+                &thread,
+                &Image::load_image_from_mem(".png", Engine::LOGO)
+                    .expect("Window::new(): Could not load texture."),
+            )
+            .expect("Window::new(): Could not load texture.");
 
         Self {
-            data: [Widget::default(); 64],
+            data: [widget::Data::default(); Self::WIDGET_COUNT],
             font,
-            card: Self::load_texture(handle, thread, Engine::CARD),
+            logo,
             point: Vector2::default(),
             focus: None,
             count: i32::default(),
         }
     }
 
-    pub fn point(&mut self, point: Vector2) {
-        self.point = point;
-    }
-
+    /// Begin a new frame to reset the per-frame state.
     pub fn begin(&mut self) {
         self.point = Vector2::default();
         self.count = i32::default();
     }
 
-    pub fn data_get(&self) -> &Widget {
-        self.data
-            .get(self.count as usize)
-            .expect("window::data_get(): Widget overflow.")
+    // Change the current draw cursor.
+    pub fn point(&mut self, point: Vector2) {
+        self.point = point;
     }
 
-    pub fn data_get_mut(&mut self) -> &mut Widget {
-        self.data
-            .get_mut(self.count as usize)
-            .expect("window::data_get_mut(): Widget overflow.")
-    }
-
-    pub fn data_clear(&mut self) {
-        self.data.fill_with(Default::default);
-    }
-
-    pub fn card_sharp(&self, draw: &mut RaylibDrawHandle, content: Rectangle, color: Color) {
+    /// Draw a sharp card.
+    pub fn card_sharp(&self, draw: &mut RaylibDrawHandle, rectangle: Rectangle, color: Color) {
         draw.draw_rectangle_gradient_v(
-            content.x as i32,
-            (content.y + content.height) as i32,
-            content.width as i32,
+            rectangle.x as i32,
+            (rectangle.y + rectangle.height) as i32,
+            rectangle.width as i32,
             Self::GRADIENT_SHAPE_Y,
             Self::GRADIENT_COLOR_MAX,
             Self::GRADIENT_COLOR_MIN,
         );
 
-        draw.draw_rectangle_rec(content, color);
+        draw.draw_rectangle_rec(rectangle, color);
     }
 
-    pub fn card_round(&self, draw: &mut RaylibDrawHandle, content: Rectangle, color: Color) {
+    /// Draw a round card.
+    pub fn card_round(&self, draw: &mut RaylibDrawHandle, rectangle: Rectangle, color: Color) {
         draw.draw_rectangle_gradient_v(
-            content.x as i32,
-            (content.y + content.height - Self::GRADIENT_POINT_Y) as i32,
-            content.width as i32,
+            rectangle.x as i32,
+            (rectangle.y + rectangle.height - Self::GRADIENT_POINT_Y) as i32,
+            rectangle.width as i32,
             Self::GRADIENT_SHAPE_Y + Self::GRADIENT_POINT_Y as i32,
             Self::GRADIENT_COLOR_MAX,
             Self::GRADIENT_COLOR_MIN,
         );
 
         draw.draw_rectangle_rounded(
-            content,
+            rectangle,
             Self::CARD_ROUND_SHAPE,
             Self::CARD_ROUND_COUNT,
             color,
         );
     }
 
-    pub fn font(&mut self, draw: &mut RaylibDrawHandle, text: &str, point: Vector2, color: Color) {
-        draw.draw_text_ex(
-            &self.font,
-            text,
-            point,
-            Self::TEXT_SHAPE,
-            Self::TEXT_SPACE,
-            color,
-        );
-    }
-
-    pub fn font_measure(&mut self, text: &str) -> Vector2 {
-        self.font
-            .measure_text(text, Self::TEXT_SHAPE, Self::TEXT_SPACE)
-    }
-
+    /// Draw text.
     pub fn text(&mut self, draw: &mut RaylibDrawHandle, text: &str, color: Color) {
         self.font(draw, text, self.point, color);
 
         self.point.y += self.font_measure(text).y + Self::TEXT_SHIFT;
     }
 
-    pub fn state(&mut self, draw: &RaylibDrawHandle, content: Rectangle) -> State {
-        let mut state = State::default();
-        let hover = content.check_collision_point_rec(draw.get_mouse_position());
-
-        if hover {
-            if self.focus.is_none() && draw.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT)
-            {
-                self.focus = Some(self.count);
-            }
-
-            state.hover = true;
-        }
-
-        if let Some(focus) = self.focus {
-            if focus == self.count {
-                if draw.is_mouse_button_released(MouseButton::MOUSE_BUTTON_LEFT) {
-                    if hover {
-                        state.click = true;
-                    }
-
-                    self.focus = None;
-                }
-
-                state.focus = true;
-            }
-        }
-
-        state
-    }
-
+    /// Draw a button. Will return true on click.
     pub fn button(&mut self, draw: &mut RaylibDrawHandle, text: &str) -> bool {
-        let content = Rectangle::new(
+        let rectangle = Rectangle::new(
             self.point.x,
             self.point.y,
-            128.0 + Self::BUTTON_TEXT_SHIFT.x * 2.0,
-            24.0 + Self::BUTTON_TEXT_SHIFT.y * 2.0,
+            Self::BUTTON_SHAPE.x,
+            Self::BUTTON_SHAPE.y,
         );
 
-        let result = self.state(draw, content);
+        let state = widget::State::get(self, draw, rectangle);
+        let data = widget::Data::get_mutable(self);
+        data.set_hover(draw, state.hover);
+        data.set_focus(draw, state.focus);
+        let data = widget::Data::get(self);
 
-        self.set_alpha(draw, result.hover);
-        self.set_scale(draw, result.focus);
-
-        let data = self.data_get();
+        let text_point = Vector2::new(
+            rectangle.x + Self::BUTTON_TEXT_SHIFT.x,
+            rectangle.y + Self::BUTTON_TEXT_SHIFT.y - data.get_point(),
+        );
 
         self.card_round(
             draw,
-            Self::get_scale(&content, data.focus, data.hover),
-            Self::get_alpha(&Window::COLOR_MAIN_HEAVY, data.hover),
+            data.get_shape(&rectangle),
+            data.get_color(&Window::COLOR_MAIN_HEAVY),
         );
-        self.font(
-            draw,
-            text,
-            Vector2::new(
-                content.x + Self::BUTTON_TEXT_SHIFT.x,
-                content.y - Self::get_point(data.focus, data.hover) + Self::BUTTON_TEXT_SHIFT.y,
-            ),
-            Self::get_alpha(&Self::COLOR_TEXT, data.hover),
-        );
+        self.font(draw, text, text_point, data.get_color(&Self::COLOR_TEXT));
 
-        self.point.y += content.height + Self::BUTTON_SHIFT;
+        self.point.y += Self::BUTTON_SHAPE.y + Self::BUTTON_SHIFT;
         self.count += 1;
 
-        result.click
+        state.click
     }
 
+    // Draw a toggle.
     pub fn toggle(&mut self, draw: &mut RaylibDrawHandle, text: &str, value: &mut bool) {
-        let content_max = Rectangle::new(self.point.x, self.point.y, 24.0, 24.0);
-        let state = self.state(draw, content_max);
+        let rectangle_max = Rectangle::new(
+            self.point.x,
+            self.point.y,
+            Self::TOGGLE_SHAPE.x,
+            Self::TOGGLE_SHAPE.y,
+        );
+        let rectangle_min = Rectangle::new(
+            self.point.x + (Self::TOGGLE_SHAPE.x * 0.25),
+            self.point.y + (Self::TOGGLE_SHAPE.y * 0.25),
+            Self::TOGGLE_SHAPE.x - (Self::TOGGLE_SHAPE.x * 0.5),
+            Self::TOGGLE_SHAPE.y - (Self::TOGGLE_SHAPE.y * 0.5),
+        );
 
-        self.set_alpha(draw, state.hover);
-        self.set_scale(draw, state.focus);
+        let state = widget::State::get(self, draw, rectangle_max);
+        let data = widget::Data::get_mutable(self);
+        data.set_hover(draw, state.hover);
+        data.set_focus(draw, state.focus);
+        let data = widget::Data::get(self);
 
-        let data = self.data_get();
+        let text_point = Vector2::new(
+            rectangle_max.x + rectangle_max.width + Self::TOGGLE_SHIFT,
+            rectangle_max.y - data.get_point(),
+        );
 
+        // Click event, change value.
         if state.click {
             *value = !*value;
         }
 
         self.card_round(
             draw,
-            content_max,
-            Self::get_alpha(&Window::COLOR_MAIN_HEAVY, data.hover),
+            data.get_shape(&rectangle_max),
+            data.get_color(&Window::COLOR_MAIN_HEAVY),
         );
 
         if *value {
-            /*
-            draw.draw_texture_pro(
-                &self.check,
-                Rectangle::new(0.0, 0.0, self.check.width as f32, self.check.height as f32),
-                Rectangle::new(
-                    content_max.x,
-                    content_max.y,
-                    content_max.width,
-                    content_max.height,
-                ),
-                Vector2::zero(),
-                0.0,
-                Self::get_alpha(&Color::WHITE, data.hover),
+            self.card_round(
+                draw,
+                data.get_shape(&rectangle_min),
+                data.get_color(&Window::COLOR_MAIN_LIGHT),
             );
-            */
         }
 
         self.font(
             draw,
             text,
-            Vector2::new(
-                content_max.width + content_max.x + Self::TOGGLE_SHIFT,
-                content_max.y,
-            ),
-            Self::get_alpha(&Self::COLOR_TEXT_MAIN, data.hover),
+            text_point,
+            data.get_color(&Self::COLOR_TEXT_MAIN),
         );
 
-        self.point.y += content_max.height + Self::TOGGLE_SHIFT;
+        self.point.y += Self::TOGGLE_SHAPE.y + Self::TOGGLE_SHIFT;
         self.count += 1;
     }
 
+    // Draw a slider.
     pub fn slider(
         &mut self,
         draw: &mut RaylibDrawHandle,
@@ -297,19 +250,39 @@ impl Window {
         max: f32,
     ) {
         let percent = (*value - min) / (max - min);
-        let content_hit = Rectangle::new(self.point.x, self.point.y, 96.0, 24.0);
-        let content_max = Rectangle::new(self.point.x, self.point.y + 8.0, 96.0, 4.0);
-        let content_min = Rectangle::new(self.point.x, self.point.y + 8.0, 96.0 * percent, 4.0);
-        let state = self.state(draw, content_hit);
+        let rectangle_hit = Rectangle::new(
+            self.point.x,
+            self.point.y,
+            Self::SLIDER_SHAPE_MAX.x,
+            Self::SLIDER_SHAPE_MAX.y,
+        );
+        let rectangle_max = Rectangle::new(
+            self.point.x,
+            self.point.y + (Self::SLIDER_SHAPE_MAX.y - Self::SLIDER_SHAPE_MIN.y) * 0.5,
+            Self::SLIDER_SHAPE_MIN.x,
+            Self::SLIDER_SHAPE_MIN.y,
+        );
+        let rectangle_min = Rectangle::new(
+            self.point.x,
+            self.point.y + (Self::SLIDER_SHAPE_MAX.y - Self::SLIDER_SHAPE_MIN.y) * 0.5,
+            Self::SLIDER_SHAPE_MIN.x * percent,
+            Self::SLIDER_SHAPE_MIN.y,
+        );
 
-        self.set_alpha(draw, state.hover || state.focus);
-        self.set_scale(draw, state.focus);
+        let state = widget::State::get(self, draw, rectangle_hit);
+        let data = widget::Data::get_mutable(self);
+        data.set_hover(draw, state.hover || state.focus);
+        data.set_focus(draw, state.focus);
+        let data = widget::Data::get(self);
 
-        let data = self.data_get();
+        let text_point = Vector2::new(
+            self.point.x + Self::SLIDER_SHAPE_MAX.x + Self::SLIDER_SHIFT,
+            self.point.y - data.get_point(),
+        );
 
         if state.focus {
-            let mouse = (draw.get_mouse_x() as f32 - content_hit.x)
-                / ((content_hit.x + content_hit.width) - content_hit.x);
+            let mouse = (draw.get_mouse_x() as f32 - rectangle_hit.x)
+                / ((rectangle_hit.x + rectangle_hit.width) - rectangle_hit.x);
 
             let mouse = mouse.clamp(0.0, 1.0);
 
@@ -318,32 +291,32 @@ impl Window {
 
         self.card_sharp(
             draw,
-            content_max,
-            Self::get_alpha(&Window::COLOR_MAIN_LIGHT, data.hover),
+            data.get_shape(&rectangle_max),
+            data.get_color(&Window::COLOR_MAIN_LIGHT),
         );
         self.card_sharp(
             draw,
-            content_min,
-            Self::get_alpha(&Window::COLOR_MAIN_HEAVY, data.hover),
+            data.get_shape(&rectangle_min),
+            data.get_color(&Window::COLOR_MAIN_HEAVY),
         );
 
         if state.focus {
             let pin = Vector2::new(
-                self.point.x + content_max.width * percent,
-                self.point.y - 32.0,
+                self.point.x + Self::SLIDER_FOCUS_POINT.x + rectangle_max.width * percent,
+                self.point.y + Self::SLIDER_FOCUS_POINT.y - data.get_point(),
             );
 
             draw.draw_circle_v(
                 pin,
-                20.0,
-                Self::get_alpha(&Self::COLOR_MAIN_HEAVY, data.hover),
+                Self::SLIDER_FOCUS_SHAPE,
+                data.get_color(&Self::COLOR_MAIN_HEAVY),
             );
 
             draw.draw_triangle(
-                pin + Vector2::new(-20.0, 6.0),
-                pin + Vector2::new(0.0, 32.0),
-                pin + Vector2::new(20.0, 6.0),
-                Self::get_alpha(&Self::COLOR_MAIN_HEAVY, data.hover),
+                pin + Vector2::new(-Self::SLIDER_FOCUS_SHAPE, 0.0),
+                pin + Vector2::new(0.0, -Self::SLIDER_FOCUS_POINT.y),
+                pin + Vector2::new(Self::SLIDER_FOCUS_SHAPE, 0.0),
+                data.get_color(&Self::COLOR_MAIN_HEAVY),
             );
 
             let value = &format!("{value:.0}");
@@ -351,50 +324,71 @@ impl Window {
             let measure = self.font_measure(value);
 
             self.font(draw, value, pin - measure * 0.5, Self::COLOR_TEXT_MAIN);
-        } else {
-            let pin = Vector2::new(
-                self.point.x + content_max.width * percent,
-                self.point.y + 10.0,
-            );
-
-            draw.draw_circle_v(
-                pin,
-                8.0,
-                Self::get_alpha(&Self::COLOR_MAIN_HEAVY, data.hover),
-            );
         }
 
-        self.font(
-            draw,
-            text,
-            Vector2::new(
-                content_max.width + content_max.x + Self::SLIDER_SHIFT * 2.0,
-                self.point.y,
-            ),
-            Self::COLOR_TEXT_MAIN,
+        let pin = Vector2::new(
+            self.point.x + Self::SLIDER_SHAPE_MAX.x * percent,
+            self.point.y + Self::SLIDER_SHAPE_MAX.y * 0.5 - data.get_point(),
         );
 
-        self.point.y += content_hit.height + Self::SLIDER_SHIFT;
+        draw.draw_circle_v(
+            pin,
+            Self::SLIDER_CIRCLE_SHAPE,
+            data.get_color(&Self::COLOR_MAIN_HEAVY),
+        );
+
+        self.font(draw, text, text_point, Self::COLOR_TEXT_MAIN);
+
+        self.point.y += Self::SLIDER_SHAPE_MAX.y + Self::SLIDER_SHIFT;
         self.count += 1;
     }
 
+    // Draw a record.
     pub fn record(&mut self, draw: &mut RaylibDrawHandle, text: &str, value: &mut String) {
-        let content_hit = Rectangle::new(self.point.x, self.point.y, 160.0, 24.0);
-        let content_max = Rectangle::new(self.point.x, self.point.y + 20.0, 160.0, 4.0);
-        let state = self.state(draw, content_hit);
+        let rectangle_hit = Rectangle::new(
+            self.point.x,
+            self.point.y,
+            Self::RECORD_SHAPE_MAX.x,
+            Self::RECORD_SHAPE_MAX.y,
+        );
+        let rectangle_max = Rectangle::new(
+            self.point.x,
+            self.point.y + Self::RECORD_SHAPE_MAX.y - Self::RECORD_SHAPE_MIN.y,
+            Self::RECORD_SHAPE_MIN.x,
+            Self::RECORD_SHAPE_MIN.y,
+        );
 
-        self.card_sharp(draw, content_max, Window::COLOR_MAIN_HEAVY);
+        let state = widget::State::get(self, draw, rectangle_hit);
+        let data = widget::Data::get_mutable(self);
+        data.set_hover(draw, state.hover);
+        data.set_focus(draw, state.focus);
+        let data = widget::Data::get(self);
+
+        let text_max_point = Vector2::new(
+            self.point.x,
+            self.point.y - data.get_point() - Self::RECORD_SHAPE_MIN.y,
+        );
+        let text_min_point = Vector2::new(
+            self.point.x + Self::RECORD_SHAPE_MAX.x + Self::RECORD_SHIFT,
+            self.point.y - data.get_point(),
+        );
+
+        self.card_sharp(
+            draw,
+            data.get_shape(&rectangle_max),
+            data.get_color(&Window::COLOR_MAIN_HEAVY),
+        );
         self.font(
             draw,
             value,
-            self.point + Vector2::new(0.0, -4.0),
-            Self::COLOR_TEXT_SIDE,
+            text_max_point,
+            data.get_color(&Self::COLOR_TEXT_SIDE),
         );
         self.font(
             draw,
             text,
-            self.point + Vector2::new(content_hit.width + Self::RECORD_SHIFT, 0.0),
-            Self::COLOR_TEXT_MAIN,
+            text_min_point,
+            data.get_color(&Self::COLOR_TEXT_MAIN),
         );
 
         unsafe {
@@ -413,70 +407,156 @@ impl Window {
 
                 self.card_sharp(
                     draw,
-                    Rectangle::new(self.point.x + measure.x, self.point.y, 2.0, 16.0),
-                    Window::COLOR_MAIN_HEAVY,
+                    data.get_shape(&Rectangle::new(
+                        self.point.x + measure.x,
+                        self.point.y,
+                        Self::RECORD_SHAPE_CARET.x,
+                        Self::RECORD_SHAPE_CARET.y,
+                    )),
+                    data.get_color(&Window::COLOR_MAIN_HEAVY),
                 );
             }
         }
 
-        self.point.y += content_hit.height + Self::SLIDER_SHIFT;
+        self.point.y += Self::RECORD_SHAPE_MAX.y + Self::RECORD_SHIFT;
         self.count += 1;
     }
 
-    fn load_texture(handle: &mut RaylibHandle, thread: &RaylibThread, texture: &[u8]) -> Texture2D {
-        handle
-            .load_texture_from_image(
-                &thread,
-                &Image::load_image_from_mem(".png", texture)
-                    .expect("window::new(): Could not load texture."),
+    fn font(&self, draw: &mut RaylibDrawHandle, text: &str, point: Vector2, color: Color) {
+        draw.draw_text_ex(
+            &self.font,
+            text,
+            point,
+            Self::TEXT_SHAPE,
+            Self::TEXT_SPACE,
+            color,
+        );
+    }
+
+    fn font_measure(&self, text: &str) -> Vector2 {
+        self.font
+            .measure_text(text, Self::TEXT_SHAPE, Self::TEXT_SPACE)
+    }
+}
+
+mod widget {
+    use super::*;
+
+    #[derive(Default, Debug)]
+    pub struct State {
+        pub hover: bool,
+        pub focus: bool,
+        pub click: bool,
+    }
+
+    impl State {
+        pub fn get(window: &mut Window, draw: &RaylibDrawHandle, rectangle: Rectangle) -> Self {
+            let mut state = Self::default();
+            let hover = rectangle.check_collision_point_rec(draw.get_mouse_position());
+
+            if hover {
+                if let None = window.focus {
+                    if draw.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
+                        window.focus = Some(window.count);
+                    }
+                }
+
+                state.hover = true;
+            }
+
+            if let Some(focus) = window.focus {
+                if focus == window.count {
+                    if draw.is_mouse_button_released(MouseButton::MOUSE_BUTTON_LEFT) {
+                        if hover {
+                            state.click = true;
+                        }
+
+                        window.focus = None;
+                    }
+
+                    state.focus = true;
+                }
+            }
+
+            state
+        }
+    }
+
+    #[derive(Copy, Clone, Default)]
+    pub struct Data {
+        hover: f32,
+        focus: f32,
+    }
+
+    impl Data {
+        const POINT_SHIFT: f32 = 4.0;
+        const COLOR_UPPER: f32 = 0.25;
+        const COLOR_LOWER: f32 = 0.75;
+        const HOVER_SPEED: f32 = 16.0;
+        const FOCUS_SPEED: f32 = 16.0;
+
+        // Get a reference to widget data. WARNING: will panic on widget overflow.
+        pub fn get(window: &Window) -> &Self {
+            window
+                .data
+                .get(window.count as usize)
+                .expect("Data::get(): Widget overflow.")
+        }
+
+        // Get a mutable reference to widget data. WARNING: will panic on widget overflow.
+        pub fn get_mutable(window: &mut Window) -> &mut Self {
+            window
+                .data
+                .get_mut(window.count as usize)
+                .expect("Data::get_mutable(): Widget overflow.")
+        }
+
+        // Reset all state data.
+        pub fn clear(window: &mut Window) {
+            window.data.fill_with(Default::default);
+        }
+
+        pub fn get_point(&self) -> f32 {
+            ((self.hover - 1.0) + (1.0 - self.focus)) * Self::POINT_SHIFT
+        }
+
+        pub fn get_shape(&self, rectangle: &Rectangle) -> Rectangle {
+            Rectangle::new(
+                rectangle.x,
+                rectangle.y - self.get_point(),
+                rectangle.width,
+                rectangle.height,
             )
-            .expect("window::new(): Could not load texture.")
-    }
-
-    fn get_point(scale: f32, alpha: f32) -> f32 {
-        ((alpha - 1.0) + scale) * 4.0
-    }
-
-    fn get_alpha(color: &Color, alpha: f32) -> Color {
-        Color::new(
-            (color.r as f32 * ((alpha * 0.25) + 0.75)) as u8,
-            (color.g as f32 * ((alpha * 0.25) + 0.75)) as u8,
-            (color.b as f32 * ((alpha * 0.25) + 0.75)) as u8,
-            color.a,
-        )
-    }
-
-    fn get_scale(content: &Rectangle, scale: f32, alpha: f32) -> Rectangle {
-        Rectangle::new(
-            content.x,
-            content.y - Self::get_point(scale, alpha),
-            content.width,
-            content.height,
-        )
-    }
-
-    fn set_alpha(&mut self, draw: &RaylibDrawHandle, value: bool) {
-        let data = self.data_get_mut();
-
-        if value {
-            data.hover += draw.get_frame_time() * 16.0;
-        } else {
-            data.hover -= draw.get_frame_time() * 16.0;
         }
 
-        data.hover = data.hover.clamp(0.0, 1.0);
-    }
-
-    fn set_scale(&mut self, draw: &RaylibDrawHandle, value: bool) {
-        let data = self.data_get_mut();
-
-        if value {
-            data.focus -= draw.get_frame_time() * 16.0;
-        } else {
-            data.focus += draw.get_frame_time() * 16.0;
+        pub fn get_color(&self, color: &Color) -> Color {
+            Color::new(
+                (color.r as f32 * ((self.hover * Self::COLOR_UPPER) + Self::COLOR_LOWER)) as u8,
+                (color.g as f32 * ((self.hover * Self::COLOR_UPPER) + Self::COLOR_LOWER)) as u8,
+                (color.b as f32 * ((self.hover * Self::COLOR_UPPER) + Self::COLOR_LOWER)) as u8,
+                color.a,
+            )
         }
 
-        data.focus = data.focus.clamp(0.0, 1.0);
+        pub fn set_hover(&mut self, draw: &RaylibDrawHandle, value: bool) {
+            if value {
+                self.hover += draw.get_frame_time() * Self::HOVER_SPEED;
+            } else {
+                self.hover -= draw.get_frame_time() * Self::HOVER_SPEED;
+            }
+
+            self.hover = self.hover.clamp(0.0, 1.0);
+        }
+
+        pub fn set_focus(&mut self, draw: &RaylibDrawHandle, value: bool) {
+            if value {
+                self.focus += draw.get_frame_time() * Self::FOCUS_SPEED;
+            } else {
+                self.focus -= draw.get_frame_time() * Self::FOCUS_SPEED;
+            }
+
+            self.focus = self.focus.clamp(0.0, 1.0);
+        }
     }
 }
 
@@ -508,14 +588,14 @@ impl Wizard {
     const NAME_BASE: &'static str = "base.lua";
 
     #[rustfmt::skip]
-    pub fn draw(&mut self, engine: &Engine, draw: &mut RaylibDrawHandle, window: &mut Window) {
+    pub fn draw(&mut self, engine: &mut Engine, draw: &mut RaylibDrawHandle, window: &mut Window) {
         window.begin();
 
         let size = draw.get_screen_width();
 
         match self.state {
             WizardState::Main => {
-                let card_y = 240;
+                let card_y = 160;
 
                 window.card_sharp(
                     draw,
@@ -535,19 +615,19 @@ impl Wizard {
 
                 if window.button(draw, "New Module") {
                     self.state = WizardState::NewModule;
-                    window.data_clear();
+                    widget::Data::clear(window);
                 }
                 window.button(draw, "Load Module");
-                window.button(draw, "Exit Quiver");
-                window.button(draw, "GitHub");
-                window.button(draw, "Discord");
+                if window.button(draw, "Exit Quiver") {
+                    engine.status = Status::Closure;
+                }
 
                 draw.draw_texture_v(
-                    &window.card,
+                    &window.logo,
                     Vector2::new(
-                        draw.get_screen_width() as f32 * 0.5 - window.card.width as f32 * 0.5,
+                        draw.get_screen_width() as f32 * 0.5 - window.logo.width as f32 * 0.5,
                         draw.get_screen_height() as f32 * 0.5
-                            - window.card.height as f32 * 0.5
+                            - window.logo.height as f32 * 0.5
                             - card_y as f32 * 0.5,
                     ),
                     Color::WHITE,

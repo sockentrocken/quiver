@@ -1,4 +1,5 @@
 use crate::script::*;
+use crate::utility::*;
 
 //================================================================
 
@@ -7,151 +8,128 @@ use serde::{Deserialize, Serialize};
 
 //================================================================
 
+#[derive(Default)]
 pub struct Engine {
-    pub info: InfoEngine,
     pub status: Status,
-    pub script: Option<Script>,
+    pub script: Script,
 }
 
 impl Engine {
-    pub const BUILD: i32 = 1;
     pub const FONT: &'static [u8] = include_bytes!("asset/font.ttf");
-    pub const CARD: &'static [u8] = include_bytes!("asset/card.png");
-    pub const LOGO: [&'static [u8]; 3] = [
-        include_bytes!("asset/logo_512.png"),
-        include_bytes!("asset/logo_256.png"),
-        include_bytes!("asset/logo_128.png"),
+    pub const LOGO: &'static [u8] = include_bytes!("asset/logo.png");
+    pub const ICON: [&'static [u8]; 3] = [
+        include_bytes!("asset/icon_128.png"),
+        include_bytes!("asset/icon_256.png"),
+        include_bytes!("asset/icon_512.png"),
     ];
 
     pub fn new() -> Self {
         let info = InfoEngine::new();
 
         match info {
-            Ok(info) => {
-                let status = Status::default();
-                let script = Script::new(&info);
-
-                match script {
-                    Ok(script) => Self {
-                        info,
-                        status,
-                        script: Some(script),
-                    },
-                    Err(script) => Self {
-                        info,
-                        status: Status::Failure(script.to_string()),
-                        script: None,
-                    },
-                }
-            }
+            Ok(info) => match Script::new(&info) {
+                Ok(script) => Self {
+                    status: Status::Success,
+                    script,
+                },
+                Err(script) => Self {
+                    status: Status::Failure(script.to_string()),
+                    script: Script::default(),
+                },
+            },
             Err(info) => match info {
                 InfoResult::Failure(info) => Self {
-                    info: InfoEngine::default(),
                     status: Status::Failure(info.to_string()),
-                    script: None,
+                    script: Script::default(),
                 },
                 InfoResult::Missing => Self {
-                    info: InfoEngine::default(),
-                    status: Status::Wizard(Wizard::default()),
-                    script: None,
+                    status: Status::Wizard,
+                    script: Script::default(),
                 },
             },
         }
     }
 
-    pub fn window(&mut self) -> Result<(RaylibHandle, RaylibThread, RaylibAudio), String> {
-        if let Some(script) = &mut self.script {
-            let window = script.window.clone();
+    pub fn initialize(&mut self) -> (RaylibHandle, RaylibThread, RaylibAudio) {
+        let window = self.script.window.clone();
 
-            let (mut handle, thread) = raylib::init()
-                .title(&window.name)
-                .size(window.shape.0, window.shape.1)
-                .msaa_4x()
-                .build();
+        let (mut handle, thread) = raylib::init()
+            .title(&window.name)
+            .size(window.shape.0, window.shape.1)
+            .msaa_4x()
+            .build();
 
-            handle.set_window_state(
-                WindowState::default()
-                    .set_fullscreen_mode(window.fullscreen)
-                    .set_vsync_hint(window.sync)
-                    .set_msaa(window.msaa)
-                    .set_window_resizable(window.resize)
-                    .set_window_hidden(window.hidden)
-                    .set_window_minimized(window.minimize)
-                    .set_window_maximized(window.maximize)
-                    .set_window_undecorated(window.no_decor)
-                    .set_window_unfocused(window.no_focus)
-                    .set_window_topmost(window.on_front)
-                    .set_window_always_run(window.run_hidden)
-                    .set_window_transparent(window.draw_alpha)
-                    .set_window_highdpi(window.high_scale),
-            );
+        handle.set_window_state(
+            WindowState::default()
+                .set_fullscreen_mode(window.fullscreen)
+                .set_vsync_hint(window.sync)
+                .set_msaa(window.msaa)
+                .set_window_resizable(window.resize)
+                .set_window_hidden(window.hidden)
+                .set_window_minimized(window.minimize)
+                .set_window_maximized(window.maximize)
+                .set_window_undecorated(window.no_decor)
+                .set_window_unfocused(window.no_focus)
+                .set_window_topmost(window.on_front)
+                .set_window_always_run(window.run_hidden)
+                .set_window_transparent(window.draw_alpha)
+                .set_window_highdpi(window.high_scale),
+        );
 
-            //handle.set_target_fps(window.rate);
-            handle.set_target_fps(144);
+        //handle.set_target_fps(window.rate);
+        handle.set_target_fps(144);
 
-            let mut list: Vec<ffi::Image> = Vec::new();
+        let mut list: Vec<ffi::Image> = Vec::new();
 
-            if let Some(icon_list) = &window.icon {
-                for icon in icon_list {
-                    match Image::load_image(icon) {
-                        Ok(icon) => {
-                            list.push(unsafe { icon.unwrap() });
-                        }
-                        Err(error) => {
-                            Status::set_failure(self, error.to_string());
-                        }
+        if let Some(icon_list) = &window.icon {
+            for icon in icon_list {
+                match Image::load_image(icon) {
+                    Ok(icon) => {
+                        list.push(unsafe { icon.unwrap() });
                     }
-                }
-            } else {
-                for icon in Self::LOGO {
-                    match Image::load_image_from_mem(".png", icon) {
-                        Ok(icon) => {
-                            list.push(unsafe { icon.unwrap() });
-                        }
-                        Err(error) => {
-                            Status::set_failure(self, error.to_string());
-                        }
+                    Err(error) => {
+                        Status::set_failure(self, error.to_string());
                     }
                 }
             }
-
-            handle.set_window_icons(&mut list);
-
-            if window.borderless {
-                handle.toggle_borderless_windowed();
-            }
-
-            if let Some(point) = window.point {
-                handle.set_window_position(point.0, point.1);
-            }
-
-            if let Some(shape) = window.shape_min {
-                handle.set_window_min_size(shape.0, shape.1);
-            }
-
-            if let Some(shape) = window.shape_max {
-                handle.set_window_max_size(shape.0, shape.1);
-            }
-
-            handle.set_window_opacity(window.alpha);
-
-            let audio = RaylibAudio::init_audio_device().map_err(|e| e.to_string())?;
-
-            Ok((handle, thread, audio))
         } else {
-            let (mut handle, thread) = raylib::init()
-                .resizable()
-                .title("Quiver")
-                .size(1024, 768)
-                .msaa_4x()
-                .build();
-
-            handle.set_target_fps(60);
-
-            let audio = RaylibAudio::init_audio_device().map_err(|e| e.to_string())?;
-
-            Ok((handle, thread, audio))
+            for icon in Self::ICON {
+                match Image::load_image_from_mem(".png", icon) {
+                    Ok(icon) => {
+                        list.push(unsafe { icon.unwrap() });
+                    }
+                    Err(error) => {
+                        Status::set_failure(self, error.to_string());
+                    }
+                }
+            }
         }
+
+        handle.set_window_icons(&mut list);
+
+        if window.borderless {
+            handle.toggle_borderless_windowed();
+        }
+
+        if let Some(point) = window.point {
+            handle.set_window_position(point.0, point.1);
+        }
+
+        if let Some(shape) = window.shape_min {
+            handle.set_window_min_size(shape.0, shape.1);
+        }
+
+        if let Some(shape) = window.shape_max {
+            handle.set_window_max_size(shape.0, shape.1);
+        }
+
+        handle.set_window_opacity(window.alpha);
+
+        let audio = RaylibAudio::init_audio_device()
+            .map_err(|e| panic_window(&e.to_string()))
+            .unwrap();
+
+        (handle, thread, audio)
     }
 }
 
@@ -211,7 +189,7 @@ pub enum Status {
     #[default]
     Success,
     Failure(String),
-    Wizard(Wizard),
+    Wizard,
     Restart,
     Closure,
 }
@@ -221,10 +199,8 @@ impl Status {
         let mut draw = handle.begin_drawing(thread);
         draw.clear_background(Color::WHITE);
 
-        if let Some(script) = &mut engine.script {
-            if let Err(error) = &mut script.step() {
-                Status::set_failure(engine, error.to_string());
-            }
+        if let Err(error) = &engine.script.step() {
+            Status::set_failure(engine, error.to_string());
         }
     }
 
@@ -280,23 +256,19 @@ impl Status {
     }
 
     pub fn restart(engine: &mut Engine) {
-        if let Some(script) = &mut engine.script {
-            if let Err(error) = &mut script.exit() {
-                Status::set_failure(engine, error.to_string());
-            }
+        if let Err(error) = &engine.script.exit() {
+            Status::set_failure(engine, error.to_string());
         }
 
         *engine = Engine::new();
 
-        if let Some(script) = &mut engine.script {
-            if let Err(error) = &mut script.main() {
-                Status::set_failure(engine, error.to_string());
-            }
+        if let Err(error) = &engine.script.main() {
+            Status::set_failure(engine, error.to_string());
         }
     }
 
-    pub fn set_failure(engine: &Engine, text: String) {
-        //*engine.status.borrow_mut() = Status::Failure(text);
+    pub fn set_failure(engine: &mut Engine, text: String) {
+        engine.status = Status::Failure(text);
 
         unsafe {
             if ffi::IsWindowReady() {
@@ -308,17 +280,5 @@ impl Status {
                 ffi::EnableCursor();
             }
         }
-    }
-
-    pub fn set_wizard(engine: &Engine) {
-        //*engine.status.borrow_mut() = Status::Wizard;
-    }
-
-    pub fn _set_restart(engine: &Engine) {
-        //*engine.status.borrow_mut() = Status::Restart;
-    }
-
-    pub fn _set_closure(engine: &Engine) {
-        //*engine.status.borrow_mut() = Status::Closure;
     }
 }

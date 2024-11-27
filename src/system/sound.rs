@@ -28,15 +28,15 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, system: &ModuleSystem) -> mlua
 pub struct Sound(RLSound);
 
 impl Sound {
-    /* function
+    /* entry
     {
         "name": "quiver.sound.new",
         "info": "Create a new sound resource.",
-        "parameter": [
-            { "optional": false, "name": "path", "info": "Path to sound file.", "type": "string" }
+        "member": [
+            { "name": "path", "info": "Path to sound file.", "kind": "string" }
         ],
-        "return": [
-            { "optional": false, "name": "sound", "info": "Sound resource.", "type": "sound" }
+        "result": [
+            { "name": "sound", "info": "Sound resource.", "kind": "sound" }
         ]
     }
     */
@@ -69,7 +69,7 @@ impl mlua::UserData for Sound {
     fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
-        /* function
+        /* entry
         { "name": "sound:play", "info": "Play the sound." }
         */
         method.add_method("play", |_, this, ()| unsafe {
@@ -77,12 +77,12 @@ impl mlua::UserData for Sound {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "sound:get_playing",
             "info": "Check if sound is currently playing.",
-            "return": [
-                { "optional": false, "name": "state", "info": "State of the sound.", "type": "boolean" }
+            "result": [
+                { "name": "state", "info": "State of the sound.", "kind": "boolean" }
             ]
         }
         */
@@ -90,7 +90,7 @@ impl mlua::UserData for Sound {
             Ok(ffi::IsSoundPlaying(this.0))
         });
 
-        /* function
+        /* entry
         { "name": "sound:stop", "info": "Stop the sound." }
         */
         method.add_method("stop", |_, this, ()| unsafe {
@@ -98,7 +98,7 @@ impl mlua::UserData for Sound {
             Ok(())
         });
 
-        /* function
+        /* entry
         { "name": "sound:pause", "info": "Pause the sound." }
         */
         method.add_method("pause", |_, this, ()| unsafe {
@@ -106,7 +106,7 @@ impl mlua::UserData for Sound {
             Ok(())
         });
 
-        /* function
+        /* entry
         { "name": "sound:resume", "info": "Resume the sound." }
         */
         method.add_method("resume", |_, this, ()| unsafe {
@@ -114,12 +114,12 @@ impl mlua::UserData for Sound {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "sound:set_volume",
             "info": "Set volume for the sound. (range: 0.0 - 1.0)",
-            "parameter": [
-                { "optional": false, "name": "volume", "info": "Current volume.", "type" : "number" }
+            "member": [
+                { "name": "volume", "info": "Current volume.", "kind" : "number" }
             ]
         }
         */
@@ -128,12 +128,12 @@ impl mlua::UserData for Sound {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "sound:set_pitch",
             "info": "Set pitch for the sound.",
-            "parameter": [
-                { "optional": false, "name": "pitch", "info": "Current pitch.", "type" : "number" }
+            "member": [
+                { "name": "pitch", "info": "Current pitch.", "kind" : "number" }
             ]
         }
         */
@@ -142,12 +142,12 @@ impl mlua::UserData for Sound {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "sound:set_pan",
             "info": "Set pan for the sound. (range: 0.0 - 1.0; 0.5 is center)",
-            "parameter": [
-                { "optional": false, "name": "pan", "info": "Current pan.", "type" : "number" }
+            "member": [
+                { "name": "pan", "info": "Current pan.", "kind" : "number" }
             ]
         }
         */

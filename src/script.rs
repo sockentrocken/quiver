@@ -7,6 +7,7 @@ use mlua::prelude::*;
 
 //================================================================
 
+#[derive(Default)]
 pub struct Script {
     pub lua: Lua,
     pub system: ModuleSystem,
@@ -65,19 +66,25 @@ impl Script {
 
         self.lua.load(file).exec().map_err(|e| e.to_string())?;
 
-        self.module.main.call::<()>(()).map_err(|e| e.to_string())?;
+        if let Some(main) = &self.module.main {
+            main.call::<()>(()).map_err(|e| e.to_string())?;
+        }
 
         Ok(())
     }
 
     pub fn step(&self) -> Result<(), String> {
-        self.module.step.call::<()>(()).map_err(|e| e.to_string())?;
+        if let Some(step) = &self.module.step {
+            step.call::<()>(()).map_err(|e| e.to_string())?;
+        }
 
         Ok(())
     }
 
     pub fn exit(&self) -> Result<(), String> {
-        self.module.exit.call::<()>(()).map_err(|e| e.to_string())?;
+        if let Some(exit) = &self.module.exit {
+            exit.call::<()>(()).map_err(|e| e.to_string())?;
+        }
 
         Ok(())
     }
@@ -87,18 +94,19 @@ use serde::{Deserialize, Serialize};
 
 //================================================================
 
+#[derive(Default)]
 pub struct Module {
     pub path: String,
-    pub main: mlua::Function,
-    pub step: mlua::Function,
-    pub exit: mlua::Function,
+    pub main: Option<mlua::Function>,
+    pub step: Option<mlua::Function>,
+    pub exit: Option<mlua::Function>,
 }
 
 impl Module {
     pub fn new(lua: &Lua, path: &str, global: &mlua::Table) -> mlua::Result<Self> {
-        let main = global.get::<mlua::Function>("main")?;
-        let step = global.get::<mlua::Function>("step")?;
-        let exit = global.get::<mlua::Function>("exit")?;
+        let main = Some(global.get::<mlua::Function>("main")?);
+        let step = Some(global.get::<mlua::Function>("step")?);
+        let exit = Some(global.get::<mlua::Function>("exit")?);
 
         Ok(Self {
             path: path.to_string(),
@@ -197,7 +205,7 @@ impl Default for ModuleWindow {
             borderless: false,
             sync: true,
             msaa: true,
-            resize: true,
+            resize: false,
             hidden: false,
             minimize: false,
             maximize: false,
