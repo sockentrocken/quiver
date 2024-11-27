@@ -1,5 +1,4 @@
 use crate::status::*;
-use crate::window::*;
 
 //================================================================
 
@@ -366,7 +365,7 @@ impl Into<ffi::BoundingBox> for Box3 {
 //================================================================
 
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, status: StatusPointer, window: WindowPointer) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, status: StatusPointer) -> mlua::Result<()> {
     /* class
     { "name": "quiver.engine", "info": "The engine API." }
     */
@@ -397,160 +396,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, status: StatusPointer, window:
     engine.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
 
     table.set("engine", engine)?;
-
-    //================================================================
-
-    /* class
-    { "name": "quiver.debug", "info": "The debug window API." }
-    */
-    let debug = lua.create_table()?;
-
-    /* function
-    {
-        "name": "quiver.debug.get_state",
-        "info": "Get the current state of the debug window.",
-        "return": [
-            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
-        ]
-    }
-    */
-    let clone = window.clone();
-    debug.set("get_state", lua.create_function(move |_, _ : ()| {
-        Ok(clone.borrow().active)
-    })?)?;
-
-    /* function
-    {
-        "name": "quiver.debug.set_state",
-        "info": "Set the current state of the debug window.",
-        "parameter": [
-            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
-        ]
-    }
-    */
-    let clone = window.clone();
-    debug.set("set_state", lua.create_function(move |_, value : bool| {
-        let mut clone = clone.borrow_mut();
-        clone.active = value;
-        clone.parser.dirty = value;
-
-        Ok(())
-    })?)?;
-
-    table.set("debug", debug)?;
-
-    //================================================================
-
-    /* class
-    { "name": "quiver.logger", "info": "The debug logger API." }
-    */
-    let logger = lua.create_table()?;
-
-    /* function
-    {
-        "name": "quiver.logger.get_state",
-        "info": "Get the current state of the debug logger.",
-        "return": [
-            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
-        ]
-    }
-    */
-    let clone = window.clone();
-    logger.set("get_state", lua.create_function(move |_, _ : ()| {
-        Ok(clone.borrow_mut().logger.active)
-    })?)?;
-
-    /* function
-    {
-        "name": "quiver.logger.set_state",
-        "info": "Set the current state of the debug logger.",
-        "parameter": [
-            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
-        ]
-    }
-    */
-    let clone = window.clone();
-    logger.set("set_state", lua.create_function(move |_, value : bool| {
-        clone.borrow_mut().logger.active = value;
-        Ok(())
-    })?)?;
-
-    /* function
-    { "name": "quiver.logger.wipe", "info": "Wipe the debug logger text." }
-    */
-    let clone = window.clone();
-    logger.set("wipe", lua.create_function(move |_, _ : ()| {
-        Logger::wipe(&mut clone.borrow_mut().logger);
-        Ok(())
-    })?)?;
-
-    /* function
-    {
-        "name": "quiver.logger.show",
-        "info": "Show the debug logger text.",
-        "parameter": [
-            { "optional": false, "name": "state", "info": "Current state.", "type": "boolean" }
-        ]
-    }
-    */
-    let clone = window.clone();
-    logger.set("show", lua.create_function(move |_, value: bool| {
-        Logger::show(&mut clone.borrow_mut().logger, value);
-        Ok(())
-    })?)?;
-
-    /* function
-    {
-        "name": "quiver.logger.push",
-        "info": "Push a new string to the debug logger.",
-        "parameter": [
-            { "optional": false, "name": "label", "info": "Label for line to print.", "type": "string" },
-            { "optional": true,  "name": "color", "info": "Color for line to print.", "type": "color"  }
-        ]
-    }
-    */
-    let clone = window.clone();
-    logger.set("push", lua.create_function(move |lua: &Lua, (label, color) : (String, Option<LuaValue>)| {
-        println!("{label}");
-
-        let color : crate::system::general::Color = {
-            if let Some(color) = color {
-                lua.from_value(color)?
-            } else {
-                crate::system::general::Color::new(1.0, 1.0, 1.0, 1.0)
-            }
-        };
-        clone.borrow_mut().logger.push(LogLine::new(label, [color.r, color.g, color.b, color.a]));
-        Ok(())
-    })?)?;
-
-    table.set("logger", logger)?;
-
-    //================================================================
-
-    /* class
-    { "name": "quiver.parser", "info": "The debug parser API." }
-    */
-    let parser = lua.create_table()?;
-
-    /* function
-    {
-        "name": "quiver.parser.push",
-        "info": "Push a new method to the debug parser.",
-        "parameter": [
-            { "optional": false, "name": "name", "info": "Name for method to push.",               "type": "string"   },
-            { "optional": false, "name": "info", "info": "Info for method to push.",               "type": "string"   },
-            { "optional": false, "name": "call", "info": "Function call-back for method to push.", "type": "function" }
-        ]
-    }
-    */
-    let clone = window.clone();
-    parser.set("push_parser", lua.create_function(move |_, (name, info, call) : (String, String, mlua::Function)| {
-        clone.borrow_mut().parser.method.insert(name, ParserMethod { call, info });
-        Ok(())
-    })?)?;
-
-    table.set("parser", parser)?;
 
     Ok(())
 }

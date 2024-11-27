@@ -1,8 +1,5 @@
-use crate::interface::*;
 use crate::script::*;
 use crate::status::*;
-use crate::support::*;
-use crate::window::*;
 
 //================================================================
 
@@ -11,12 +8,10 @@ use serde::{Deserialize, Serialize};
 
 //================================================================
 
-#[derive(Default)]
 pub struct Engine {
     pub info: InfoEngine,
     pub status: StatusPointer,
-    pub window: WindowPointer,
-    pub script: Script,
+    pub script: Option<Script>,
 }
 
 impl Engine {
@@ -31,137 +26,137 @@ impl Engine {
     ];
 
     pub fn new() -> Self {
-        let mut engine = Engine::default();
+        let info = InfoEngine::new();
 
-        match InfoEngine::new() {
-            Ok(result) => engine.info = result,
-            Err(result) => match result {
-                InfoResult::Failure(error) => {
-                    Status::set_failure(&engine, error);
+        match info {
+            Ok(info) => {
+                let status = StatusPointer::default();
+                let script = Script::new(&info, status.clone());
 
-                    return engine;
+                match script {
+                    Ok(script) => Self {
+                        info,
+                        status,
+                        script: Some(script),
+                    },
+                    Err(script) => Self {
+                        info,
+                        status: StatusPointer::new(Status::Failure(script.to_string()).into()),
+                        script: None,
+                    },
                 }
-                InfoResult::Missing => {
-                    Status::set_wizard(&engine);
-
-                    return engine;
-                }
+            }
+            Err(info) => match info {
+                InfoResult::Failure(info) => Self {
+                    info: InfoEngine::default(),
+                    status: StatusPointer::new(Status::Failure(info.to_string()).into()),
+                    script: None,
+                },
+                InfoResult::Missing => Self {
+                    info: InfoEngine::default(),
+                    status: StatusPointer::new(Status::Wizard.into()),
+                    script: None,
+                },
             },
-        }
-
-        match Script::new(&engine.info, engine.status.clone(), engine.window.clone()) {
-            Ok(result) => {
-                engine.script = result;
-
-                engine
-            }
-            Err(result) => {
-                Status::set_failure(&engine, result.to_string());
-
-                engine
-            }
         }
     }
 
-    pub fn window(
-        &mut self,
-    ) -> Result<(RaylibHandle, RaylibThread, RaylibAudio, RaylibImguiSupport), String> {
-        let window = &mut self.script.window.clone();
+    pub fn window(&mut self) -> Result<(RaylibHandle, RaylibThread, RaylibAudio), String> {
+        if let Some(script) = &mut self.script {
+            let window = script.window.clone();
 
-        if matches!(&*self.status.borrow(), Status::Wizard) {
-            window.shape = (1024, 768);
-        }
+            let (mut handle, thread) = raylib::init()
+                .title(&window.name)
+                .size(window.shape.0, window.shape.1)
+                .msaa_4x()
+                .build();
 
-        let (mut handle, thread) = raylib::init()
-            .title(&window.name)
-            .size(window.shape.0, window.shape.1)
-            .msaa_4x()
-            .build();
+            handle.set_window_state(
+                WindowState::default()
+                    .set_fullscreen_mode(window.fullscreen)
+                    .set_vsync_hint(window.sync)
+                    .set_msaa(window.msaa)
+                    .set_window_resizable(window.resize)
+                    .set_window_hidden(window.hidden)
+                    .set_window_minimized(window.minimize)
+                    .set_window_maximized(window.maximize)
+                    .set_window_undecorated(window.no_decor)
+                    .set_window_unfocused(window.no_focus)
+                    .set_window_topmost(window.on_front)
+                    .set_window_always_run(window.run_hidden)
+                    .set_window_transparent(window.draw_alpha)
+                    .set_window_highdpi(window.high_scale),
+            );
 
-        handle.set_window_state(
-            WindowState::default()
-                .set_fullscreen_mode(window.fullscreen)
-                .set_vsync_hint(window.sync)
-                .set_msaa(window.msaa)
-                .set_window_resizable(window.resize)
-                .set_window_hidden(window.hidden)
-                .set_window_minimized(window.minimize)
-                .set_window_maximized(window.maximize)
-                .set_window_undecorated(window.no_decor)
-                .set_window_unfocused(window.no_focus)
-                .set_window_topmost(window.on_front)
-                .set_window_always_run(window.run_hidden)
-                .set_window_transparent(window.draw_alpha)
-                .set_window_highdpi(window.high_scale),
-        );
+            //handle.set_target_fps(window.rate);
+            handle.set_target_fps(144);
 
-        //handle.set_target_fps(window.rate);
-        handle.set_target_fps(144);
+            let mut list: Vec<ffi::Image> = Vec::new();
 
-        let mut list: Vec<ffi::Image> = Vec::new();
-
-        if let Some(icon_list) = &window.icon {
-            for icon in icon_list {
-                match Image::load_image(icon) {
-                    Ok(icon) => {
-                        list.push(unsafe { icon.unwrap() });
+            if let Some(icon_list) = &window.icon {
+                for icon in icon_list {
+                    match Image::load_image(icon) {
+                        Ok(icon) => {
+                            list.push(unsafe { icon.unwrap() });
+                        }
+                        Err(error) => {
+                            Status::set_failure(self, error.to_string());
+                        }
                     }
-                    Err(error) => {
-                        Status::set_failure(self, error.to_string());
+                }
+            } else {
+                for icon in Self::LOGO {
+                    match Image::load_image_from_mem(".png", icon) {
+                        Ok(icon) => {
+                            list.push(unsafe { icon.unwrap() });
+                        }
+                        Err(error) => {
+                            Status::set_failure(self, error.to_string());
+                        }
                     }
                 }
             }
+
+            handle.set_window_icons(&mut list);
+
+            if window.borderless {
+                handle.toggle_borderless_windowed();
+            }
+
+            if let Some(point) = window.point {
+                handle.set_window_position(point.0, point.1);
+            }
+
+            if let Some(shape) = window.shape_min {
+                handle.set_window_min_size(shape.0, shape.1);
+            }
+
+            if let Some(shape) = window.shape_max {
+                handle.set_window_max_size(shape.0, shape.1);
+            }
+
+            handle.set_window_opacity(window.alpha);
+
+            let audio = RaylibAudio::init_audio_device().map_err(|e| e.to_string())?;
+
+            Ok((handle, thread, audio))
         } else {
-            for icon in Self::LOGO {
-                match Image::load_image_from_mem(".png", icon) {
-                    Ok(icon) => {
-                        list.push(unsafe { icon.unwrap() });
-                    }
-                    Err(error) => {
-                        Status::set_failure(self, error.to_string());
-                    }
-                }
-            }
+            let (handle, thread) = raylib::init()
+                .title("Quiver")
+                .size(1024, 768)
+                .msaa_4x()
+                .build();
+
+            let audio = RaylibAudio::init_audio_device().map_err(|e| e.to_string())?;
+
+            Ok((handle, thread, audio))
         }
-
-        handle.set_window_icons(&mut list);
-
-        if window.borderless {
-            handle.toggle_borderless_windowed();
-        }
-
-        if let Some(point) = window.point {
-            handle.set_window_position(point.0, point.1);
-        }
-
-        if let Some(shape) = window.shape_min {
-            handle.set_window_min_size(shape.0, shape.1);
-        }
-
-        if let Some(shape) = window.shape_max {
-            handle.set_window_max_size(shape.0, shape.1);
-        }
-
-        handle.set_window_opacity(window.alpha);
-
-        let audio = RaylibAudio::init_audio_device().map_err(|e| e.to_string())?;
-
-        let interface = RaylibImguiSupport::setup(&mut handle, &thread);
-
-        let icon = Image::load_image_from_mem(".png", Self::CARD).map_err(|e| e.to_string())?;
-
-        self.window.borrow_mut().icon = Some(
-            handle
-                .load_texture_from_image(&thread, &icon)
-                .map_err(|e| e.to_string())?,
-        );
-
-        Ok((handle, thread, audio, interface))
     }
 }
 
 //================================================================
 
+#[derive(Debug)]
 pub enum InfoResult {
     Failure(String),
     Missing,
@@ -170,7 +165,7 @@ pub enum InfoResult {
 #[derive(Default, Deserialize, Serialize)]
 pub struct InfoEngine {
     pub safe: bool,
-    pub path: Vec<String>,
+    pub path: String,
 }
 
 impl InfoEngine {

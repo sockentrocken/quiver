@@ -5,95 +5,49 @@ use serde::{Deserialize, Serialize};
 
 pub struct Module {
     pub path: String,
-    pub info: InfoModule,
+    pub main: mlua::Function,
+    pub step: mlua::Function,
+    pub exit: mlua::Function,
 }
 
 impl Module {
-    pub fn new(lua: &Lua, path: &str) -> mlua::Result<Self> {
+    pub fn new(lua: &Lua, path: &str, global: &mlua::Table) -> mlua::Result<Self> {
+        let main = global.get::<mlua::Function>("main")?;
+        let step = global.get::<mlua::Function>("step")?;
+        let exit = global.get::<mlua::Function>("exit")?;
+
         Ok(Self {
             path: path.to_string(),
-            info: InfoModule::new(lua, path)?,
+            main,
+            step,
+            exit,
         })
     }
 }
 
 //================================================================
 
-pub struct ModuleFunction {
-    pub call: mlua::Function,
-}
-
-impl ModuleFunction {
-    pub fn new(global: &mlua::Table, name: &str) -> Result<Self, String> {
-        let call = global
-            .get::<mlua::Function>(name)
-            .map_err(|_| format!("ModuleFunction::new(): Could not find function \"{name}\"."))?;
-
-        Ok(Self { call })
-    }
-}
-
-//================================================================
-
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Default)]
 pub struct InfoModule {
-    pub name: String,
-    pub info: String,
-    pub build: Option<ModuleBuild>,
-    pub entry: Option<ModuleEntry>,
-    pub system: Option<ModuleSystem>,
-    pub window: Option<ModuleWindow>,
+    pub system: ModuleSystem,
+    pub window: ModuleWindow,
 }
 
 impl InfoModule {
     pub const FILE_NAME: &'static str = "info.lua";
 
-    pub fn new(lua: &Lua, path: &str) -> mlua::Result<Self> {
+    pub fn new(lua: &Lua, path: &str) -> Result<Self, String> {
         let path = &format!("{}/{}", path, Self::FILE_NAME);
-        let data = std::path::Path::new(path);
 
-        if data.is_file() {
-            let data =
-                std::fs::read_to_string(path).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+        let data = std::fs::read_to_string(path).map_err(|e| e.to_string())?;
 
-            let value = lua.load(data).eval::<LuaValue>()?;
+        let value = lua
+            .load(data)
+            .eval::<LuaValue>()
+            .map_err(|e| e.to_string())?;
 
-            lua.from_value::<Self>(value)
-        } else {
-            Ok(Self::default())
-        }
+        lua.from_value::<Self>(value).map_err(|e| e.to_string())
     }
-}
-
-impl Default for InfoModule {
-    fn default() -> Self {
-        Self {
-            name: String::new(),
-            info: String::new(),
-            build: None,
-            entry: Some(ModuleEntry::default()),
-            system: Some(ModuleSystem::default()),
-            window: Some(ModuleWindow::default()),
-        }
-    }
-}
-
-//================================================================
-
-#[derive(Default, Deserialize, Serialize, Clone)]
-pub struct ModuleBuild {
-    pub min: Option<i32>,
-    pub max: Option<i32>,
-}
-
-//================================================================
-
-#[derive(Default, Deserialize, Serialize, Clone)]
-pub struct ModuleEntry {
-    pub file: String,
-    pub main: Option<String>,
-    pub step: Option<String>,
-    pub exit: Option<String>,
 }
 
 //================================================================
@@ -144,7 +98,7 @@ pub struct ModuleWindow {
     pub high_scale: bool,
     pub name: String,
     pub icon: Option<Vec<String>>,
-    pub rate: u32,
+    pub rate: f32,
     pub point: Option<(i32, i32)>,
     pub shape: (i32, i32),
     pub shape_min: Option<(i32, i32)>,
@@ -171,7 +125,7 @@ impl Default for ModuleWindow {
             draw_alpha: false,
             high_scale: false,
             name: "Quiver".to_string(),
-            rate: 60,
+            rate: 60.0,
             icon: None,
             point: None,
             shape: (1024, 768),
