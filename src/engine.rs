@@ -1,5 +1,4 @@
 use crate::script::*;
-use crate::status::*;
 
 //================================================================
 
@@ -10,19 +9,18 @@ use serde::{Deserialize, Serialize};
 
 pub struct Engine {
     pub info: InfoEngine,
-    pub status: StatusPointer,
+    pub status: Status,
     pub script: Option<Script>,
 }
 
 impl Engine {
     pub const BUILD: i32 = 1;
-    pub const CHECK: &'static [u8] = include_bytes!("asset/video/check.png");
-    pub const FONT: &'static [u8] = include_bytes!("asset/video/font.ttf");
-    pub const CARD: &'static [u8] = include_bytes!("asset/video/card.png");
+    pub const FONT: &'static [u8] = include_bytes!("asset/font.ttf");
+    pub const CARD: &'static [u8] = include_bytes!("asset/card.png");
     pub const LOGO: [&'static [u8]; 3] = [
-        include_bytes!("asset/video/logo_512.png"),
-        include_bytes!("asset/video/logo_256.png"),
-        include_bytes!("asset/video/logo_128.png"),
+        include_bytes!("asset/logo_512.png"),
+        include_bytes!("asset/logo_256.png"),
+        include_bytes!("asset/logo_128.png"),
     ];
 
     pub fn new() -> Self {
@@ -30,8 +28,8 @@ impl Engine {
 
         match info {
             Ok(info) => {
-                let status = StatusPointer::default();
-                let script = Script::new(&info, status.clone());
+                let status = Status::default();
+                let script = Script::new(&info);
 
                 match script {
                     Ok(script) => Self {
@@ -41,7 +39,7 @@ impl Engine {
                     },
                     Err(script) => Self {
                         info,
-                        status: StatusPointer::new(Status::Failure(script.to_string()).into()),
+                        status: Status::Failure(script.to_string()),
                         script: None,
                     },
                 }
@@ -49,12 +47,12 @@ impl Engine {
             Err(info) => match info {
                 InfoResult::Failure(info) => Self {
                     info: InfoEngine::default(),
-                    status: StatusPointer::new(Status::Failure(info.to_string()).into()),
+                    status: Status::Failure(info.to_string()),
                     script: None,
                 },
                 InfoResult::Missing => Self {
                     info: InfoEngine::default(),
-                    status: StatusPointer::new(Status::Wizard.into()),
+                    status: Status::Wizard(Wizard::default()),
                     script: None,
                 },
             },
@@ -141,11 +139,14 @@ impl Engine {
 
             Ok((handle, thread, audio))
         } else {
-            let (handle, thread) = raylib::init()
+            let (mut handle, thread) = raylib::init()
+                .resizable()
                 .title("Quiver")
                 .size(1024, 768)
                 .msaa_4x()
                 .build();
+
+            handle.set_target_fps(60);
 
             let audio = RaylibAudio::init_audio_device().map_err(|e| e.to_string())?;
 
@@ -200,5 +201,124 @@ impl InfoEngine {
         )?;
 
         Ok(())
+    }
+}
+
+use crate::window::*;
+
+#[derive(Default, Clone)]
+pub enum Status {
+    #[default]
+    Success,
+    Failure(String),
+    Wizard(Wizard),
+    Restart,
+    Closure,
+}
+
+impl Status {
+    pub fn success(engine: &mut Engine, handle: &mut RaylibHandle, thread: &RaylibThread) {
+        let mut draw = handle.begin_drawing(thread);
+        draw.clear_background(Color::WHITE);
+
+        if let Some(script) = &mut engine.script {
+            if let Err(error) = &mut script.step() {
+                Status::set_failure(engine, error.to_string());
+            }
+        }
+    }
+
+    pub fn failure(
+        engine: &mut Engine,
+        handle: &mut RaylibHandle,
+        thread: &RaylibThread,
+        window: &mut Window,
+        text: &str,
+    ) {
+        let mut draw = handle.begin_drawing(thread);
+        draw.clear_background(Color::WHITE);
+
+        window.begin();
+
+        let size = draw.get_screen_width();
+
+        window.card_sharp(
+            &mut draw,
+            Rectangle::new(0.0, 0.0, size as f32, 48.0),
+            Window::COLOR_MAIN,
+        );
+
+        window.point(Vector2::new(20.0, 12.0));
+        window.text(&mut draw, "Fatal Error", Window::COLOR_TEXT);
+
+        window.card_round(
+            &mut draw,
+            Rectangle::new(20.0, 72.0, size as f32 - 36.0, 128.0),
+            Window::COLOR_MAIN,
+        );
+
+        window.point(Vector2::new(36.0, 84.0));
+        window.text(&mut draw, text, Window::COLOR_TEXT_MAIN);
+
+        window.point(Vector2::new(20.0, (draw.get_screen_height() - 96) as f32));
+        window.button(&mut draw, "Load Module");
+        window.button(&mut draw, "Exit Quiver");
+    }
+
+    #[rustfmt::skip]
+    pub fn wizard(
+        engine: &mut Engine,
+        handle: &mut RaylibHandle,
+        thread: &RaylibThread,
+        window: &mut Window,
+        wizard: &mut Wizard,
+    ) {
+        let mut draw = handle.begin_drawing(thread);
+        draw.clear_background(Color::WHITE);
+
+        wizard.draw(engine, &mut draw, window);
+    }
+
+    pub fn restart(engine: &mut Engine) {
+        if let Some(script) = &mut engine.script {
+            if let Err(error) = &mut script.exit() {
+                Status::set_failure(engine, error.to_string());
+            }
+        }
+
+        *engine = Engine::new();
+
+        if let Some(script) = &mut engine.script {
+            if let Err(error) = &mut script.main() {
+                Status::set_failure(engine, error.to_string());
+            }
+        }
+    }
+
+    pub fn set_failure(engine: &Engine, text: String) {
+        //*engine.status.borrow_mut() = Status::Failure(text);
+
+        unsafe {
+            if ffi::IsWindowReady() {
+                ffi::SetMouseOffset(0, 0);
+                ffi::SetMouseScale(1.0, 1.0);
+                ffi::EndMode3D();
+                ffi::EndMode2D();
+                ffi::EndShaderMode();
+                ffi::EnableCursor();
+            }
+        }
+    }
+
+    pub fn set_wizard(engine: &Engine) {
+        //*engine.status.borrow_mut() = Status::Wizard;
+    }
+
+    pub fn _set_restart(engine: &Engine) {
+        //*engine.status.borrow_mut() = Status::Restart;
+    }
+
+    pub fn _set_closure(engine: &Engine) {
+        //*engine.status.borrow_mut() = Status::Closure;
     }
 }

@@ -1,25 +1,4 @@
 return {
-    -- Module name.
-    name = "{name}",
-    -- Module info.
-    info = "{info}",
-    -- OPTIONAL: minimum/maximum build version.
-    --build = {
-    --    -- OPTIONAL: minimum build version.
-    --    min = 1,
-    --    -- OPTIONAL: maximum build version.
-    --    max = 1,
-    --},
-    entry = {
-        -- Name of the main entry-file.
-        file = "main",
-        -- Name of the "main" entry-point.
-        main = "main",
-        -- Name of the "step" entry-point.
-        step = "step",
-        -- Name of the "exit" entry-point.
-        exit = "exit",
-    },
     system = {
         -- Enable the model system.
         model = {model},

@@ -8,8 +8,7 @@ pub mod general;
 //================================================================
 
 /* draw */
-pub mod draw_2d;
-pub mod draw_3d;
+pub mod draw;
 
 /* miscellaneous */
 pub mod input;

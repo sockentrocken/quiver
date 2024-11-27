@@ -1,6 +1,4 @@
-use crate::status::*;
-
-//================================================================
+use crate::script::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
@@ -365,12 +363,13 @@ impl Into<ffi::BoundingBox> for Box3 {
 //================================================================
 
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, status: StatusPointer) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     /* class
     { "name": "quiver.engine", "info": "The engine API." }
     */
     let engine = lua.create_table()?;
 
+    /*
     /* function
     { "name": "quiver.engine.load", "info": "Load the engine." }
     */
@@ -388,6 +387,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, status: StatusPointer) -> mlua
         *clone.borrow_mut() = Status::Closure;
         Ok(())
     })?)?;
+    */
 
     engine.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
     engine.set("get_time",       lua.create_function(self::get_time)?)?;

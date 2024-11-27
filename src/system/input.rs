@@ -1,4 +1,4 @@
-use crate::module::*;
+use crate::script::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;

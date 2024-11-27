@@ -1,4 +1,4 @@
-use crate::module::*;
+use crate::script::*;
 use crate::system::*;
 
 use mlua::prelude::*;

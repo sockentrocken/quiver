@@ -118,6 +118,8 @@ impl Function {
 
 *{info}*
 
+[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/{file}.rs#L{line})
+
 ```lua
 {code}
 ```
@@ -136,7 +138,7 @@ impl Function {
   - *{info}*
 "#;
 
-    pub fn to_wiki(data: &str, file: &str) -> String {
+    pub fn to_wiki(data: &str, file: &str, line: usize) -> String {
         let mut result = String::new();
 
         let data: Self = serde_json::from_str(data)
@@ -150,6 +152,8 @@ impl Function {
         let mut wiki_header = Self::FUNCTION_HEADER.to_string();
         wiki_header = wiki_header.replace("{name}", &data.name);
         wiki_header = wiki_header.replace("{info}", &data.info);
+        wiki_header = wiki_header.replace("{file}", &file.to_lowercase());
+        wiki_header = wiki_header.replace("{line}", &format!("{line}"));
         let mut code = data.name.clone();
 
         code.push('(');
@@ -215,7 +219,7 @@ impl Function {
         result
     }
 
-    pub fn to_meta(data: &str, file: &str) -> String {
+    pub fn to_meta(data: &str, file: &str, line: usize) -> String {
         let mut result = String::new();
 
         let data: Self = serde_json::from_str(data)
@@ -248,6 +252,9 @@ impl Function {
                 ));
             }
         }
+
+        result.push_str(&format!("--- ---\n"));
+        result.push_str(&format!("---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/{}.rs#L{line})\n", file.to_lowercase()));
 
         result.push_str(&format!("function {}", data.name));
 
@@ -284,9 +291,9 @@ fn main() {
     //================================================================
 
     // create the meta.lua/base.lua file in the asset folder.
-    let meta = File::create(format!("src/asset/module/{meta_name}"))
+    let meta = File::create(format!("src/asset/{meta_name}"))
         .unwrap_or_else(|_| panic!("build.rs: Could not create \"{meta_name}\" file."));
-    let base = File::create(format!("src/asset/module/{base_name}"))
+    let base = File::create(format!("src/asset/{base_name}"))
         .unwrap_or_else(|_| panic!("build.rs: Could not create \"{base_name}\" file."));
     let mut meta = BufWriter::new(meta);
     let mut base = BufWriter::new(base);
@@ -339,13 +346,16 @@ fn main() {
         // current working meta + wiki string.
         let mut work = String::new();
 
+        // current line.
+        let mut line_index = 0;
+
         // open file, use bufReader.
         let source = File::open(path)
             .unwrap_or_else(|_| panic!("build.rs: Could not open source file \"{path}\"."));
         let source = BufReader::new(source).lines();
 
         // for every line in the file...
-        for line in source.map_while(Result::ok) {
+        for (i, line) in source.map_while(Result::ok).enumerate() {
             // keep the original version of the line, with trailing white-space and all, for base.lua.
             let copy = line.clone();
 
@@ -356,8 +366,8 @@ fn main() {
             if line.starts_with("*/") {
                 // write function line.
                 if function_write {
-                    let wiki_string = Function::to_wiki(&work, name);
-                    let meta_string = Function::to_meta(&work, name);
+                    let wiki_string = Function::to_wiki(&work, name, line_index);
+                    let meta_string = Function::to_meta(&work, name, line_index);
 
                     wiki.write_all(wiki_string.as_bytes()).unwrap();
                     meta.write_all(meta_string.as_bytes()).unwrap();
@@ -408,11 +418,13 @@ fn main() {
             // START function marker
             if line.starts_with("/* function") {
                 function_write = true;
+                line_index = i;
             }
 
             // START class marker
             if line.starts_with("/* class") {
                 class_write = true;
+                line_index = i;
             }
 
             // START base marker, begin writing to base.lua.

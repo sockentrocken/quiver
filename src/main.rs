@@ -1,8 +1,5 @@
 mod engine;
-mod interface;
-mod module;
 mod script;
-mod status;
 mod system;
 mod utility;
 mod window;
@@ -10,8 +7,7 @@ mod window;
 //================================================================
 
 use crate::engine::*;
-use crate::interface::*;
-use crate::status::*;
+use crate::window::*;
 
 //================================================================
 
@@ -19,7 +15,7 @@ use crate::status::*;
 fn main() -> Result<(), String> {
     let mut engine = Engine::new();
     let (mut handle, thread, _audio) = engine.window().map_err(|e| { crate::utility::panic_window(&e); e })?;
-    let mut interface = Interface::new(&mut handle, &thread);
+    let mut window = Window::new(&mut handle, &thread);
 
     if let Some(script) = &mut engine.script {
         if let Err(error) = &mut script.main() {
@@ -28,21 +24,22 @@ fn main() -> Result<(), String> {
     }
 
     while !handle.window_should_close() {
-        let status = engine.status.borrow().clone();
+        let mut status = engine.status.clone();
 
         match status {
             Status::Success =>
                 Status::success(&mut engine, &mut handle, &thread),
             Status::Failure(ref text) =>
-                Status::failure(&mut engine, &mut handle, &thread, text),
-            Status::Wizard =>
-                Status::wizard(&mut engine, &mut handle, &thread, &mut interface),
-            Status::Restart => {
-                Status::restart(&mut engine);
-            }
+                Status::failure(&mut engine, &mut handle, &thread, &mut window, text),
+            Status::Wizard(ref mut wizard) =>
+                Status::wizard(&mut engine, &mut handle, &thread, &mut window, wizard),
+            Status::Restart =>
+                Status::restart(&mut engine),
             Status::Closure =>
                 break,
         }
+
+        engine.status = status;
     }
 
     if let Some(script) = &mut engine.script {
