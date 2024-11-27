@@ -28,15 +28,15 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, system: &ModuleSystem) -> mlua
 pub struct Music(RLMusic);
 
 impl Music {
-    /* function
+    /* entry
     {
         "name": "quiver.music.new",
         "info": "Create a new music resource.",
-        "parameter": [
-            { "optional": false, "name": "path", "info": "Path to music file.", "type": "string" }
+        "member": [
+            { "name": "path", "info": "Path to music file.", "kind": "string" }
         ],
-        "return": [
-            { "optional": false, "name": "music", "info": "Music resource.", "type": "music" }
+        "result": [
+            { "name": "music", "info": "Music resource.", "kind": "music" }
         ]
     }
     */
@@ -69,7 +69,7 @@ impl mlua::UserData for Music {
     fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
-        /* function
+        /* entry
         { "name": "music:play", "info": "Play the music." }
         */
         method.add_method("play", |_, this, ()| unsafe {
@@ -77,12 +77,12 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "music:get_playing",
             "info": "Check if music is currently playing.",
-            "return": [
-                { "optional": false, "name": "state", "info": "State of the music.", "type": "boolean" }
+            "result": [
+                { "name": "state", "info": "State of the music.", "kind": "boolean" }
             ]
         }
         */
@@ -90,7 +90,7 @@ impl mlua::UserData for Music {
             Ok(ffi::IsMusicStreamPlaying(this.0))
         });
 
-        /* function
+        /* entry
         { "name": "music:stop", "info": "Stop the music." }
         */
         method.add_method("stop", |_, this, ()| unsafe {
@@ -98,7 +98,7 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         { "name": "music:pause", "info": "Pause the music." }
         */
         method.add_method("pause", |_, this, ()| unsafe {
@@ -106,7 +106,7 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         { "name": "music:resume", "info": "Resume the music." }
         */
         method.add_method("resume", |_, this, ()| unsafe {
@@ -114,12 +114,12 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "music:set_volume",
             "info": "Set volume for the music. (range: 0.0 - 1.0)",
-            "parameter": [
-                { "optional": false, "name": "volume", "info": "Current volume.", "type" : "number" }
+            "member": [
+                { "name": "volume", "info": "Current volume.", "kind" : "number" }
             ]
         }
         */
@@ -128,12 +128,12 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "music:set_pitch",
             "info": "Set pitch for the music.",
-            "parameter": [
-                { "optional": false, "name": "pitch", "info": "Current pitch.", "type" : "number" }
+            "member": [
+                { "name": "pitch", "info": "Current pitch.", "kind" : "number" }
             ]
         }
         */
@@ -142,12 +142,12 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "music:set_pan",
             "info": "Set pan for the music. (range: 0.0 - 1.0; 0.5 is center)",
-            "parameter": [
-                { "optional": false, "name": "pan", "info": "Current pan.", "type" : "number" }
+            "member": [
+                { "name": "pan", "info": "Current pan.", "kind" : "number" }
             ]
         }
         */
@@ -156,7 +156,7 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         { "name": "music:update", "info": "Update the music." }
         */
         method.add_method("update", |_, this, ()| unsafe {
@@ -164,12 +164,12 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "music:set_position",
             "info": "Set position for the music.",
-            "parameter": [
-                { "optional": false, "name": "position", "info": "Current position.", "type" : "number" }
+            "member": [
+                { "name": "position", "info": "Current position.", "kind" : "number" }
             ]
         }
         */
@@ -178,12 +178,12 @@ impl mlua::UserData for Music {
             Ok(())
         });
 
-        /* function
+        /* entry
         {
             "name": "music:get_length",
             "info": "Get time length for the music.",
-            "return": [
-                { "optional": false, "name": "length", "info": "Time length.", "type" : "number" }
+            "result": [
+                { "name": "length", "info": "Time length.", "kind" : "number" }
             ]
         }
         */
@@ -191,12 +191,12 @@ impl mlua::UserData for Music {
             Ok(ffi::GetMusicTimeLength(this.0))
         });
 
-        /* function
+        /* entry
         {
             "name": "music:get_played",
             "info": "Get time played for the music.",
-            "return": [
-                { "optional": false, "name": "played", "info": "Time played.", "type" : "number" }
+            "result": [
+                { "name": "played", "info": "Time played.", "kind" : "number" }
             ]
         }
         */

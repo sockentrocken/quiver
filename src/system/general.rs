@@ -370,7 +370,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let engine = lua.create_table()?;
 
     /*
-    /* function
+    /* entry
     { "name": "quiver.engine.load", "info": "Load the engine." }
     */
     let clone = status.clone();
@@ -379,7 +379,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         Ok(())
     })?)?;
 
-    /* function
+    /* entry
     { "name": "quiver.engine.exit", "info": "Exit the engine." }
     */
     let clone = status.clone();
@@ -402,12 +402,12 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 
 //================================================================
 
-/* function
+/* entry
 {
     "name": "quiver.engine.set_exit_key",
     "info": "Set a key to exit Quiver.",
-    "parameter": [
-        { "optional": false, "name": "key", "info": "Key to exit Quiver with.", "type": "input_board" }
+    "member": [
+        { "name": "key", "info": "Key to exit Quiver with.", "kind": "input_board" }
     ]
 }
 */
@@ -424,12 +424,12 @@ fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
     }
 }
 
-/* function
+/* entry
 {
     "name": "quiver.engine.get_time",
     "info": "Get the current time. Will count up since the initialization of the window.",
-    "return": [
-        { "optional": false, "name": "time", "info": "Current time.", "type": "number" }
+    "result": [
+        { "name": "time", "info": "Current time.", "kind": "number" }
     ]
 }
 */
@@ -437,12 +437,12 @@ fn get_time(_: &Lua, _: ()) -> mlua::Result<f64> {
     unsafe { Ok(ffi::GetTime()) }
 }
 
-/* function
+/* entry
 {
     "name": "quiver.engine.get_frame_time",
     "info": "Get the current frame time.",
-    "return": [
-        { "optional": false, "name": "frame_time", "info": "Current frame time.", "type": "number" }
+    "result": [
+        { "name": "frame_time", "info": "Current frame time.", "kind": "number" }
     ]
 }
 */
@@ -450,12 +450,12 @@ fn get_frame_time(_: &Lua, _: ()) -> mlua::Result<f32> {
     unsafe { Ok(ffi::GetFrameTime()) }
 }
 
-/* function
+/* entry
 {
     "name": "quiver.engine.get_frame_rate",
     "info": "Get the current frame rate.",
-    "return": [
-        { "optional": false, "name": "frame_rate", "info": "Current frame rate.", "type": "number" }
+    "result": [
+        { "name": "frame_rate", "info": "Current frame rate.", "kind": "number" }
     ]
 }
 */
@@ -463,12 +463,12 @@ fn get_frame_rate(_: &Lua, _: ()) -> mlua::Result<i32> {
     unsafe { Ok(ffi::GetFPS()) }
 }
 
-/* function
+/* entry
 {
     "name": "quiver.engine.set_frame_rate",
     "info": "set the current frame rate.",
-    "parameter": [
-        { "optional": false, "name": "frame_rate", "info": "Current frame rate.", "type": "number" }
+    "member": [
+        { "name": "frame_rate", "info": "Current frame rate.", "kind": "number" }
     ]
 }
 */

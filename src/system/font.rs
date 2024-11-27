@@ -31,16 +31,16 @@ impl mlua::UserData for Font {
     fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
-        /* function
+        /* entry
         {
             "name": "font.draw",
             "info": "Draw a font.",
-            "parameter": [
-                { "optional": false, "name": "label", "info": "Label of font to draw.", "type": "string"   },
-                { "optional": false, "name": "point", "info": "Point of font to draw.", "type": "vector_2" },
-                { "optional": false, "name": "scale", "info": "Scale of font to draw.", "type": "number"   },
-                { "optional": false, "name": "space", "info": "Space of font to draw.", "type": "number"   },
-                { "optional": false, "name": "color", "info": "Color of font to draw.", "type": "color"    }
+            "member": [
+                { "name": "label", "info": "Label of font to draw.", "kind": "string"   },
+                { "name": "point", "info": "Point of font to draw.", "kind": "vector_2" },
+                { "name": "scale", "info": "Scale of font to draw.", "kind": "number"   },
+                { "name": "space", "info": "Space of font to draw.", "kind": "number"   },
+                { "name": "color", "info": "Color of font to draw.", "kind": "color"    }
             ]
         }
         */
@@ -69,15 +69,15 @@ impl mlua::UserData for Font {
 }
 
 impl Font {
-    /* function
+    /* entry
     {
         "name": "quiver.font.new",
         "info": "Create a new font resource.",
-        "parameter": [
-            { "optional": false, "name": "path", "info": "Path to font file.", "type": "string" }
+        "member": [
+            { "name": "path", "info": "Path to font file.", "kind": "string" }
         ],
-        "return": [
-            { "optional": false, "name": "font", "info": "Font resource.", "type": "font" }
+        "result": [
+            { "name": "font", "info": "Font resource.", "kind": "font" }
         ]
     }
     */

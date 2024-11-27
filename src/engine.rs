@@ -8,50 +8,39 @@ use serde::{Deserialize, Serialize};
 //================================================================
 
 pub struct Engine {
-    pub info: InfoEngine,
     pub status: Status,
     pub script: Option<Script>,
 }
 
 impl Engine {
-    pub const BUILD: i32 = 1;
     pub const FONT: &'static [u8] = include_bytes!("asset/font.ttf");
     pub const CARD: &'static [u8] = include_bytes!("asset/card.png");
     pub const LOGO: [&'static [u8]; 3] = [
-        include_bytes!("asset/logo_512.png"),
-        include_bytes!("asset/logo_256.png"),
         include_bytes!("asset/logo_128.png"),
+        include_bytes!("asset/logo_256.png"),
+        include_bytes!("asset/logo_512.png"),
     ];
 
     pub fn new() -> Self {
         let info = InfoEngine::new();
 
         match info {
-            Ok(info) => {
-                let status = Status::default();
-                let script = Script::new(&info);
-
-                match script {
-                    Ok(script) => Self {
-                        info,
-                        status,
-                        script: Some(script),
-                    },
-                    Err(script) => Self {
-                        info,
-                        status: Status::Failure(script.to_string()),
-                        script: None,
-                    },
-                }
-            }
+            Ok(info) => match Script::new(&info) {
+                Ok(script) => Self {
+                    status: Status::Success,
+                    script: Some(script),
+                },
+                Err(script) => Self {
+                    status: Status::Failure(script.to_string()),
+                    script: None,
+                },
+            },
             Err(info) => match info {
                 InfoResult::Failure(info) => Self {
-                    info: InfoEngine::default(),
                     status: Status::Failure(info.to_string()),
                     script: None,
                 },
                 InfoResult::Missing => Self {
-                    info: InfoEngine::default(),
                     status: Status::Wizard(Wizard::default()),
                     script: None,
                 },
