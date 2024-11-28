@@ -1,5 +1,6 @@
 use crate::script::*;
-use crate::utility::*;
+use crate::window::*;
+use crate::wizard::*;
 
 //================================================================
 
@@ -8,13 +9,15 @@ use serde::{Deserialize, Serialize};
 
 //================================================================
 
-#[derive(Default)]
-pub struct Engine {
-    pub status: Status,
-    pub script: Script,
+pub enum Status {
+    Success(Script),
+    Failure(Window, String),
+    Wizard(Window, Wizard),
+    Restart,
+    Closure,
 }
 
-impl Engine {
+impl Status {
     pub const FONT: &'static [u8] = include_bytes!("asset/font.ttf");
     pub const LOGO: &'static [u8] = include_bytes!("asset/logo.png");
     pub const ICON: [&'static [u8]; 3] = [
@@ -23,35 +26,8 @@ impl Engine {
         include_bytes!("asset/icon_512.png"),
     ];
 
-    pub fn new() -> Self {
-        let info = InfoEngine::new();
-
-        match info {
-            Ok(info) => match Script::new(&info) {
-                Ok(script) => Self {
-                    status: Status::Success,
-                    script,
-                },
-                Err(script) => Self {
-                    status: Status::Failure(script.to_string()),
-                    script: Script::default(),
-                },
-            },
-            Err(info) => match info {
-                InfoResult::Failure(info) => Self {
-                    status: Status::Failure(info.to_string()),
-                    script: Script::default(),
-                },
-                InfoResult::Missing => Self {
-                    status: Status::Wizard,
-                    script: Script::default(),
-                },
-            },
-        }
-    }
-
-    pub fn initialize(&mut self) -> (RaylibHandle, RaylibThread, RaylibAudio) {
-        let window = self.script.window.clone();
+    pub fn initialize() -> (RaylibHandle, RaylibThread, RaylibAudio) {
+        let window = ModuleWindow::default();
 
         let (mut handle, thread) = raylib::init()
             .title(&window.name)
@@ -88,7 +64,7 @@ impl Engine {
                         list.push(unsafe { icon.unwrap() });
                     }
                     Err(error) => {
-                        Status::set_failure(self, error.to_string());
+                        //Status::set_failure(self, error.to_string());
                     }
                 }
             }
@@ -99,7 +75,7 @@ impl Engine {
                         list.push(unsafe { icon.unwrap() });
                     }
                     Err(error) => {
-                        Status::set_failure(self, error.to_string());
+                        //Status::set_failure(self, error.to_string());
                     }
                 }
             }
@@ -126,14 +102,118 @@ impl Engine {
         handle.set_window_opacity(window.alpha);
 
         let audio = RaylibAudio::init_audio_device()
-            .map_err(|e| panic_window(&e.to_string()))
+            /*.map_err(|e| panic_window(&e.to_string()))*/
             .unwrap();
 
         (handle, thread, audio)
     }
-}
 
-//================================================================
+    pub fn new(handle: &mut RaylibHandle, thread: &RaylibThread) -> Self {
+        let info = InfoEngine::new();
+
+        match info {
+            Ok(info) => match Script::new(&info) {
+                Ok(script) => Self::Success(script),
+                Err(script) => Self::Failure(Window::new(handle, thread), script.to_string()),
+            },
+            Err(info) => match info {
+                InfoResult::Failure(info) => {
+                    Self::Failure(Window::new(handle, thread), info.to_string())
+                }
+                InfoResult::Missing => Self::Wizard(Window::new(handle, thread), Wizard::default()),
+            },
+        }
+    }
+
+    pub fn success(
+        handle: &mut RaylibHandle,
+        thread: &RaylibThread,
+        script: &mut Script,
+    ) -> Option<Status> {
+        if let Err(error) = script.main() {
+            return Some(Status::Failure(
+                Window::new(handle, thread),
+                error.to_string(),
+            ));
+        }
+
+        let mut loop_error: Option<String> = None;
+
+        while !handle.window_should_close() {
+            let mut draw = handle.begin_drawing(&thread);
+            draw.clear_background(Color::WHITE);
+
+            if let Err(error) = script.step() {
+                loop_error = Some(error.to_string());
+                break;
+            }
+        }
+
+        if let Some(error) = loop_error {
+            return Some(Status::Failure(Window::new(handle, thread), error));
+        }
+
+        if let Err(error) = script.exit() {
+            return Some(Status::Failure(
+                Window::new(handle, thread),
+                error.to_string(),
+            ));
+        }
+
+        None
+    }
+
+    pub fn failure(
+        handle: &mut RaylibHandle,
+        thread: &RaylibThread,
+        window: &mut Window,
+        text: &str,
+    ) -> Option<Status> {
+        let mut draw = handle.begin_drawing(thread);
+        draw.clear_background(Color::WHITE);
+
+        window.begin();
+
+        let size = draw.get_screen_width();
+
+        window.card_sharp(
+            &mut draw,
+            Rectangle::new(0.0, 0.0, size as f32, 48.0),
+            Window::COLOR_MAIN,
+        );
+
+        window.point(Vector2::new(20.0, 12.0));
+        window.text(&mut draw, "Fatal Error", Window::COLOR_TEXT);
+
+        window.card_round(
+            &mut draw,
+            Rectangle::new(20.0, 72.0, size as f32 - 36.0, 128.0),
+            Window::COLOR_MAIN,
+        );
+
+        window.point(Vector2::new(36.0, 84.0));
+        window.text(&mut draw, text, Window::COLOR_TEXT_MAIN);
+
+        window.point(Vector2::new(20.0, (draw.get_screen_height() - 96) as f32));
+        window.button(&mut draw, "Load Module");
+        window.button(&mut draw, "Exit Quiver");
+
+        None
+    }
+
+    #[rustfmt::skip]
+    pub fn wizard(
+        handle: &mut RaylibHandle,
+        thread: &RaylibThread,
+        window: &mut Window,
+        wizard: &mut Wizard,
+    ) -> Option<Status> {
+        let mut draw = handle.begin_drawing(thread);
+        draw.clear_background(Color::WHITE);
+
+        wizard.draw(&mut draw, window)
+    }
+}
 
 #[derive(Debug)]
 pub enum InfoResult {
@@ -173,112 +253,13 @@ impl InfoEngine {
     }
 
     pub fn dump(&self, path: &str) -> Result<(), String> {
+        /*
         crate::utility::file::write(
             &format!("{}{}", path, InfoEngine::FILE_NAME),
             serde_json::to_string(self).map_err(|e| e.to_string())?,
         )?;
+        */
 
         Ok(())
-    }
-}
-
-use crate::window::*;
-
-#[derive(Default, Clone)]
-pub enum Status {
-    #[default]
-    Success,
-    Failure(String),
-    Wizard,
-    Restart,
-    Closure,
-}
-
-impl Status {
-    pub fn success(engine: &mut Engine, handle: &mut RaylibHandle, thread: &RaylibThread) {
-        let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::WHITE);
-
-        if let Err(error) = &engine.script.step() {
-            Status::set_failure(engine, error.to_string());
-        }
-    }
-
-    pub fn failure(
-        engine: &mut Engine,
-        handle: &mut RaylibHandle,
-        thread: &RaylibThread,
-        window: &mut Window,
-        text: &str,
-    ) {
-        let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::WHITE);
-
-        window.begin();
-
-        let size = draw.get_screen_width();
-
-        window.card_sharp(
-            &mut draw,
-            Rectangle::new(0.0, 0.0, size as f32, 48.0),
-            Window::COLOR_MAIN,
-        );
-
-        window.point(Vector2::new(20.0, 12.0));
-        window.text(&mut draw, "Fatal Error", Window::COLOR_TEXT);
-
-        window.card_round(
-            &mut draw,
-            Rectangle::new(20.0, 72.0, size as f32 - 36.0, 128.0),
-            Window::COLOR_MAIN,
-        );
-
-        window.point(Vector2::new(36.0, 84.0));
-        window.text(&mut draw, text, Window::COLOR_TEXT_MAIN);
-
-        window.point(Vector2::new(20.0, (draw.get_screen_height() - 96) as f32));
-        window.button(&mut draw, "Load Module");
-        window.button(&mut draw, "Exit Quiver");
-    }
-
-    #[rustfmt::skip]
-    pub fn wizard(
-        engine: &mut Engine,
-        handle: &mut RaylibHandle,
-        thread: &RaylibThread,
-        window: &mut Window,
-        wizard: &mut Wizard,
-    ) {
-        let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::WHITE);
-
-        wizard.draw(engine, &mut draw, window);
-    }
-
-    pub fn restart(engine: &mut Engine) {
-        if let Err(error) = &engine.script.exit() {
-            Status::set_failure(engine, error.to_string());
-        }
-
-        *engine = Engine::new();
-
-        if let Err(error) = &engine.script.main() {
-            Status::set_failure(engine, error.to_string());
-        }
-    }
-
-    pub fn set_failure(engine: &mut Engine, text: String) {
-        engine.status = Status::Failure(text);
-
-        unsafe {
-            if ffi::IsWindowReady() {
-                ffi::SetMouseOffset(0, 0);
-                ffi::SetMouseScale(1.0, 1.0);
-                ffi::EndMode3D();
-                ffi::EndMode2D();
-                ffi::EndShaderMode();
-                ffi::EnableCursor();
-            }
-        }
     }
 }

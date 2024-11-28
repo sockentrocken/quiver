@@ -1,4 +1,4 @@
-use crate::engine::*;
+use crate::status::*;
 use crate::system::*;
 
 //================================================================
@@ -62,9 +62,9 @@ impl Script {
     }
 
     pub fn main(&mut self) -> Result<(), String> {
-        let file = crate::utility::file::read(&format!("{}/main.lua", self.module.path))?;
+        //let file = crate::utility::file::read(&format!("{}/main.lua", self.module.path))?;
 
-        self.lua.load(file).exec().map_err(|e| e.to_string())?;
+        //self.lua.load(file).exec().map_err(|e| e.to_string())?;
 
         if let Some(main) = &self.module.main {
             main.call::<()>(()).map_err(|e| e.to_string())?;

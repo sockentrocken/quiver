@@ -1,47 +1,43 @@
-mod engine;
 mod script;
+mod status;
 mod system;
-mod utility;
 mod window;
+mod wizard;
 
 //================================================================
 
-use crate::engine::*;
-use crate::window::*;
+use crate::status::*;
+use raylib::prelude::*;
 
 //================================================================
 
-#[rustfmt::skip]
 fn main() -> Result<(), String> {
-    let mut engine = Engine::new();
-    let (mut handle, thread, _audio) = engine.initialize();
-    let mut window = Window::new(&mut handle, &thread);
-    let mut wizard = Wizard::default();
-
-    if let Err(error) = &engine.script.main() {
-        Status::set_failure(&mut engine, error.to_string());
-    }
+    let (mut handle, thread, _audio) = Status::initialize();
+    let mut status = Status::new(&mut handle, &thread);
 
     while !handle.window_should_close() {
-        match engine.status.clone() {
-            Status::Success =>
-                Status::success(&mut engine, &mut handle, &thread),
-            Status::Failure(ref text) =>
-                Status::failure(&mut engine, &mut handle, &thread, &mut window, text),
-            Status::Wizard =>
-                Status::wizard(&mut engine, &mut handle, &thread, &mut window, &mut wizard),
-            Status::Restart =>
-                Status::restart(&mut engine),
-            Status::Closure =>
-                break,
+        match status {
+            Status::Success(ref mut script) => {
+                if let Some(s) = Status::success(&mut handle, &thread, script) {
+                    status = s;
+                }
+            }
+            Status::Failure(ref mut window, ref error) => {
+                if let Some(s) = Status::failure(&mut handle, &thread, window, error) {
+                    status = s;
+                }
+            }
+            Status::Wizard(ref mut window, ref mut wizard) => {
+                if let Some(s) = Status::wizard(&mut handle, &thread, window, wizard) {
+                    status = s;
+                }
+            }
+            Status::Restart => {
+                status = Status::Closure;
+            }
+            Status::Closure => break,
         }
     }
-
-    if let Err(error) = &engine.script.exit() {
-        Status::set_failure(&mut engine, error.to_string());
-    }
-
-    drop(engine);
 
     Ok(())
 }
