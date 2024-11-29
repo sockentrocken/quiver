@@ -12,9 +12,7 @@ pub struct Script {
     #[allow(dead_code)]
     pub lua: Lua,
     pub main: mlua::Function,
-    pub step: mlua::Function,
-    pub exit: mlua::Function,
-    pub error: Option<mlua::Function>,
+    pub fail: Option<mlua::Function>,
 }
 
 impl Script {
@@ -25,9 +23,7 @@ impl Script {
     const NAME_BASE: &'static str = "base.lua";
     const NAME_META: &'static str = "meta.lua";
     const CALL_MAIN: &'static str = "main";
-    const CALL_STEP: &'static str = "step";
-    const CALL_EXIT: &'static str = "exit";
-    const CALL_ERROR: &'static str = "error";
+    const CALL_FAIL: &'static str = "fail";
 
     pub fn new(info: &Info) -> mlua::Result<Self> {
         let lua = {
@@ -48,19 +44,16 @@ impl Script {
         let path = package.get::<mlua::String>("path")?;
         package.set("path", format!("{path:?};{}/?.lua", info.path))?;
 
-        lua.load(&format!("require \"{}\"", Self::CALL_MAIN))
-            .exec()?;
+        lua.load("require \"main\"").exec()?;
 
         let quiver = global.get::<mlua::Table>("quiver")?;
 
         Ok(Self {
             lua,
             main: quiver.get::<mlua::Function>(Self::CALL_MAIN)?,
-            step: quiver.get::<mlua::Function>(Self::CALL_STEP)?,
-            exit: quiver.get::<mlua::Function>(Self::CALL_EXIT)?,
-            error: {
-                if quiver.contains_key(Self::CALL_ERROR)? {
-                    Some(quiver.get::<mlua::Function>(Self::CALL_ERROR)?)
+            fail: {
+                if quiver.contains_key(Self::CALL_FAIL)? {
+                    Some(quiver.get::<mlua::Function>(Self::CALL_FAIL)?)
                 } else {
                     None
                 }
@@ -75,10 +68,13 @@ impl Script {
         input::set_global(lua, table)?;
         window::set_global(lua, table)?;
 
+        model::set_global(lua, table)?;
         texture::set_global(lua, table)?;
         sound::set_global(lua, table)?;
         music::set_global(lua, table)?;
         font::set_global(lua, table)?;
+
+        rapier::set_global(lua, table)?;
 
         Ok(())
     }
@@ -95,34 +91,20 @@ impl Script {
             .unwrap();
     }
 
-    pub fn main(&self) -> Result<(), String> {
-        self.main.call::<()>(()).map_err(|e| e.to_string())?;
-
-        Ok(())
+    pub fn main(&self) -> Result<bool, String> {
+        self.main.call::<bool>(()).map_err(|e| e.to_string())
     }
 
-    pub fn step(&self) -> Result<(), String> {
-        self.step.call::<()>(()).map_err(|e| e.to_string())?;
-
-        Ok(())
-    }
-
-    pub fn exit(&self) -> Result<(), String> {
-        self.exit.call::<()>(()).map_err(|e| e.to_string())?;
-
-        Ok(())
-    }
-
-    pub fn error(&self, message: &str) -> Result<(), String> {
-        if let Some(error) = &self.error {
-            error.call::<()>(message).map_err(|e| e.to_string())?;
-        }
-
-        Ok(())
+    pub fn fail(&self, message: &str) -> Result<bool, String> {
+        self.fail
+            .as_ref()
+            .expect("Script::fail(): Unwrapping without a function.")
+            .call::<bool>(message)
+            .map_err(|e| e.to_string())
     }
 
     pub fn new_module(path: &str) {
-        Script::dump(&path);
+        Script::dump(path);
 
         Info {
             safe: true,

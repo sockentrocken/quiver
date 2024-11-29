@@ -13,7 +13,7 @@ fn main() {
     let (mut handle, thread, _audio) = Status::initialize();
     let mut status = Status::new(&mut handle, &thread);
 
-    while !handle.window_should_close() {
+    loop {
         match status {
             Status::Success(ref mut script) => {
                 if let Some(state) = Status::success(&mut handle, &thread, script) {

@@ -4,17 +4,100 @@
 ---@class quiver
 quiver = {}
 
----Main entry-point. Quiver will call this on module initialization.
+---Main entry-point. Quiver will call this on initialization.
 ---@alias quiver.main fun()
 
----Step entry-point. Quiver will call this every frame.
----@alias quiver.step fun()
+---Fail entry-point. Quiver will call this on a script error, with the script error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
+---@alias quiver.fail fun(error : string)
 
----Exit entry-point. Quiver will call this on module de-initialization.
----@alias quiver.exit fun()
+---The Rapier API.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L13)
+---@class quiver.rapier
+quiver.rapier = {}
 
----Error entry-point. Quiver will call this on module error, with the error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
----@alias quiver.error fun(error : string)
+---An unique handle for a Rapier simulation in memory.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L30)
+---@class rapier
+rapier = {}
+
+---Create a new Rapier simulation.
+---@return rapier rapier # Rapier resource.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L79)
+function quiver.rapier.new() end
+
+---Render every object in the simulation.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L107)
+function rapier:debug_render() end
+
+---
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L122)
+function rapier:step() end
+
+---Rigid body information.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L157)
+---@class rigid_body_info
+rigid_body_info = {}
+
+---Create a rigid body.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L178)
+function rapier:create_rigid_body() end
+
+---
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L199)
+function rapier:create_ground() end
+
+---
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L209)
+function rapier:create_sphere() end
+
+---
+---@return table vertex # The vertex list to use for the convex hull.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L233)
+function rapier:create_convex_hull() end
+
+---
+---@return table vertex # The vertex list to use for the convex hull.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L282)
+function rapier:create_convex_hull() end
+
+---Create a kinematic character controller.
+---@return table index # The handle to the collider.
+---@return table controller # The handle to the controller.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L322)
+function rapier:create_controller() end
+
+---Move a kinematic character controller.
+---@param index table # The handle to the collider.
+---@param controller table # The handle to the controller.
+---@param point vector_3 # The point to move to.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L345)
+function rapier:move_controller(index,controller,point) end
 
 ---The window API.
 ---
@@ -26,149 +109,156 @@ quiver.window = {}
 ---Set the window to full-screen mode.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L50)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L51)
 function quiver.window.set_fullscreen() end
 
 ---Set the window to border-less mode.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L60)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L61)
 function quiver.window.set_borderless() end
 
 ---Minimize the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L70)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L71)
 function quiver.window.set_minimize() end
 
 ---Maximize the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L80)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L81)
 function quiver.window.set_maximize() end
 
 ---Focus the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L90)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L91)
 function quiver.window.set_focus() end
 
 ---Restore the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L100)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L101)
 function quiver.window.set_restore() end
 
 ---Set the window name.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L110)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L111)
 function quiver.window.set_name() end
 
 ---Set the window monitor.
 ---@param index number # Index of monitor to move window to.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L128)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L129)
 function quiver.window.set_monitor(index) end
 
 ---Set the current window shape.
 ---@param shape vector_2 # Shape of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L144)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L145)
 function quiver.window.set_shape(shape) end
 
 ---Set the minimum window shape.
 ---@param shape vector_2 # Minimum shape of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L162)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L163)
 function quiver.window.set_shape_min(shape) end
 
 ---Set the maximum window shape.
 ---@param shape vector_2 # Maximum shape of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L180)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L181)
 function quiver.window.set_shape_max(shape) end
 
 ---Set the window alpha.
 ---@param alpha number # Alpha of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L198)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L199)
 function quiver.window.set_alpha(alpha) end
 
 ---Set the window point.
 ---@param point vector_2 # Point of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L214)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L215)
 function quiver.window.set_point(point) end
 
 ---Get the state of the window (full-screen).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L234)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L235)
 function quiver.window.get_fullscreen() end
 
 ---Get the state of the window (minimize).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L247)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L248)
 function quiver.window.get_minimize() end
 
 ---Get the state of the window (maximize).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L260)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L261)
 function quiver.window.get_maximize() end
 
 ---Get the state of the window (focus).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L273)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L274)
 function quiver.window.get_focus() end
 
 ---Get the state of the window (resize).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L286)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L287)
 function quiver.window.get_resize() end
 
 ---Get the state of the window (hidden).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L299)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L300)
 function quiver.window.get_hidden() end
 
 ---Get the shape of the window.
 ---@return vector_2 shape # Shape of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L312)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L313)
 function quiver.window.get_shape() end
 
 ---Get the point of the window.
 ---@return vector_2 point # Point of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L330)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L331)
 function quiver.window.get_point() end
 
 ---Get the DPI scale of the window.
 ---@return number scale # Scale of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L347)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L348)
 function quiver.window.get_scale() end
+
+---Get if the window should close.
+---@return boolean close # True if the window should close.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L365)
+function quiver.window.get_close() end
 
 ---The texture API.
 ---
@@ -380,10 +470,36 @@ function quiver.general.get_frame_rate() end
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L105)
 function quiver.general.set_frame_rate(frame_rate) end
 
+---The drawing API.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L23)
+---@class quiver.draw
+quiver.draw = {}
+
+---Initialize drawing to the screen. **MUST** call *quiver.draw.close* after drawing is done.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L39)
+function quiver.draw.begin() end
+
+---Finalize drawing to the screen.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L49)
+function quiver.draw.close() end
+
+---Clear the screen with a color.
+---@param color color # The color to use for clearing.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L65)
+function quiver.draw.clear(color) end
+
 ---The 2D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L20)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L81)
 ---@class quiver.draw_2d
 quiver.draw_2d = {}
 
@@ -398,13 +514,13 @@ quiver.draw_2d = {}
 ---@param camera camera_2d # The 2D camera to use for drawing.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L48)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L109)
 function quiver.draw_2d.begin(camera) end
 
 ---Finalize the 2D draw mode.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L60)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L121)
 function quiver.draw_2d.close() end
 
 ---Draw 2D box.
@@ -414,7 +530,7 @@ function quiver.draw_2d.close() end
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L79)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L140)
 function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
 
 ---Draw text.
@@ -424,13 +540,13 @@ function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
 ---@param color color # The color of the text.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L105)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L166)
 function quiver.draw_2d.draw_text(label,point,scale,color) end
 
 ---The 3D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L132)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L193)
 ---@class quiver.draw_3d
 quiver.draw_3d = {}
 
@@ -438,13 +554,13 @@ quiver.draw_3d = {}
 ---@param camera camera_3d # The 3D camera to use for drawing.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L157)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L218)
 function quiver.draw_3d.begin(camera) end
 
 ---Finalize the 3D draw mode.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L169)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L230)
 function quiver.draw_3d.close() end
 
 ---Draw a grid.
@@ -452,7 +568,7 @@ function quiver.draw_3d.close() end
 ---@param space number # The space shift of the grid.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L186)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L247)
 function quiver.draw_3d.draw_grid(slice,space) end
 
 ---Draw a cube.
@@ -461,7 +577,7 @@ function quiver.draw_3d.draw_grid(slice,space) end
 ---@param color color # The color of the cube.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L204)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L265)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a ball.
@@ -470,7 +586,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L229)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L290)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a 3D box.
@@ -478,7 +594,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L249)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L310)
 function quiver.draw_3d.draw_box_3(shape,color) end
 
 ---The input API.
@@ -709,6 +825,34 @@ function quiver.input.pad.get_press(pad) end
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L565)
 function quiver.input.pad.get_release(pad) end
+
+---The model API.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L10)
+---@class quiver.model
+quiver.model = {}
+
+---An unique handle for a model in memory.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L26)
+---@class model
+model = {}
+
+---Create a new Model resource.
+---@param path string # Path to model file.
+---@return Model Model # Model resource.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L41)
+function quiver.model.new(path) end
+
+---Draw the model (wire-frame render).
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L73)
+function model:draw_wire() end
 
 ---The sound API.
 ---

@@ -7,37 +7,79 @@
 
 require "base"
 
+local time = 0.0
+
 function quiver.main()
     --- Main entry-point. Quiver will call this on module initialization.
+    while not quiver.window.get_close() do
+        time = time + quiver.general.get_frame_time()
+
+        -- Press F1 to reload Quiver.
+        if quiver.input.board.get_press(INPUT_BOARD.KEY_F1) then
+            -- Returning "true" will reload Quiver.
+            return true
+        end
+
+        -- Initialize drawing.
+        quiver.draw.begin()
+
+        -- Clear the screen.
+        quiver.draw.clear(color:new(1.0, 1.0, 1.0, 1.0))
+
+            local x = math.sin(time)
+            local z = math.cos(time)
+
+            -- Begin the 3D draw mode.
+            quiver.draw_3d.begin(camera_3d:new(vector_3:new(x * 4.0, 4.0, z * 4.0), vector_3:zero(), vector_3:new(0.0, 1.0, 0.0), 90.0))
+
+                -- Draw a grid.
+                quiver.draw_3d.draw_grid(64.0, 1.0)
+
+                -- Draw a cube.
+                quiver.draw_3d.draw_cube(vector_3:zero(), vector_3:one(), color:new(1.0, 0.0, 0.0, 1.0))
+
+            -- Close the 3D draw mode.
+            quiver.draw_3d.close()
+
+            -- Begin the 2D draw mode.
+            quiver.draw_2d.begin(camera_2d:new(vector_2:zero(), vector_2:zero(), 0.0, 1.0))
+
+                -- Draw text.
+                quiver.draw_2d.draw_text("Hello, world!", vector_2:new(16.0, 16.0), 32.0, color:new(1.0, 0.0, 0.0, 1.0))
+
+            -- Close the 2D draw mode.
+            quiver.draw_2d.close()
+
+        -- Finalize drawing.
+        quiver.draw.close()
+    end
+
+    -- Returning "false" will exit Quiver.
+    return false
 end
 
-function quiver.step()
-    --- Step entry-point. Quiver will call this every frame.
-    local x = math.sin(quiver.general.get_time())
-    local z = math.cos(quiver.general.get_time())
+-- Uncomment this to use a custom crash handler.
+--[[
+function quiver.fail(message)
+    --- Fail entry-point. Quiver will call this on a script error, with the script error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
+    while not quiver.window.get_close() do
+        -- Initialize drawing.
+        quiver.draw.begin()
 
-    -- Begin the 3D draw mode.
-    quiver.draw_3d.begin(camera_3d:new(vector_3:new(x * 4.0, 4.0, z * 4.0), vector_3:zero(), vector_3:new(0.0, 1.0, 0.0), 90.0))
+        -- Clear the screen.
+        quiver.draw.clear(color:new(1.0, 1.0, 1.0, 1.0))
 
-        -- Draw a grid.
-        quiver.draw_3d.draw_grid(64.0, 1.0)
+            -- Begin the 2D draw mode.
+            quiver.draw_2d.begin(camera_2d:new(vector_2:zero(), vector_2:zero(), 0.0, 1.0))
 
-        -- Draw a cube.
-        quiver.draw_3d.draw_cube(vector_3:zero(), vector_3:one(), color:new(1.0, 0.0, 0.0, 1.0))
+                -- Draw text.
+                quiver.draw_2d.draw_text(message, vector_2:new(16.0, 16.0), 32.0, color:new(1.0, 0.0, 0.0, 1.0))
 
-    -- Close the 3D draw mode.
-    quiver.draw_3d.close()
+            -- Close the 2D draw mode.
+            quiver.draw_2d.close()
 
-    -- Begin the 2D draw mode.
-    quiver.draw_2d.begin(camera_2d:new(vector_2:zero(), vector_2:zero(), 0.0, 1.0))
-
-        -- Draw text.
-        quiver.draw_2d.draw_text("Hello, world!", vector_2:new(16.0, 16.0), 32.0, color:new(1.0, 0.0, 0.0, 1.0))
-
-    -- Close the 2D draw mode.
-    quiver.draw_2d.close()
+        -- Finalize drawing.
+        quiver.draw.close()
+    end
 end
-
-function quiver.exit()
-    --- Exit entry-point. Quiver will call this on module de-initialization.
-end
+]]--

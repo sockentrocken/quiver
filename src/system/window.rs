@@ -38,6 +38,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     window.set("get_shape", lua.create_function(self::get_window_shape)?)?;
     window.set("get_point", lua.create_function(self::get_window_point)?)?;
     window.set("get_scale", lua.create_function(self::get_window_scale)?)?;
+    window.set("get_close", lua.create_function(self::get_window_close)?)?;
 
     table.set("window", window)?;
 
@@ -350,4 +351,17 @@ fn get_window_scale(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
 
         lua.to_value(&crate::system::general::Vector2::new(value.x, value.y))
     }
+}
+
+/* entry
+{
+    "name": "quiver.window.get_close",
+    "info": "Get if the window should close.",
+    "result": [
+        { "name": "close", "info": "True if the window should close.", "kind": "boolean" }
+    ]
+}
+*/
+fn get_window_close(_: &Lua, _: ()) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::WindowShouldClose()) }
 }

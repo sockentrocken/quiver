@@ -1,3 +1,5 @@
+use crate::system::*;
+
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
@@ -5,10 +7,69 @@ use std::ffi::CString;
 //================================================================
 
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+    draw_general::set_global(lua, table)?;
     draw_2d::set_global(lua, table)?;
     draw_3d::set_global(lua, table)?;
 
     Ok(())
+}
+
+mod draw_general {
+    use super::*;
+
+    /* class
+    { "name": "quiver.draw", "info": "The drawing API." }
+    */
+    #[rustfmt::skip]
+    pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+        let draw = lua.create_table()?;
+
+        draw.set("begin", lua.create_function(self::begin)?)?;
+        draw.set("close", lua.create_function(self::close)?)?;
+        draw.set("clear", lua.create_function(self::clear)?)?;
+
+        table.set("draw", draw)?;
+
+        Ok(())
+    }
+
+    /* entry
+    { "name": "quiver.draw.begin", "info": "Initialize drawing to the screen. **MUST** call *quiver.draw.close* after drawing is done." }
+    */
+    fn begin(_: &Lua, _: ()) -> mlua::Result<()> {
+        unsafe {
+            ffi::BeginDrawing();
+            Ok(())
+        }
+    }
+
+    /* entry
+    { "name": "quiver.draw.close", "info": "Finalize drawing to the screen." }
+    */
+    fn close(_: &Lua, _: ()) -> mlua::Result<()> {
+        unsafe {
+            ffi::EndDrawing();
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "name": "quiver.draw.clear",
+        "info": "Clear the screen with a color.",
+        "member": [
+            { "name": "color", "info": "The color to use for clearing.", "kind": "color" }
+        ]
+    }
+    */
+    fn clear(lua: &Lua, color: LuaValue) -> mlua::Result<()> {
+        let value: general::Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::ClearBackground(value.into());
+            Ok(())
+        }
+    }
 }
 
 mod draw_2d {
@@ -46,7 +107,7 @@ mod draw_2d {
     quiver.draw_2d.close()
     */
     fn begin(lua: &Lua, camera: LuaValue) -> mlua::Result<()> {
-        let value: crate::system::general::Camera2D = lua.from_value(camera)?;
+        let value: general::Camera2D = lua.from_value(camera)?;
 
         unsafe {
             ffi::BeginMode2D(value.into());
@@ -80,9 +141,9 @@ mod draw_2d {
         lua: &Lua,
         (shape, point, angle, color): (LuaValue, LuaValue, f32, LuaValue),
     ) -> mlua::Result<()> {
-        let shape: crate::system::general::Box2 = lua.from_value(shape)?;
-        let point: crate::system::general::Vector2 = lua.from_value(point)?;
-        let color: crate::system::general::Color = lua.from_value(color)?;
+        let shape: general::Box2 = lua.from_value(shape)?;
+        let point: general::Vector2 = lua.from_value(point)?;
+        let color: general::Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawRectanglePro(shape.into(), point.into(), angle, color.into());
@@ -107,8 +168,8 @@ mod draw_2d {
         (text, point, scale, color): (String, LuaValue, i32, LuaValue),
     ) -> mlua::Result<()> {
         let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
-        let point: crate::system::general::Vector2 = lua.from_value(point)?;
-        let color: crate::system::general::Color = lua.from_value(color)?;
+        let point: general::Vector2 = lua.from_value(point)?;
+        let color: general::Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawText(
@@ -155,7 +216,7 @@ mod draw_3d {
     }
     */
     fn begin(lua: &Lua, camera: LuaValue) -> mlua::Result<()> {
-        let value: crate::system::general::Camera3D = lua.from_value(camera)?;
+        let value: general::Camera3D = lua.from_value(camera)?;
 
         unsafe {
             ffi::BeginMode3D(value.into());
@@ -205,9 +266,9 @@ mod draw_3d {
         lua: &Lua,
         (point, shape, color): (LuaValue, LuaValue, LuaValue),
     ) -> mlua::Result<()> {
-        let point: crate::system::general::Vector3 = lua.from_value(point)?;
-        let shape: crate::system::general::Vector3 = lua.from_value(shape)?;
-        let color: crate::system::general::Color = lua.from_value(color)?;
+        let point: general::Vector3 = lua.from_value(point)?;
+        let shape: general::Vector3 = lua.from_value(shape)?;
+        let color: general::Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawCubeV(point.into(), shape.into(), color.into());
@@ -227,8 +288,8 @@ mod draw_3d {
     }
     */
     fn draw_ball(lua: &Lua, (point, shape, color): (LuaValue, f32, LuaValue)) -> mlua::Result<()> {
-        let point: crate::system::general::Vector3 = lua.from_value(point)?;
-        let color: crate::system::general::Color = lua.from_value(color)?;
+        let point: general::Vector3 = lua.from_value(point)?;
+        let color: general::Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawSphere(point.into(), shape, color.into());
@@ -247,8 +308,8 @@ mod draw_3d {
     }
     */
     fn draw_box_3(lua: &Lua, (box_3, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
-        let box_3: crate::system::general::Box3 = lua.from_value(box_3)?;
-        let color: crate::system::general::Color = lua.from_value(color)?;
+        let box_3: general::Box3 = lua.from_value(box_3)?;
+        let color: general::Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawBoundingBox(box_3.into(), color.into());

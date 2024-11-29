@@ -80,17 +80,11 @@ r#"---@meta
 ---@class quiver
 quiver = {}
 
----Main entry-point. Quiver will call this on module initialization.
+---Main entry-point. Quiver will call this on initialization.
 ---@alias quiver.main fun()
 
----Step entry-point. Quiver will call this every frame.
----@alias quiver.step fun()
-
----Exit entry-point. Quiver will call this on module de-initialization.
----@alias quiver.exit fun()
-
----Error entry-point. Quiver will call this on module error, with the error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
----@alias quiver.error fun(error : string)
+---Fail entry-point. Quiver will call this on a script error, with the script error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
+---@alias quiver.fail fun(error : string)
 
 "#;
 

@@ -62,37 +62,24 @@ impl Status {
         thread: &RaylibThread,
         script: &Script,
     ) -> Option<Status> {
-        if let Err(error) = script.main() {
-            return Some(Status::Failure(
-                Window::new(handle, thread),
-                Some(script.clone()),
-                error.to_string(),
-            ));
-        }
-
-        while !handle.window_should_close() {
-            let mut draw = handle.begin_drawing(thread);
-            draw.clear_background(Color::WHITE);
-
-            if let Err(error) = script.step() {
-                drop(draw);
-                return Some(Status::Failure(
-                    Window::new(handle, thread),
-                    Some(script.clone()),
-                    error,
-                ));
+        match script.main() {
+            Ok(result) => {
+                if result {
+                    // need to do this, otherwise MAY cause an infinite hang.
+                    unsafe {
+                        ffi::PollInputEvents();
+                    }
+                    Some(Status::new(handle, thread))
+                } else {
+                    Some(Status::Closure)
+                }
             }
-        }
-
-        if let Err(error) = script.exit() {
-            return Some(Status::Failure(
+            Err(result) => Some(Status::Failure(
                 Window::new(handle, thread),
                 Some(script.clone()),
-                error.to_string(),
-            ));
+                result.to_string(),
+            )),
         }
-
-        Some(Status::Closure)
     }
 
     pub fn failure(
@@ -102,18 +89,33 @@ impl Status {
         script: &Option<Script>,
         text: &str,
     ) -> Option<Status> {
-        let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::WHITE);
-
         if let Some(script) = script {
-            if script.error.is_some() {
-                if let Err(error) = script.error(text) {
-                    Status::panic(&error);
+            if script.fail.is_some() {
+                match script.fail(text) {
+                    Ok(result) => {
+                        if result {
+                            // need to do this, otherwise MAY cause an infinite hang.
+                            unsafe {
+                                ffi::PollInputEvents();
+                            }
+                            return Some(Status::new(handle, thread));
+                        } else {
+                            return Some(Status::Closure);
+                        }
+                    }
+                    Err(result) => {
+                        return Some(Status::Failure(
+                            Window::new(handle, thread),
+                            Some(script.clone()),
+                            result.to_string(),
+                        ))
+                    }
                 }
-
-                return None;
             }
         }
+
+        let mut draw = handle.begin_drawing(thread);
+        draw.clear_background(Color::WHITE);
 
         window.begin();
 
@@ -148,7 +150,13 @@ impl Status {
             return Some(Status::Closure);
         }
 
-        None
+        drop(draw);
+
+        if handle.window_should_close() {
+            Some(Status::Closure)
+        } else {
+            None
+        }
     }
 
     #[rustfmt::skip]
