@@ -4,6 +4,113 @@ use serde::{Deserialize, Serialize};
 
 //================================================================
 
+/* class
+{ "name": "quiver.general", "info": "The general API." }
+*/
+#[rustfmt::skip]
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+    let general = lua.create_table()?;
+
+    general.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
+    general.set("get_time",       lua.create_function(self::get_time)?)?;
+    general.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
+    general.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
+    general.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
+
+    table.set("general", general)?;
+
+    Ok(())
+}
+
+//================================================================
+
+/* entry
+{ "name": "quiver.general.load", "info": "Load the engine.", "skip_definition": "true" }
+*/
+
+/* entry
+{ "name": "quiver.general.exit", "info": "Exit the engine.", "skip_definition": "true" }
+*/
+
+/* entry
+{
+    "name": "quiver.general.set_exit_key",
+    "info": "Set a key to exit Quiver.",
+    "member": [
+        { "name": "key", "info": "Key to exit Quiver with.", "kind": "input_board" }
+    ]
+}
+*/
+fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
+    if (crate::system::input::BOARD_RANGE_LOWER..=crate::system::input::BOARD_RANGE_UPPER)
+        .contains(&value)
+    {
+        unsafe {
+            ffi::SetExitKey(value);
+            Ok(())
+        }
+    } else {
+        Err(mlua::Error::runtime("set_exit_key(): Unknown key value."))
+    }
+}
+
+/* entry
+{
+    "name": "quiver.general.get_time",
+    "info": "Get the current time. Will count up since the initialization of the window.",
+    "result": [
+        { "name": "time", "info": "Current time.", "kind": "number" }
+    ]
+}
+*/
+fn get_time(_: &Lua, _: ()) -> mlua::Result<f64> {
+    unsafe { Ok(ffi::GetTime()) }
+}
+
+/* entry
+{
+    "name": "quiver.general.get_frame_time",
+    "info": "Get the current frame time.",
+    "result": [
+        { "name": "frame_time", "info": "Current frame time.", "kind": "number" }
+    ]
+}
+*/
+fn get_frame_time(_: &Lua, _: ()) -> mlua::Result<f32> {
+    unsafe { Ok(ffi::GetFrameTime()) }
+}
+
+/* entry
+{
+    "name": "quiver.general.get_frame_rate",
+    "info": "Get the current frame rate.",
+    "result": [
+        { "name": "frame_rate", "info": "Current frame rate.", "kind": "number" }
+    ]
+}
+*/
+fn get_frame_rate(_: &Lua, _: ()) -> mlua::Result<i32> {
+    unsafe { Ok(ffi::GetFPS()) }
+}
+
+/* entry
+{
+    "name": "quiver.general.set_frame_rate",
+    "info": "set the current frame rate.",
+    "member": [
+        { "name": "frame_rate", "info": "Current frame rate.", "kind": "number" }
+    ]
+}
+*/
+fn set_frame_rate(_: &Lua, rate: i32) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetTargetFPS(rate);
+        Ok(())
+    }
+}
+
+//================================================================
+
 #[derive(Deserialize, Serialize)]
 pub struct Vector2 {
     pub x: f32,
@@ -30,12 +137,6 @@ pub struct Vector3 {
     pub x: f32,
     pub y: f32,
     pub z: f32,
-}
-
-impl Vector3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
-        Self { x, y, z }
-    }
 }
 
 impl Into<ffi::Vector3> for Vector3 {
@@ -106,12 +207,6 @@ impl Into<ffi::Color> for Color {
     }
 }
 
-impl Color {
-    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
-        Self { r, g, b, a }
-    }
-}
-
 #[derive(Deserialize, Serialize)]
 pub struct Box2 {
     pub min: Vector2,
@@ -141,124 +236,5 @@ impl Into<ffi::BoundingBox> for Box3 {
             min: self.min.into(),
             max: self.max.into(),
         }
-    }
-}
-
-//================================================================
-
-#[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
-    /* class
-    { "name": "quiver.engine", "info": "The engine API." }
-    */
-    let engine = lua.create_table()?;
-
-    /*
-    /* entry
-    { "name": "quiver.engine.load", "info": "Load the engine." }
-    */
-    let clone = status.clone();
-    engine.set("load", lua.create_function(move |_, _ : ()| {
-        *clone.borrow_mut() = Status::Restart;
-        Ok(())
-    })?)?;
-
-    /* entry
-    { "name": "quiver.engine.exit", "info": "Exit the engine." }
-    */
-    let clone = status.clone();
-    engine.set("exit", lua.create_function(move |_, _ : ()| {
-        *clone.borrow_mut() = Status::Closure;
-        Ok(())
-    })?)?;
-    */
-
-    engine.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
-    engine.set("get_time",       lua.create_function(self::get_time)?)?;
-    engine.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
-    engine.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
-    engine.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
-
-    table.set("engine", engine)?;
-
-    Ok(())
-}
-
-//================================================================
-
-/* entry
-{
-    "name": "quiver.engine.set_exit_key",
-    "info": "Set a key to exit Quiver.",
-    "member": [
-        { "name": "key", "info": "Key to exit Quiver with.", "kind": "input_board" }
-    ]
-}
-*/
-fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
-    if (crate::system::input::BOARD_RANGE_LOWER..=crate::system::input::BOARD_RANGE_UPPER)
-        .contains(&value)
-    {
-        unsafe {
-            ffi::SetExitKey(value);
-            Ok(())
-        }
-    } else {
-        Err(mlua::Error::runtime("set_exit_key(): Unknown key value."))
-    }
-}
-
-/* entry
-{
-    "name": "quiver.engine.get_time",
-    "info": "Get the current time. Will count up since the initialization of the window.",
-    "result": [
-        { "name": "time", "info": "Current time.", "kind": "number" }
-    ]
-}
-*/
-fn get_time(_: &Lua, _: ()) -> mlua::Result<f64> {
-    unsafe { Ok(ffi::GetTime()) }
-}
-
-/* entry
-{
-    "name": "quiver.engine.get_frame_time",
-    "info": "Get the current frame time.",
-    "result": [
-        { "name": "frame_time", "info": "Current frame time.", "kind": "number" }
-    ]
-}
-*/
-fn get_frame_time(_: &Lua, _: ()) -> mlua::Result<f32> {
-    unsafe { Ok(ffi::GetFrameTime()) }
-}
-
-/* entry
-{
-    "name": "quiver.engine.get_frame_rate",
-    "info": "Get the current frame rate.",
-    "result": [
-        { "name": "frame_rate", "info": "Current frame rate.", "kind": "number" }
-    ]
-}
-*/
-fn get_frame_rate(_: &Lua, _: ()) -> mlua::Result<i32> {
-    unsafe { Ok(ffi::GetFPS()) }
-}
-
-/* entry
-{
-    "name": "quiver.engine.set_frame_rate",
-    "info": "set the current frame rate.",
-    "member": [
-        { "name": "frame_rate", "info": "Current frame rate.", "kind": "number" }
-    ]
-}
-*/
-fn set_frame_rate(_: &Lua, rate: i32) -> mlua::Result<()> {
-    unsafe {
-        ffi::SetTargetFPS(rate);
-        Ok(())
     }
 }

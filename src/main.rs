@@ -25,8 +25,8 @@ fn main() {
                     status = state;
                 }
             }
-            Status::Wizard(ref mut window) => {
-                if let Some(state) = Status::wizard(&mut handle, &thread, window) {
+            Status::Missing(ref mut window) => {
+                if let Some(state) = Status::missing(&mut handle, &thread, window) {
                     status = state;
                 }
             }

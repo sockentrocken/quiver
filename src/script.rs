@@ -7,36 +7,64 @@ use mlua::prelude::*;
 
 //================================================================
 
-#[derive(Default)]
 pub struct Script {
+    #[allow(dead_code)]
     pub lua: Lua,
-    pub module: Module,
+    pub main: mlua::Function,
+    pub step: mlua::Function,
+    pub exit: mlua::Function,
 }
 
 impl Script {
-    pub fn new(info: &InfoEngine) -> Result<Self, String> {
+    const FILE_MAIN: &'static str = include_str!("asset/main.lua");
+    const FILE_BASE: &'static str = include_str!("asset/base.lua");
+    const FILE_META: &'static str = include_str!("asset/meta.lua");
+    const NAME_MAIN: &'static str = "main.lua";
+    const NAME_BASE: &'static str = "base.lua";
+    const NAME_META: &'static str = "meta.lua";
+    const CALL_MAIN: &'static str = "main";
+    const CALL_STEP: &'static str = "step";
+    const CALL_EXIT: &'static str = "exit";
+
+    pub fn new(info: &InfoEngine) -> mlua::Result<Self> {
         let lua = {
             if info.safe {
-                Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())
-                    .expect("Error initializing Lua virtual machine.")
+                Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())?
             } else {
                 unsafe { Lua::unsafe_new_with(LuaStdLib::ALL, LuaOptions::new()) }
             }
         };
 
-        let quiver = lua.create_table().map_err(|e| e.to_string())?;
+        let quiver = lua.create_table()?;
 
-        general::set_global(&lua, &quiver).map_err(|e| e.to_string())?;
+        general::set_global(&lua, &quiver)?;
 
-        Self::standard(&lua, &quiver).map_err(|e| e.to_string())?;
+        Self::standard(&lua, &quiver)?;
 
-        lua.globals()
-            .set("quiver", quiver)
-            .map_err(|e| e.to_string())?;
+        let global = lua.globals();
 
-        let module = Module::new(&lua, &info.path, &lua.globals()).unwrap();
+        global.set("quiver", quiver)?;
 
-        Ok(Self { lua, module })
+        let package = global.get::<mlua::Table>("package")?;
+        let path = package.get::<mlua::String>("path")?;
+        package.set("path", format!("{path:?};{}/?.lua", info.path))?;
+
+        let file = std::fs::read(&format!("{}/{}", info.path, Self::NAME_MAIN))?;
+
+        lua.load(file).exec()?;
+
+        let quiver = global.get::<mlua::Table>("quiver")?;
+
+        let main = quiver.get::<mlua::Function>(Self::CALL_MAIN)?;
+        let step = quiver.get::<mlua::Function>(Self::CALL_STEP)?;
+        let exit = quiver.get::<mlua::Function>(Self::CALL_EXIT)?;
+
+        Ok(Self {
+            lua,
+            main,
+            step,
+            exit,
+        })
     }
 
     fn standard(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
@@ -53,57 +81,32 @@ impl Script {
     }
 
     pub fn main(&mut self) -> Result<(), String> {
-        //let file = crate::utility::file::read(&format!("{}/main.lua", self.module.path))?;
-
-        //self.lua.load(file).exec().map_err(|e| e.to_string())?;
-
-        if let Some(main) = &self.module.main {
-            main.call::<()>(()).map_err(|e| e.to_string())?;
-        }
+        self.main.call::<()>(()).map_err(|e| e.to_string())?;
 
         Ok(())
     }
 
     pub fn step(&self) -> Result<(), String> {
-        if let Some(step) = &self.module.step {
-            step.call::<()>(()).map_err(|e| e.to_string())?;
-        }
+        self.step.call::<()>(()).map_err(|e| e.to_string())?;
 
         Ok(())
     }
 
     pub fn exit(&self) -> Result<(), String> {
-        if let Some(exit) = &self.module.exit {
-            exit.call::<()>(()).map_err(|e| e.to_string())?;
-        }
+        self.exit.call::<()>(()).map_err(|e| e.to_string())?;
 
         Ok(())
     }
-}
 
-use serde::{Deserialize, Serialize};
-
-//================================================================
-
-#[derive(Default)]
-pub struct Module {
-    pub path: String,
-    pub main: Option<mlua::Function>,
-    pub step: Option<mlua::Function>,
-    pub exit: Option<mlua::Function>,
-}
-
-impl Module {
-    pub fn new(lua: &Lua, path: &str, global: &mlua::Table) -> mlua::Result<Self> {
-        let main = Some(global.get::<mlua::Function>("main")?);
-        let step = Some(global.get::<mlua::Function>("step")?);
-        let exit = Some(global.get::<mlua::Function>("exit")?);
-
-        Ok(Self {
-            path: path.to_string(),
-            main,
-            step,
-            exit,
-        })
+    pub fn dump(path: &str) {
+        std::fs::write(format!("{path}/{}", Self::NAME_MAIN), Self::FILE_MAIN)
+            .map_err(|e| Status::panic(&e.to_string()))
+            .unwrap();
+        std::fs::write(format!("{path}/{}", Self::NAME_BASE), Self::FILE_BASE)
+            .map_err(|e| Status::panic(&e.to_string()))
+            .unwrap();
+        std::fs::write(format!("{path}/{}", Self::NAME_META), Self::FILE_META)
+            .map_err(|e| Status::panic(&e.to_string()))
+            .unwrap();
     }
 }

@@ -4,10 +4,6 @@ use std::ffi::CString;
 
 //================================================================
 
-type RLSound = ffi::Sound;
-
-//================================================================
-
 /* class
 { "name": "quiver.sound", "info": "The sound API." }
 */
@@ -22,10 +18,12 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     Ok(())
 }
 
+type RLSound = ffi::Sound;
+
 /* class
 { "name": "sound", "info": "An unique handle for sound in memory." }
 */
-pub struct Sound(RLSound);
+struct Sound(RLSound);
 
 impl Sound {
     /* entry
@@ -40,7 +38,7 @@ impl Sound {
         ]
     }
     */
-    pub fn new(_: &Lua, path: String) -> mlua::Result<Self> {
+    fn new(_: &Lua, path: String) -> mlua::Result<Self> {
         let name = CString::new(path.clone()).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
         unsafe {

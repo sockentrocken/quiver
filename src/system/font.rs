@@ -4,10 +4,6 @@ use std::ffi::CString;
 
 //================================================================
 
-type RLFont = raylib::core::text::Font;
-
-//================================================================
-
 /* class
 { "name": "quiver.font", "info": "The font API." }
 */
@@ -22,10 +18,12 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     Ok(())
 }
 
+type RLFont = raylib::core::text::Font;
+
 /* class
 { "name": "font", "info": "An unique handle to a font in memory." }
 */
-pub struct Font(RLFont);
+struct Font(RLFont);
 
 impl mlua::UserData for Font {
     fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
@@ -81,7 +79,7 @@ impl Font {
         ]
     }
     */
-    pub fn new(_: &Lua, path: String) -> mlua::Result<Self> {
+    fn new(_: &Lua, path: String) -> mlua::Result<Self> {
         let name = CString::new(path.clone()).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
         unsafe {

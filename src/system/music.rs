@@ -4,10 +4,6 @@ use std::ffi::CString;
 
 //================================================================
 
-type RLMusic = ffi::Music;
-
-//================================================================
-
 /* class
 { "name": "quiver.music", "info": "The music API." }
 */
@@ -22,10 +18,12 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     Ok(())
 }
 
+type RLMusic = ffi::Music;
+
 /* class
 { "name": "music", "info": "An unique handle for music in memory." }
 */
-pub struct Music(RLMusic);
+struct Music(RLMusic);
 
 impl Music {
     /* entry
@@ -40,7 +38,7 @@ impl Music {
         ]
     }
     */
-    pub fn new(_: &Lua, path: String) -> mlua::Result<Self> {
+    fn new(_: &Lua, path: String) -> mlua::Result<Self> {
         let name = CString::new(path.clone()).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
         unsafe {

@@ -73,7 +73,7 @@ fn texture_pro_draw(
     ]
 }
 */
-pub struct Texture(RLTexture);
+struct Texture(RLTexture);
 
 impl mlua::UserData for Texture {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
@@ -143,7 +143,7 @@ impl Texture {
         ]
     }
     */
-    pub fn new(_: &Lua, path: String) -> mlua::Result<Self> {
+    fn new(_: &Lua, path: String) -> mlua::Result<Self> {
         let name = CString::new(path.clone()).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
         unsafe {

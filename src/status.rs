@@ -1,6 +1,5 @@
 use crate::script::*;
 use crate::window::*;
-use crate::wizard::*;
 
 //================================================================
 
@@ -12,7 +11,7 @@ use serde::{Deserialize, Serialize};
 pub enum Status {
     Success(Script),
     Failure(Window, String),
-    Wizard(Window),
+    Missing(Window),
     Closure,
 }
 
@@ -42,18 +41,24 @@ impl Status {
                 InfoResult::Failure(info) => {
                     Self::Failure(Window::new(handle, thread), info.to_string())
                 }
-                InfoResult::Missing => Self::Wizard(Window::new(handle, thread)),
+                InfoResult::Missing => Self::Missing(Window::new(handle, thread)),
             },
         }
     }
 
     pub fn initialize() -> (RaylibHandle, RaylibThread, RaylibAudio) {
-        let (handle, thread) = raylib::init()
+        let (mut handle, thread) = raylib::init()
             .msaa_4x()
             .vsync()
             .size(1024, 768)
             .title("Quiver")
             .build();
+
+        let icon = Image::load_image_from_mem(".png", Self::ICON)
+            .map_err(|e| Self::panic(&e.to_string()))
+            .unwrap();
+
+        handle.set_window_icon(icon);
 
         let audio = RaylibAudio::init_audio_device()
             .map_err(|e| Self::panic(&e.to_string()))
@@ -74,20 +79,14 @@ impl Status {
             ));
         }
 
-        let mut loop_error: Option<String> = None;
-
         while !handle.window_should_close() {
             let mut draw = handle.begin_drawing(thread);
             draw.clear_background(Color::WHITE);
 
             if let Err(error) = script.step() {
-                loop_error = Some(error.to_string());
-                break;
+                drop(draw);
+                return Some(Status::Failure(Window::new(handle, thread), error));
             }
-        }
-
-        if let Some(error) = loop_error {
-            return Some(Status::Failure(Window::new(handle, thread), error));
         }
 
         if let Err(error) = script.exit() {
@@ -116,7 +115,7 @@ impl Status {
         window.card_sharp(
             &mut draw,
             Rectangle::new(0.0, 0.0, size as f32, 48.0),
-            Window::COLOR_MAIN,
+            Window::COLOR_PRIMARY_MAIN,
         );
 
         window.point(Vector2::new(20.0, 12.0));
@@ -125,29 +124,32 @@ impl Status {
         window.card_round(
             &mut draw,
             Rectangle::new(20.0, 72.0, size as f32 - 36.0, 128.0),
-            Window::COLOR_MAIN,
+            Window::COLOR_PRIMARY_MAIN,
         );
 
         window.point(Vector2::new(36.0, 84.0));
-        window.text(&mut draw, text, Window::COLOR_TEXT_MAIN);
+        window.text(&mut draw, text, Window::COLOR_TEXT);
 
         window.point(Vector2::new(20.0, (draw.get_screen_height() - 96) as f32));
-        window.button(&mut draw, "Load Module");
-        window.button(&mut draw, "Exit Quiver");
+
+        if window.button(&mut draw, "Load Module") {
+            drop(draw);
+            return Some(Status::new(handle, thread));
+        }
+        if window.button(&mut draw, "Exit Quiver") {
+            return Some(Status::Closure);
+        }
 
         None
     }
 
     #[rustfmt::skip]
-    pub fn wizard(
+    pub fn missing(
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         window: &mut Window,
     ) -> Option<Status> {
-        let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::WHITE);
-
-        window.draw(&mut draw)
+        window.draw(handle, thread)
     }
 }
 
@@ -188,14 +190,14 @@ impl InfoEngine {
         }
     }
 
-    pub fn dump(&self, path: &str) -> Result<(), String> {
-        /*
-        crate::utility::file::write(
-            &format!("{}{}", path, InfoEngine::FILE_NAME),
-            serde_json::to_string(self).map_err(|e| e.to_string())?,
-        )?;
-        */
-
-        Ok(())
+    pub fn dump(&self) {
+        std::fs::write(
+            Self::FILE_NAME,
+            serde_json::to_string_pretty(self)
+                .map_err(|e| Status::panic(&e.to_string()))
+                .unwrap(),
+        )
+        .map_err(|e| Status::panic(&e.to_string()))
+        .unwrap();
     }
 }

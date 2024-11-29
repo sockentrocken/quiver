@@ -80,6 +80,15 @@ r#"---@meta
 ---@class quiver
 quiver = {}
 
+---Main entry-point. Quiver will call this on module initialization.
+---@alias quiver.main fun()
+
+---Step entry-point. Quiver will call this every frame.
+---@alias quiver.step fun()
+
+---Exit entry-point. Quiver will call this on module de-initialization.
+---@alias quiver.exit fun()
+
 "#;
 
     #[rustfmt::skip]
