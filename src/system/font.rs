@@ -1,8 +1,8 @@
-use crate::script::*;
-
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
+
+//================================================================
 
 type RLFont = raylib::core::text::Font;
 
@@ -12,10 +12,10 @@ type RLFont = raylib::core::text::Font;
 { "name": "quiver.font", "info": "The font API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, system : &ModuleSystem) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let font = lua.create_table()?;
 
-    if system.font { font.set("new", lua.create_function(self::Font::new)?)?;   }
+    font.set("new", lua.create_function(self::Font::new)?)?;
 
     table.set("font", font)?;
 

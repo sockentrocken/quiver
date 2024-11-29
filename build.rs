@@ -40,7 +40,6 @@ fn main() {
         let file = BufReader::new(file).lines();
 
         // Create GitHub wiki documentation file.
-        //let mut wiki = Wiki::new(name);
         parser.new_wiki(name);
 
         // For each line in the file...
@@ -72,6 +71,16 @@ struct Parser {
 
 impl Parser {
     const META_FILE: &'static str = "meta.lua";
+
+    #[rustfmt::skip]
+    const META_FILE_HEADER: &'static str =
+r#"---@meta
+
+---The Quiver API.
+---@class quiver
+quiver = {}
+
+"#;
 
     #[rustfmt::skip]
     const META_CLASS_HEADER: &'static str =
@@ -113,7 +122,7 @@ r#"---@param {name} {kind} # {info}
 "#;
         #[rustfmt::skip]
     const META_RETURN: &'static str =
-r#"---@return {name} {kind} # {info}
+r#"---@return {kind} {name} # {info}
 "#;
 
     //================================================================
@@ -176,7 +185,11 @@ r#"* Return: `{name}` – {info}
     pub fn new() -> Self {
         let meta_file = File::create(format!("src/asset/{}", Self::META_FILE))
             .unwrap_or_else(|_| panic!("build.rs: Could not create \"{}\" file.", Self::META_FILE));
-        let meta_file = BufWriter::new(meta_file);
+        let mut meta_file = BufWriter::new(meta_file);
+
+        meta_file
+            .write_all(Self::META_FILE_HEADER.as_bytes())
+            .expect("Meta::new(): Could not write to file.");
 
         Self {
             class: false,
@@ -254,7 +267,7 @@ r#"* Return: `{name}` – {info}
 
     fn write_meta_class(&mut self, path: &str, _name: &str, line: usize) {
         let class: Class = serde_json::from_str(&self.comment_line).unwrap_or_else(|_| {
-            panic!("Meta::write_class(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
+            panic!("Meta::write_meta_class(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
         });
 
         let mut data = Self::META_CLASS_HEADER.to_string();
@@ -285,16 +298,16 @@ r#"* Return: `{name}` – {info}
         data.push_str(Self::META_CLASS_FOOTER);
         data = data.replace("{name}", &class.name);
         data = data.replace("{path}", path);
-        data = data.replace("{line}", &format!("{line}"));
+        data = data.replace("{line}", &format!("{}", line + 2));
 
         self.meta_file
             .write_all(data.as_bytes())
-            .expect("Meta::write_class(): Could not write to file.");
+            .expect("Meta::write_meta_class(): Could not write to file.");
     }
 
     fn write_meta_entry(&mut self, path: &str, _name: &str, line: usize) {
         let entry: Entry = serde_json::from_str(&self.comment_line).unwrap_or_else(|_| {
-            panic!("Meta::write_class(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
+            panic!("Meta::write_meta_entry(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
         });
 
         let mut data = Self::META_ENTRY_HEADER.to_string();
@@ -335,7 +348,7 @@ r#"* Return: `{name}` – {info}
         data.push_str(Self::META_ENTRY_FOOTER);
         data = data.replace("{name}", &entry.name);
         data = data.replace("{path}", path);
-        data = data.replace("{line}", &format!("{line}"));
+        data = data.replace("{line}", &format!("{}", line + 2));
 
         let mut data_member = String::new();
 
@@ -353,14 +366,14 @@ r#"* Return: `{name}` – {info}
 
         self.meta_file
             .write_all(data.as_bytes())
-            .expect("Meta::write_class(): Could not write to file.");
+            .expect("Meta::write_meta_entry(): Could not write to file.");
     }
 
     //================================================================
 
     fn write_wiki_class(&mut self, path: &str, _name: &str, line: usize) {
         let class: Class = serde_json::from_str(&self.comment_line).unwrap_or_else(|_| {
-            panic!("Wiki::write_class(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
+            panic!("Wiki::write_wiki_class(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
         });
 
         let mut data = Self::WIKI_CLASS_HEADER.to_string();
@@ -385,18 +398,18 @@ r#"* Return: `{name}` – {info}
 
         data.push_str(Self::WIKI_CLASS_FOOTER);
         data = data.replace("{path}", path);
-        data = data.replace("{line}", &format!("{line}"));
+        data = data.replace("{line}", &format!("{}", line + 2));
 
         self.wiki_file
             .as_mut()
             .unwrap()
             .write_all(data.as_bytes())
-            .expect("Wiki::write_class(): Could not write to file.");
+            .expect("Wiki::write_wiki_class(): Could not write to file.");
     }
 
     fn write_wiki_entry(&mut self, path: &str, _name: &str, line: usize) {
         let entry: Entry = serde_json::from_str(&self.comment_line).unwrap_or_else(|_| {
-            panic!("Wiki::write_class(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
+            panic!("Wiki::write_wiki_entry(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
         });
 
         let mut data = Self::WIKI_ENTRY_HEADER.to_string();
@@ -418,7 +431,9 @@ r#"* Return: `{name}` – {info}
 
         if let Some(entry_result) = &entry.result {
             for (i, result) in entry_result.iter().enumerate() {
-                data_result.push_str(&format!("\n  -> {} : {}", result.name, result.kind));
+                let i = if i == 0 { "->" } else { &format!("{i}.") };
+
+                data_result.push_str(&format!("\n  {} {} : {}", i, result.name, result.kind));
             }
         }
 
@@ -454,13 +469,13 @@ r#"* Return: `{name}` – {info}
         data.push_str(Self::WIKI_ENTRY_FOOTER);
         data = data.replace("{name}", &entry.name);
         data = data.replace("{path}", path);
-        data = data.replace("{line}", &format!("{line}"));
+        data = data.replace("{line}", &format!("{}", line + 2));
 
         self.wiki_file
             .as_mut()
             .unwrap()
             .write_all(data.as_bytes())
-            .expect("Wiki::write_class(): Could not write to file.");
+            .expect("Wiki::write_wiki_entry(): Could not write to file.");
     }
 }
 

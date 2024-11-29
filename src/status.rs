@@ -12,100 +12,22 @@ use serde::{Deserialize, Serialize};
 pub enum Status {
     Success(Script),
     Failure(Window, String),
-    Wizard(Window, Wizard),
-    Restart,
+    Wizard(Window),
     Closure,
 }
 
 impl Status {
     pub const FONT: &'static [u8] = include_bytes!("asset/font.ttf");
     pub const LOGO: &'static [u8] = include_bytes!("asset/logo.png");
-    pub const ICON: [&'static [u8]; 3] = [
-        include_bytes!("asset/icon_128.png"),
-        include_bytes!("asset/icon_256.png"),
-        include_bytes!("asset/icon_512.png"),
-    ];
+    pub const ICON: &'static [u8] = include_bytes!("asset/icon.png");
 
-    pub fn initialize() -> (RaylibHandle, RaylibThread, RaylibAudio) {
-        let window = ModuleWindow::default();
-
-        let (mut handle, thread) = raylib::init()
-            .title(&window.name)
-            .size(window.shape.0, window.shape.1)
-            .msaa_4x()
-            .build();
-
-        handle.set_window_state(
-            WindowState::default()
-                .set_fullscreen_mode(window.fullscreen)
-                .set_vsync_hint(window.sync)
-                .set_msaa(window.msaa)
-                .set_window_resizable(window.resize)
-                .set_window_hidden(window.hidden)
-                .set_window_minimized(window.minimize)
-                .set_window_maximized(window.maximize)
-                .set_window_undecorated(window.no_decor)
-                .set_window_unfocused(window.no_focus)
-                .set_window_topmost(window.on_front)
-                .set_window_always_run(window.run_hidden)
-                .set_window_transparent(window.draw_alpha)
-                .set_window_highdpi(window.high_scale),
-        );
-
-        //handle.set_target_fps(window.rate);
-        handle.set_target_fps(144);
-
-        let mut list: Vec<ffi::Image> = Vec::new();
-
-        if let Some(icon_list) = &window.icon {
-            for icon in icon_list {
-                match Image::load_image(icon) {
-                    Ok(icon) => {
-                        list.push(unsafe { icon.unwrap() });
-                    }
-                    Err(error) => {
-                        //Status::set_failure(self, error.to_string());
-                    }
-                }
-            }
-        } else {
-            for icon in Self::ICON {
-                match Image::load_image_from_mem(".png", icon) {
-                    Ok(icon) => {
-                        list.push(unsafe { icon.unwrap() });
-                    }
-                    Err(error) => {
-                        //Status::set_failure(self, error.to_string());
-                    }
-                }
-            }
-        }
-
-        handle.set_window_icons(&mut list);
-
-        if window.borderless {
-            handle.toggle_borderless_windowed();
-        }
-
-        if let Some(point) = window.point {
-            handle.set_window_position(point.0, point.1);
-        }
-
-        if let Some(shape) = window.shape_min {
-            handle.set_window_min_size(shape.0, shape.1);
-        }
-
-        if let Some(shape) = window.shape_max {
-            handle.set_window_max_size(shape.0, shape.1);
-        }
-
-        handle.set_window_opacity(window.alpha);
-
-        let audio = RaylibAudio::init_audio_device()
-            /*.map_err(|e| panic_window(&e.to_string()))*/
-            .unwrap();
-
-        (handle, thread, audio)
+    pub fn panic(text: &str) {
+        rfd::MessageDialog::new()
+            .set_level(rfd::MessageLevel::Error)
+            .set_title("Fatal Error")
+            .set_description(text)
+            .set_buttons(rfd::MessageButtons::Ok)
+            .show();
     }
 
     pub fn new(handle: &mut RaylibHandle, thread: &RaylibThread) -> Self {
@@ -120,9 +42,24 @@ impl Status {
                 InfoResult::Failure(info) => {
                     Self::Failure(Window::new(handle, thread), info.to_string())
                 }
-                InfoResult::Missing => Self::Wizard(Window::new(handle, thread), Wizard::default()),
+                InfoResult::Missing => Self::Wizard(Window::new(handle, thread)),
             },
         }
+    }
+
+    pub fn initialize() -> (RaylibHandle, RaylibThread, RaylibAudio) {
+        let (handle, thread) = raylib::init()
+            .msaa_4x()
+            .vsync()
+            .size(1024, 768)
+            .title("Quiver")
+            .build();
+
+        let audio = RaylibAudio::init_audio_device()
+            .map_err(|e| Self::panic(&e.to_string()))
+            .unwrap();
+
+        (handle, thread, audio)
     }
 
     pub fn success(
@@ -140,7 +77,7 @@ impl Status {
         let mut loop_error: Option<String> = None;
 
         while !handle.window_should_close() {
-            let mut draw = handle.begin_drawing(&thread);
+            let mut draw = handle.begin_drawing(thread);
             draw.clear_background(Color::WHITE);
 
             if let Err(error) = script.step() {
@@ -160,7 +97,7 @@ impl Status {
             ));
         }
 
-        None
+        Some(Status::Closure)
     }
 
     pub fn failure(
@@ -206,12 +143,11 @@ impl Status {
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         window: &mut Window,
-        wizard: &mut Wizard,
     ) -> Option<Status> {
         let mut draw = handle.begin_drawing(thread);
         draw.clear_background(Color::WHITE);
 
-        wizard.draw(&mut draw, window)
+        window.draw(&mut draw)
     }
 }
 

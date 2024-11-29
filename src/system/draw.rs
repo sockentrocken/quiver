@@ -1,14 +1,12 @@
-use crate::script::*;
-
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
 
 //================================================================
 
-pub fn set_global(lua: &Lua, table: &mlua::Table, system: &ModuleSystem) -> mlua::Result<()> {
-    draw_2d::set_global(lua, table, system)?;
-    draw_3d::set_global(lua, table, system)?;
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+    draw_2d::set_global(lua, table)?;
+    draw_3d::set_global(lua, table)?;
 
     Ok(())
 }
@@ -20,7 +18,7 @@ mod draw_2d {
     { "name": "quiver.draw_2d", "info": "The 2D drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, table: &mlua::Table, _system : &ModuleSystem) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw_2d = lua.create_table()?;
 
         draw_2d.set("begin", lua.create_function(self::begin)?)?;
@@ -132,7 +130,7 @@ mod draw_3d {
     { "name": "quiver.draw_3d", "info": "The 3D drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, table: &mlua::Table, _system : &ModuleSystem) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw_3d = lua.create_table()?;
 
         draw_3d.set("begin", lua.create_function(self::begin)?)?;

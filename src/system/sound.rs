@@ -1,8 +1,8 @@
-use crate::script::*;
-
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
+
+//================================================================
 
 type RLSound = ffi::Sound;
 
@@ -12,10 +12,10 @@ type RLSound = ffi::Sound;
 { "name": "quiver.sound", "info": "The sound API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, system: &ModuleSystem) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let sound = lua.create_table()?;
 
-    if system.sound { sound.set("new", lua.create_function(self::Sound::new)?)?; }
+    sound.set("new", lua.create_function(self::Sound::new)?)?;
 
     table.set("sound", sound)?;
 

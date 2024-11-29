@@ -1,4 +1,3 @@
-use crate::script::*;
 use crate::status::*;
 
 //================================================================
@@ -19,10 +18,10 @@ pub struct Window {
 impl Window {
     pub const COLOR_MAIN: Color = Color::new(255, 87, 34, 255);
     pub const COLOR_MAIN_HEAVY: Color = Color::new(230, 74, 25, 255);
-    pub const COLOR_MAIN_LIGHT: Color = Color::new(255, 204, 108, 255);
+    //pub const COLOR_MAIN_LIGHT: Color = Color::new(255, 204, 108, 255);
     pub const COLOR_TEXT: Color = Color::new(255, 255, 255, 255);
     pub const COLOR_TEXT_MAIN: Color = Color::new(33, 33, 33, 255);
-    pub const COLOR_TEXT_SIDE: Color = Color::new(117, 117, 117, 255);
+    //pub const COLOR_TEXT_SIDE: Color = Color::new(117, 117, 117, 255);
 
     //================================================================
 
@@ -50,6 +49,7 @@ impl Window {
 
     //================================================================
 
+    /*
     const TOGGLE_SHAPE: Vector2 = Vector2::new(24.0, 24.0);
     const TOGGLE_SHIFT: f32 = 8.0;
 
@@ -68,12 +68,66 @@ impl Window {
     const RECORD_SHAPE_MIN: Vector2 = Vector2::new(320.0, 4.0);
     const RECORD_SHAPE_CARET: Vector2 = Vector2::new(2.0, 16.0);
     const RECORD_SHIFT: f32 = 8.0;
+    */
 
     //================================================================
 
     const WIDGET_COUNT: usize = 64;
 
     //================================================================
+
+    const FILE_MAIN: &'static str = include_str!("asset/main.lua");
+    const FILE_META: &'static str = include_str!("asset/meta.lua");
+    const FILE_BASE: &'static str = include_str!("asset/base.lua");
+    const NAME_MAIN: &'static str = "main.lua";
+    const NAME_META: &'static str = "meta.lua";
+    const NAME_BASE: &'static str = "base.lua";
+
+    #[rustfmt::skip]
+    pub fn draw(&mut self, draw: &mut RaylibDrawHandle) -> Option<Status> {
+        self.begin();
+
+        let size = Vector2::new(draw.get_screen_width() as f32, draw.get_screen_height() as f32);
+
+        let card_y = 160.0;
+
+        self.card_sharp(
+            draw,
+            Rectangle::new(
+                0.0,
+                0.0,
+                size.x,
+                size.y - card_y,
+            ),
+            Window::COLOR_MAIN,
+        );
+
+        draw.draw_texture_v(
+            &self.logo,
+            Vector2::new(
+                size.x * 0.5 - self.logo.width as f32 * 0.5,
+                size.y * 0.5
+                    - self.logo.height as f32 * 0.5
+                    - card_y as f32 * 0.5,
+            ),
+            Color::WHITE,
+        );
+
+        self.point(Vector2::new(
+            20.0,
+            size.y - card_y + 24.0,
+        ));
+
+        if self.button(draw, "New Module") {
+
+        }
+        self.button(draw, "Load Module");
+        if self.button(draw, "Exit Quiver") {
+            return Some(Status::Closure);
+        }
+
+        None
+    }
 
     /// Create a new Window instance.
     pub fn new(handle: &mut RaylibHandle, thread: &RaylibThread) -> Self {
@@ -184,6 +238,7 @@ impl Window {
         state.click
     }
 
+    /*
     // Draw a toggle.
     pub fn toggle(&mut self, draw: &mut RaylibDrawHandle, text: &str, value: &mut bool) {
         let rectangle_max = Rectangle::new(
@@ -421,6 +476,7 @@ impl Window {
         self.point.y += Self::RECORD_SHAPE_MAX.y + Self::RECORD_SHIFT;
         self.count += 1;
     }
+    */
 
     fn font(&self, draw: &mut RaylibDrawHandle, text: &str, point: Vector2, color: Color) {
         draw.draw_text_ex(

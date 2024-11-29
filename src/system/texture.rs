@@ -1,8 +1,8 @@
-use crate::script::*;
-
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
+
+//================================================================
 
 type RLTexture = raylib::core::texture::Texture2D;
 
@@ -12,10 +12,10 @@ type RLTexture = raylib::core::texture::Texture2D;
 { "name": "quiver.texture", "info": "The texture API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, system: &ModuleSystem) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let texture = lua.create_table()?;
 
-    if system.texture { texture.set("new", lua.create_function(self::Texture::new)?)?; }
+    texture.set("new", lua.create_function(self::Texture::new)?)?;
 
     table.set("texture", texture)?;
 

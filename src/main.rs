@@ -2,42 +2,35 @@ mod script;
 mod status;
 mod system;
 mod window;
-mod wizard;
 
 //================================================================
 
 use crate::status::*;
-use raylib::prelude::*;
 
 //================================================================
 
-fn main() -> Result<(), String> {
+fn main() {
     let (mut handle, thread, _audio) = Status::initialize();
     let mut status = Status::new(&mut handle, &thread);
 
     while !handle.window_should_close() {
         match status {
             Status::Success(ref mut script) => {
-                if let Some(s) = Status::success(&mut handle, &thread, script) {
-                    status = s;
+                if let Some(state) = Status::success(&mut handle, &thread, script) {
+                    status = state;
                 }
             }
             Status::Failure(ref mut window, ref error) => {
-                if let Some(s) = Status::failure(&mut handle, &thread, window, error) {
-                    status = s;
+                if let Some(state) = Status::failure(&mut handle, &thread, window, error) {
+                    status = state;
                 }
             }
-            Status::Wizard(ref mut window, ref mut wizard) => {
-                if let Some(s) = Status::wizard(&mut handle, &thread, window, wizard) {
-                    status = s;
+            Status::Wizard(ref mut window) => {
+                if let Some(state) = Status::wizard(&mut handle, &thread, window) {
+                    status = state;
                 }
-            }
-            Status::Restart => {
-                status = Status::Closure;
             }
             Status::Closure => break,
         }
     }
-
-    Ok(())
 }

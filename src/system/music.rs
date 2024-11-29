@@ -1,8 +1,8 @@
-use crate::script::*;
-
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
+
+//================================================================
 
 type RLMusic = ffi::Music;
 
@@ -12,10 +12,10 @@ type RLMusic = ffi::Music;
 { "name": "quiver.music", "info": "The music API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, system: &ModuleSystem) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let music = lua.create_table()?;
 
-    if system.music { music.set("new", lua.create_function(self::Music::new)?)?; }
+    music.set("new", lua.create_function(self::Music::new)?)?;
 
     table.set("music", music)?;
 

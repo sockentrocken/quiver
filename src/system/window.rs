@@ -1,15 +1,18 @@
-use crate::script::*;
 use crate::system::*;
+
+//================================================================
 
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
 
+//================================================================
+
 /* class
 { "name": "quiver.window", "info": "The window API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, _system : &ModuleSystem) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let window = lua.create_table()?;
 
     window.set("set_fullscreen", lua.create_function(self::set_window_fullscreen)?)?;
