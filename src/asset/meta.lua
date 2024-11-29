@@ -13,6 +13,9 @@ quiver = {}
 ---Exit entry-point. Quiver will call this on module de-initialization.
 ---@alias quiver.exit fun()
 
+---Error entry-point. Quiver will call this on module error, with the error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
+---@alias quiver.error fun(error : string)
+
 ---The window API.
 ---
 --- ---
@@ -427,7 +430,7 @@ function quiver.draw_2d.draw_text(label,point,scale,color) end
 ---The 3D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L134)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L132)
 ---@class quiver.draw_3d
 quiver.draw_3d = {}
 
@@ -435,13 +438,13 @@ quiver.draw_3d = {}
 ---@param camera camera_3d # The 3D camera to use for drawing.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L160)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L157)
 function quiver.draw_3d.begin(camera) end
 
 ---Finalize the 3D draw mode.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L172)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L169)
 function quiver.draw_3d.close() end
 
 ---Draw a grid.
@@ -449,7 +452,7 @@ function quiver.draw_3d.close() end
 ---@param space number # The space shift of the grid.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L189)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L186)
 function quiver.draw_3d.draw_grid(slice,space) end
 
 ---Draw a cube.
@@ -458,7 +461,7 @@ function quiver.draw_3d.draw_grid(slice,space) end
 ---@param color color # The color of the cube.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L207)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L204)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a ball.
@@ -467,7 +470,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L252)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L229)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a 3D box.
@@ -475,7 +478,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L272)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L249)
 function quiver.draw_3d.draw_box_3(shape,color) end
 
 ---The input API.

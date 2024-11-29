@@ -89,6 +89,9 @@ quiver = {}
 ---Exit entry-point. Quiver will call this on module de-initialization.
 ---@alias quiver.exit fun()
 
+---Error entry-point. Quiver will call this on module error, with the error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
+---@alias quiver.error fun(error : string)
+
 "#;
 
     #[rustfmt::skip]

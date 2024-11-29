@@ -20,8 +20,8 @@ fn main() {
                     status = state;
                 }
             }
-            Status::Failure(ref mut window, ref error) => {
-                if let Some(state) = Status::failure(&mut handle, &thread, window, error) {
+            Status::Failure(ref mut window, ref mut script, ref error) => {
+                if let Some(state) = Status::failure(&mut handle, &thread, window, script, error) {
                     status = state;
                 }
             }

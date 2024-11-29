@@ -29,6 +29,10 @@ impl Window {
 
     //================================================================
 
+    const LOGO_SHAPE: f32 = 160.0;
+
+    //================================================================
+
     const CARD_ROUND_SHAPE: f32 = 0.25;
     const CARD_ROUND_COUNT: i32 = 4;
 
@@ -56,23 +60,22 @@ impl Window {
 
         self.begin();
 
-        let card = 160.0;
-        let draw_size = Vector2::new(
+        let draw_shape = Vector2::new(
             draw.get_screen_width() as f32,
             draw.get_screen_height() as f32,
         );
-        let logo_size = Vector2::new(self.logo.width as f32, self.logo.height as f32);
-        let card_shape = Rectangle::new(0.0, 0.0, draw_size.x, draw_size.y - card);
+        let logo_shape = Vector2::new(self.logo.width as f32, self.logo.height as f32);
         let logo_point = Vector2::new(
-            draw_size.x * 0.5 - logo_size.x * 0.5,
-            draw_size.y * 0.5 - logo_size.y * 0.5 - card * 0.5,
+            draw_shape.x * 0.5 - logo_shape.x * 0.5,
+            draw_shape.y * 0.5 - logo_shape.y * 0.5 - Self::LOGO_SHAPE * 0.5,
         );
+        let card_shape = Rectangle::new(0.0, 0.0, draw_shape.x, draw_shape.y - Self::LOGO_SHAPE);
 
         self.card_sharp(&mut draw, card_shape, Window::COLOR_PRIMARY_MAIN);
 
         draw.draw_texture_v(&self.logo, logo_point, Color::WHITE);
 
-        self.point(Vector2::new(20.0, draw_size.y - card + 24.0));
+        self.point(Vector2::new(20.0, draw_shape.y - Self::LOGO_SHAPE + 24.0));
 
         if self.button(&mut draw, "New Module") {
             let module = rfd::FileDialog::new().set_directory("/").pick_folder();
@@ -80,16 +83,9 @@ impl Window {
             if let Some(module) = module {
                 let module = module.display().to_string();
 
-                Script::dump(&module);
-
-                InfoEngine {
-                    safe: true,
-                    path: module,
-                }
-                .dump();
+                Script::new_module(&module);
 
                 drop(draw);
-
                 return Some(Status::new(handle, thread));
             }
         }
@@ -99,14 +95,9 @@ impl Window {
             if let Some(module) = module {
                 let module = module.display().to_string();
 
-                InfoEngine {
-                    safe: true,
-                    path: module,
-                }
-                .dump();
+                Script::load_module(&module);
 
                 drop(draw);
-
                 return Some(Status::new(handle, thread));
             }
         }
@@ -117,13 +108,10 @@ impl Window {
         None
     }
 
-    /// Create a new Window instance.
     pub fn new(handle: &mut RaylibHandle, thread: &RaylibThread) -> Self {
-        // Load the font.
         let font = handle
             .load_font_from_memory(thread, ".ttf", Status::FONT, Self::TEXT_SHAPE as i32, None)
             .expect("Window::new(): Could not load default font.");
-        // Load the logo.
         let logo = handle
             .load_texture_from_image(
                 thread,
@@ -142,18 +130,15 @@ impl Window {
         }
     }
 
-    /// Begin a new frame to reset the per-frame state.
     pub fn begin(&mut self) {
         self.point = Vector2::default();
         self.count = i32::default();
     }
 
-    // Change the current draw cursor.
     pub fn point(&mut self, point: Vector2) {
         self.point = point;
     }
 
-    /// Draw a sharp card.
     pub fn card_sharp(&self, draw: &mut RaylibDrawHandle, rectangle: Rectangle, color: Color) {
         draw.draw_rectangle_gradient_v(
             rectangle.x as i32,
@@ -167,7 +152,6 @@ impl Window {
         draw.draw_rectangle_rec(rectangle, color);
     }
 
-    /// Draw a round card.
     pub fn card_round(&self, draw: &mut RaylibDrawHandle, rectangle: Rectangle, color: Color) {
         draw.draw_rectangle_gradient_v(
             rectangle.x as i32,
@@ -186,14 +170,12 @@ impl Window {
         );
     }
 
-    /// Draw text.
     pub fn text(&mut self, draw: &mut RaylibDrawHandle, text: &str, color: Color) {
         self.font(draw, text, self.point, color);
 
         self.point.y += self.font_measure(text).y + Self::TEXT_SHIFT;
     }
 
-    /// Draw a button. Will return true on click.
     pub fn button(&mut self, draw: &mut RaylibDrawHandle, text: &str) -> bool {
         let rectangle = Rectangle::new(
             self.point.x,
@@ -259,10 +241,10 @@ pub mod widget {
             let hover = rectangle.check_collision_point_rec(draw.get_mouse_position());
 
             if hover {
-                if let None = window.focus {
-                    if draw.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
-                        window.focus = Some(window.count);
-                    }
+                if window.focus.is_none()
+                    && draw.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT)
+                {
+                    window.focus = Some(window.count);
                 }
 
                 state.hover = true;
@@ -299,7 +281,6 @@ pub mod widget {
         const HOVER_SPEED: f32 = 16.0;
         const FOCUS_SPEED: f32 = 16.0;
 
-        // Get a reference to widget data. WARNING: will panic on widget overflow.
         pub fn get(window: &Window) -> &Self {
             window
                 .data
@@ -307,7 +288,6 @@ pub mod widget {
                 .expect("Data::get(): Widget overflow.")
         }
 
-        // Get a mutable reference to widget data. WARNING: will panic on widget overflow.
         pub fn get_mutable(window: &mut Window) -> &mut Self {
             window
                 .data

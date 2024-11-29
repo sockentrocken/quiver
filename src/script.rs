@@ -7,12 +7,14 @@ use mlua::prelude::*;
 
 //================================================================
 
+#[derive(Clone)]
 pub struct Script {
     #[allow(dead_code)]
     pub lua: Lua,
     pub main: mlua::Function,
     pub step: mlua::Function,
     pub exit: mlua::Function,
+    pub error: Option<mlua::Function>,
 }
 
 impl Script {
@@ -25,8 +27,9 @@ impl Script {
     const CALL_MAIN: &'static str = "main";
     const CALL_STEP: &'static str = "step";
     const CALL_EXIT: &'static str = "exit";
+    const CALL_ERROR: &'static str = "error";
 
-    pub fn new(info: &InfoEngine) -> mlua::Result<Self> {
+    pub fn new(info: &Info) -> mlua::Result<Self> {
         let lua = {
             if info.safe {
                 Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())?
@@ -34,14 +37,10 @@ impl Script {
                 unsafe { Lua::unsafe_new_with(LuaStdLib::ALL, LuaOptions::new()) }
             }
         };
-
+        let global = lua.globals();
         let quiver = lua.create_table()?;
 
-        general::set_global(&lua, &quiver)?;
-
-        Self::standard(&lua, &quiver)?;
-
-        let global = lua.globals();
+        Self::system(&lua, &quiver)?;
 
         global.set("quiver", quiver)?;
 
@@ -49,25 +48,29 @@ impl Script {
         let path = package.get::<mlua::String>("path")?;
         package.set("path", format!("{path:?};{}/?.lua", info.path))?;
 
-        let file = std::fs::read(&format!("{}/{}", info.path, Self::NAME_MAIN))?;
-
-        lua.load(file).exec()?;
+        lua.load(&format!("require \"{}\"", Self::CALL_MAIN))
+            .exec()?;
 
         let quiver = global.get::<mlua::Table>("quiver")?;
 
-        let main = quiver.get::<mlua::Function>(Self::CALL_MAIN)?;
-        let step = quiver.get::<mlua::Function>(Self::CALL_STEP)?;
-        let exit = quiver.get::<mlua::Function>(Self::CALL_EXIT)?;
-
         Ok(Self {
             lua,
-            main,
-            step,
-            exit,
+            main: quiver.get::<mlua::Function>(Self::CALL_MAIN)?,
+            step: quiver.get::<mlua::Function>(Self::CALL_STEP)?,
+            exit: quiver.get::<mlua::Function>(Self::CALL_EXIT)?,
+            error: {
+                if quiver.contains_key(Self::CALL_ERROR)? {
+                    Some(quiver.get::<mlua::Function>(Self::CALL_ERROR)?)
+                } else {
+                    None
+                }
+            },
         })
     }
 
-    fn standard(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+    fn system(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+        general::set_global(lua, table)?;
+
         draw::set_global(lua, table)?;
         input::set_global(lua, table)?;
         window::set_global(lua, table)?;
@@ -80,7 +83,19 @@ impl Script {
         Ok(())
     }
 
-    pub fn main(&mut self) -> Result<(), String> {
+    fn dump(path: &str) {
+        std::fs::write(format!("{path}/{}", Self::NAME_MAIN), Self::FILE_MAIN)
+            .map_err(|e| Status::panic(&e.to_string()))
+            .unwrap();
+        std::fs::write(format!("{path}/{}", Self::NAME_BASE), Self::FILE_BASE)
+            .map_err(|e| Status::panic(&e.to_string()))
+            .unwrap();
+        std::fs::write(format!("{path}/{}", Self::NAME_META), Self::FILE_META)
+            .map_err(|e| Status::panic(&e.to_string()))
+            .unwrap();
+    }
+
+    pub fn main(&self) -> Result<(), String> {
         self.main.call::<()>(()).map_err(|e| e.to_string())?;
 
         Ok(())
@@ -98,15 +113,29 @@ impl Script {
         Ok(())
     }
 
-    pub fn dump(path: &str) {
-        std::fs::write(format!("{path}/{}", Self::NAME_MAIN), Self::FILE_MAIN)
-            .map_err(|e| Status::panic(&e.to_string()))
-            .unwrap();
-        std::fs::write(format!("{path}/{}", Self::NAME_BASE), Self::FILE_BASE)
-            .map_err(|e| Status::panic(&e.to_string()))
-            .unwrap();
-        std::fs::write(format!("{path}/{}", Self::NAME_META), Self::FILE_META)
-            .map_err(|e| Status::panic(&e.to_string()))
-            .unwrap();
+    pub fn error(&self, message: &str) -> Result<(), String> {
+        if let Some(error) = &self.error {
+            error.call::<()>(message).map_err(|e| e.to_string())?;
+        }
+
+        Ok(())
+    }
+
+    pub fn new_module(path: &str) {
+        Script::dump(&path);
+
+        Info {
+            safe: true,
+            path: path.to_string(),
+        }
+        .dump();
+    }
+
+    pub fn load_module(path: &str) {
+        Info {
+            safe: true,
+            path: path.to_string(),
+        }
+        .dump();
     }
 }
