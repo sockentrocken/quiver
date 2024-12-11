@@ -1,7 +1,10 @@
 use crate::system::*;
 
 use mlua::prelude::*;
-use rapier3d::{control::KinematicCharacterController, prelude::*};
+use rapier3d::{
+    control::{EffectiveCharacterMovement, KinematicCharacterController},
+    prelude::*,
+};
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -138,40 +141,149 @@ impl mlua::UserData for Rapier {
             Ok(())
         });
 
-        /* class
+        //================================================================
+
+        /* entry
         {
-            "name": "rigid_body_info",
-            "info": "Rigid body information.",
-            "field": [
-                { "name": "kind",          "info": "Rigid body type.",                          "kind": "rigid_body_type" },
-                { "name": "position",      "info": "Rigid body position.",                      "kind": "vector_3" },
-                { "name": "rotation",      "info": "Rigid body rotation.",                      "kind": "vector_3" },
-                { "name": "lin_velocity",  "info": "Rigid body lin. velocity.",                 "kind": "vector_3" },
-                { "name": "ang_velocity",  "info": "Rigid body ang. velocity.",                 "kind": "vector_3" },
-                { "name": "gravity_scale", "info": "Rigid body gravity scale.",                 "kind": "number"   },
-                { "name": "can_sleep",     "info": "Rigid body can sleep.",                     "kind": "boolean"  },
-                { "name": "continous",     "info": "Rigid body continous collision detection.", "kind": "boolean"  }
+            "name": "rapier:create_character_controller",
+            "info": "Create a character controller.",
+            "result": [
+                { "name": "character_controller", "info": "Character controller handle.", "kind": "table" }
             ]
         }
         */
-        #[derive(Deserialize, Serialize)]
-        struct RigidBodyInfo {
+        method.add_method_mut("create_character_controller", |lua, _, _: ()| {
+            lua.to_value(&KinematicCharacterController::default())
+        });
+
+        /* entry
+        {
+            "name": "rapier:move_character_controller",
+            "info": "Move the character controller.",
+            "member": [
+                { "name": "character_controller", "info": "Character controller handle.", "kind": "table"    },
+                { "name": "collider",             "info": "Collider handle.",             "kind": "table"    },
+                { "name": "value",                "info": "Translation.",                 "kind": "vector_3" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "move_character_controller",
+            |lua, this, (character_controller, collider, value): (LuaValue, LuaValue, LuaValue)| {
+                let character_controller: KinematicCharacterController =
+                    lua.from_value(character_controller)?;
+                let collider: ColliderHandle = lua.from_value(collider)?;
+                let value: general::Vector3 = lua.from_value(value)?;
+
+                let colli = this.collider_set.get(collider).unwrap();
+
+                let mut collisions = vec![];
+
+                let movement = character_controller.move_shape(
+                    1.0 / 60.0,
+                    &this.rigid_body_set,
+                    &this.collider_set,
+                    &this.query_pipeline,
+                    colli.shape(),
+                    colli.position(),
+                    vector![value.x, value.y, value.z],
+                    QueryFilter::default().exclude_collider(collider),
+                    |collision| collisions.push(collision),
+                );
+
+                character_controller.solve_character_collision_impulses(
+                    1.0 / 60.0,
+                    &mut this.rigid_body_set,
+                    &this.collider_set,
+                    &this.query_pipeline,
+                    colli.shape(),
+                    1.0,
+                    &collisions,
+                    QueryFilter::default().exclude_collider(collider),
+                );
+
+                let trans = colli.translation().clone();
+
+                let colli = this.collider_set.get_mut(collider).unwrap();
+
+                colli.set_translation(vector![
+                    trans.x + movement.translation.x,
+                    trans.y + movement.translation.y,
+                    trans.z + movement.translation.z
+                ]);
+
+                lua.to_value(&CharacterMove::from(movement))
+            },
+        );
+
+        #[derive(Serialize)]
+        pub struct CharacterMove {
+            translation: general::Vector3,
+            ground: bool,
+            slide: bool,
+        }
+
+        impl From<EffectiveCharacterMovement> for CharacterMove {
+            fn from(value: EffectiveCharacterMovement) -> Self {
+                Self {
+                    translation: general::Vector3::new(
+                        value.translation.x,
+                        value.translation.y,
+                        value.translation.z,
+                    ),
+                    ground: value.grounded,
+                    slide: value.is_sliding_down_slope,
+                }
+            }
+        }
+
+        //================================================================
+
+        #[derive(Deserialize)]
+        pub enum RigidBodyKind {
+            Fixed = 0,
+            Dynamic = 1,
+            Velocity = 2,
+            Position = 3,
+        }
+
+        /* class
+        {
+            "name": "rigid_body_info",
+            "info": "Rigid body info.",
+            "member": [
+                { "name": "kind",      "info": "Kind.",      "kind": "number"   },
+                { "name": "position",  "info": "Position.",  "kind": "vector_3" },
+                { "name": "rotation",  "info": "Rotation.",  "kind": "vector_3" },
+                { "name": "lin_vel",   "info": "Lin. vel.",  "kind": "vector_3" },
+                { "name": "ang_vel",   "info": "Ang. vel.",  "kind": "vector_3" },
+                { "name": "gravity",   "info": "Gravity.",   "kind": "number"   },
+                { "name": "can_sleep", "info": "Can sleep.", "kind": "boolean"  },
+                { "name": "continous", "info": "Continous.", "kind": "boolean"  }
+            ]
+        }
+        */
+        #[derive(Deserialize)]
+        pub struct RigidBodyInfo {
             kind: i32,
             position: general::Vector3,
-            rotation: general::Vector3,
-            lin_velocity: general::Vector3,
-            ang_velocity: general::Vector3,
-            gravity_scale: f32,
-            can_sleep: bool,
-            continous: bool,
+            //rotation: general::Vector3,
+            //lin_vel: general::Vector3,
+            //ang_vel: general::Vector3,
+            //gravity: f32,
+            //can_sleep: bool,
+            //continous: bool,
         }
 
         /* entry
         {
             "name": "rapier:create_rigid_body",
             "info": "Create a rigid body.",
-            "parameter": [
-                { "name": "rigid_body", "info": "Rigid body information.", "kind": "rigid_body_info" }
+            "member": [
+                { "name": "kind", "info": "Rigid body kind (fixed, dynamic, velocity-based, position-based).", "kind": "rigid_body_info" }
+            ],
+            "result": [
+                { "name": "body", "info": "Rigid body handle.", "kind": "table" }
             ]
         }
         */
@@ -184,200 +296,165 @@ impl mlua::UserData for Rapier {
                     1 => RigidBodyBuilder::dynamic(),
                     2 => RigidBodyBuilder::kinematic_velocity_based(),
                     3 => RigidBodyBuilder::kinematic_position_based(),
-                    _ => todo!(),
+                    _ => RigidBodyBuilder::fixed(),
                 }
-            };
+            }
+            .translation(vector![info.position.x, info.position.y, info.position.z])
+            //.rotation(vector![info.position.x, info.position.y, info.position.z])
+            //.linvel(vector![info.position.x, info.position.y, info.position.z])
+            //.angvel(vector![info.position.x, info.position.y, info.position.z])
+            //.gravity_scale(info.gravity)
+            //.can_sleep(info.can_sleep)
+            //.ccd_enabled(info.continous)
+            .build();
 
-            rigid_body.translation(info.position);
-
-            Ok(())
-        });
-
-        /* entry
-        { "name": "rapier:create_ground", "info": "" }
-        */
-        method.add_method_mut("create_ground", |_, this, ()| {
-            let collider = ColliderBuilder::cuboid(10.0, 0.1, 10.0).build();
-            this.collider_set.insert(collider);
-
-            Ok(())
-        });
-
-        /* entry
-        { "name": "rapier:create_sphere", "info": "" }
-        */
-        method.add_method_mut("create_sphere", |_, this, ()| {
-            let rigid_body = RigidBodyBuilder::dynamic()
-                .translation(vector![0.0, 10.0, 0.0])
-                .build();
-            let collider = ColliderBuilder::ball(0.5).restitution(0.7).build();
-            let ball_body_handle = this.rigid_body_set.insert(rigid_body);
-            this.collider_set.insert_with_parent(
-                collider,
-                ball_body_handle,
-                &mut this.rigid_body_set,
-            );
-
-            Ok(())
+            lua.to_value(&this.rigid_body_set.insert(rigid_body))
         });
 
         /* entry
         {
-            "name": "rapier:create_convex_hull",
-            "info": "",
-            "result": [
-                { "name": "vertex", "info": "The vertex list to use for the convex hull.", "kind": "table" }
-            ]
-        }
-        */
-        method.add_method_mut(
-            "create_convex_hull_dynamic",
-            |lua, this, (path, dynamic): (String, bool)| unsafe {
-                let rigid_body = RigidBodyBuilder::dynamic()
-                    .translation(vector![0.0, 10.0, 0.0])
-                    .rotation(vector![45.0, 0.0, 0.0])
-                    .build();
-                let handle = this.rigid_body_set.insert(rigid_body);
-
-                let name = std::ffi::CString::new(path.clone())
-                    .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-                let data = ffi::LoadModel(name.as_ptr());
-
-                let model = Model::from_raw(data);
-
-                for mesh in model.meshes() {
-                    let mut work: Vec<Point<f32>> = Vec::new();
-
-                    for vertex in mesh.vertices() {
-                        work.push(Point::new(vertex.x, vertex.y, vertex.z));
-                    }
-
-                    if let Some(collider) = ColliderBuilder::convex_hull(&work) {
-                        this.collider_set.insert_with_parent(
-                            collider,
-                            handle,
-                            &mut this.rigid_body_set,
-                        );
-                    } else {
-                        return Err(mlua::Error::RuntimeError(
-                            "Failed to generate a convex hull".to_string(),
-                        ));
-                    }
-                }
-
-                Ok(())
-            },
-        );
-
-        /* entry
-        {
-            "name": "rapier:create_convex_hull",
-            "info": "",
-            "result": [
-                { "name": "vertex", "info": "The vertex list to use for the convex hull.", "kind": "table" }
-            ]
-        }
-        */
-        method.add_method_mut(
-            "create_convex_hull",
-            |lua, this, (path, dynamic): (String, bool)| unsafe {
-                let name = std::ffi::CString::new(path.clone())
-                    .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-                let data = ffi::LoadModel(name.as_ptr());
-
-                let model = Model::from_raw(data);
-
-                for mesh in model.meshes() {
-                    let mut work: Vec<Point<f32>> = Vec::new();
-
-                    for vertex in mesh.vertices() {
-                        work.push(Point::new(vertex.x, vertex.y, vertex.z));
-                    }
-
-                    if let Some(collider) = ColliderBuilder::convex_hull(&work) {
-                        this.collider_set.insert(collider);
-                    } else {
-                        return Err(mlua::Error::RuntimeError(
-                            "Failed to generate a convex hull".to_string(),
-                        ));
-                    }
-                }
-
-                Ok(())
-            },
-        );
-
-        /* entry
-        {
-            "name": "rapier:create_controller",
-            "info": "Create a kinematic character controller.",
-            "result": [
-                { "name": "index",      "info": "The handle to the collider.",   "kind": "table" },
-                { "name": "controller", "info": "The handle to the controller.", "kind": "table" }
-            ]
-        }
-        */
-        method.add_method_mut("create_controller", |lua, this, ()| {
-            let collider = ColliderBuilder::cuboid(1.0, 2.0, 1.0)
-                .translation(vector![0.0, 10.0, 0.0])
-                .build();
-            let character_controller = KinematicCharacterController::default();
-
-            let r_1 = lua.to_value(&this.collider_set.insert(collider))?;
-            let r_2 = lua.to_value(&character_controller)?;
-
-            Ok((r_1, r_2))
-        });
-
-        /* entry
-        {
-            "name": "rapier:move_controller",
-            "info": "Move a kinematic character controller.",
+            "name": "rapier:rigid_body_lin_vel",
+            "info": "Set a rigid body's linear velocity.",
             "member": [
-                { "name": "index",      "info": "The handle to the collider.",   "kind": "table"    },
-                { "name": "controller", "info": "The handle to the controller.", "kind": "table"    },
-                { "name": "point",      "info": "The point to move to.",         "kind": "vector_3" }
+                { "name": "handle", "info": "Rigid body handle.", "kind": "table"    },
+                { "name": "value",  "info": "Linear velocity.",   "kind": "vector_3" }
             ]
         }
         */
         method.add_method_mut(
-            "move_controller",
-            |lua, this, (index, character, point): (LuaValue, LuaValue, LuaValue)| {
-                let index: ColliderHandle = lua.from_value(index)?;
-                let character: KinematicCharacterController = lua.from_value(character)?;
-                let point: general::Vector3 = lua.from_value(point)?;
-                let object = this.collider_set.get(index).unwrap();
+            "rigid_body_lin_vel",
+            |lua, this, (handle, value): (LuaValue, LuaValue)| {
+                let handle: RigidBodyHandle = lua.from_value(handle)?;
+                let handle = this.rigid_body_set.get_mut(handle).unwrap();
+                let value: general::Vector3 = lua.from_value(value)?;
 
-                // Calculate the possible movement.
-                let corrected_movement = character.move_shape(
-                    1.0 / 60.0,
-                    &this.rigid_body_set,
-                    &this.collider_set,
-                    &this.query_pipeline,
-                    object.shape(),
-                    object.position(),
-                    vector![point.x, point.y, point.z],
-                    QueryFilter::default().exclude_collider(index),
-                    |_| {},
-                );
+                handle.set_linvel(vector![value.x, value.y, value.z], true);
 
-                let mut object = this.collider_set.get_mut(index).unwrap();
+                Ok(())
+            },
+        );
 
-                object.set_position(
-                    vector![
-                        object.position().translation.x + corrected_movement.translation.x,
-                        object.position().translation.y + corrected_movement.translation.y,
-                        object.position().translation.z + corrected_movement.translation.z,
-                    ]
-                    .into(),
-                );
+        #[derive(Deserialize)]
+        pub enum ColliderKind {
+            Ball(f32),
+            Cuboid(f32, f32, f32),
+            ConvexMesh(Vec<general::Vector3>, Vec<f32>),
+        }
 
-                lua.to_value(&general::Vector3::new(
-                    corrected_movement.translation.x,
-                    corrected_movement.translation.y,
-                    corrected_movement.translation.z,
+        /* class
+        {
+            "name": "collider_info",
+            "info": "Collider info.",
+            "member": [
+                { "name": "kind",      "info": "Kind.",     "kind": "table"    },
+                { "name": "position",  "info": "Position.", "kind": "vector_3" },
+                { "name": "rotation",  "info": "Rotation.", "kind": "vector_3" },
+                { "name": "density",   "info": "Density.",  "kind": "number"   },
+                { "name": "friction",  "info": "Friction.", "kind": "number"   },
+                { "name": "trigger",   "info": "Trigger.",  "kind": "boolean"  }
+            ]
+        }
+        */
+        #[derive(Deserialize)]
+        pub struct ColliderInfo {
+            kind: ColliderKind,
+            position: general::Vector3,
+            //rotation: general::Vector3,
+            //density: f32,
+            //friction: f32,
+            //sensor: bool,
+        }
+
+        /* entry
+        {
+            "name": "rapier:get_collider",
+            "info": "Get a collider.",
+            "member": [
+                { "name": "handle", "info": "Collider handle.", "kind": "table" }
+            ],
+            "result": [
+                { "name": "collider", "info": "Collider.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method_mut("get_collider", |lua, this, handle: LuaValue| {
+            let handle: ColliderHandle = lua.from_value(handle)?;
+
+            lua.to_value(&this.collider_set.get(handle))
+        });
+
+        /* entry
+        {
+            "name": "rapier:create_collider",
+            "info": "Create a collider.",
+            "member": [
+                { "name": "info", "info": "Collider info.", "kind": "collider_info" }
+            ],
+            "result": [
+                { "name": "collider", "info": "Collider handle.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method_mut("create_collider", |lua, this, info: LuaValue| {
+            let info: ColliderInfo = lua.from_value(info)?;
+
+            let collider = {
+                match info.kind {
+                    ColliderKind::Ball(x) => ColliderBuilder::ball(x),
+                    ColliderKind::Cuboid(x, y, z) => ColliderBuilder::cuboid(x, y, z),
+                    ColliderKind::ConvexMesh(vertex, index) => {
+                        todo!()
+                    }
+                }
+            }
+            .restitution(0.75)
+            .translation(vector![info.position.x, info.position.y, info.position.z])
+            //.rotation(info.rotation)
+            //.density(info.density)
+            //.friction(info.friction)
+            //.sensor(info.sensor)
+            .build();
+
+            lua.to_value(&this.collider_set.insert(collider))
+        });
+
+        /* entry
+        {
+            "name": "rapier:create_collider_parent",
+            "info": "Create a collider with a parent.",
+            "member": [
+                { "name": "info",   "info": "Collider info.",              "kind": "table" },
+                { "name": "parent", "info": "Collider rigid body parent.", "kind": "table" }
+            ],
+            "result": [
+                { "name": "collider", "info": "Collider handle.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "create_collider_parent",
+            |lua, this, (info, parent): (LuaValue, LuaValue)| {
+                let info: ColliderInfo = lua.from_value(info)?;
+                let parent: RigidBodyHandle = lua.from_value(parent)?;
+
+                let collider = {
+                    match info.kind {
+                        ColliderKind::Ball(x) => ColliderBuilder::ball(x),
+                        ColliderKind::Cuboid(x, y, z) => ColliderBuilder::cuboid(x, y, z),
+                    }
+                }
+                .restitution(0.75)
+                //.translation(info.position)
+                //.rotation(info.rotation)
+                //.density(info.density)
+                //.friction(info.friction)
+                //.sensor(info.sensor)
+                .build();
+
+                lua.to_value(&this.collider_set.insert_with_parent(
+                    collider,
+                    parent,
+                    &mut this.rigid_body_set,
                 ))
             },
         );

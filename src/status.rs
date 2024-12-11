@@ -9,9 +9,9 @@ use serde::{Deserialize, Serialize};
 //================================================================
 
 pub enum Status {
+    Missing(Window),
     Success(Script),
     Failure(Window, Option<Script>, String),
-    Missing(Window),
     Closure,
 }
 
@@ -36,8 +36,9 @@ impl Status {
         }
     }
 
-    pub fn initialize() -> (RaylibHandle, RaylibThread, RaylibAudio) {
+    pub fn window() -> (RaylibHandle, RaylibThread, RaylibAudio) {
         let (mut handle, thread) = raylib::init()
+            .resizable()
             .msaa_4x()
             .vsync()
             .size(1024, 768)
@@ -55,6 +56,15 @@ impl Status {
             .unwrap();
 
         (handle, thread, audio)
+    }
+
+    #[rustfmt::skip]
+    pub fn missing(
+        handle: &mut RaylibHandle,
+        thread: &RaylibThread,
+        window: &mut Window,
+    ) -> Option<Status> {
+        window.draw(handle, thread)
     }
 
     pub fn success(
@@ -157,15 +167,6 @@ impl Status {
         } else {
             None
         }
-    }
-
-    #[rustfmt::skip]
-    pub fn missing(
-        handle: &mut RaylibHandle,
-        thread: &RaylibThread,
-        window: &mut Window,
-    ) -> Option<Status> {
-        window.draw(handle, thread)
     }
 
     pub fn panic(text: &str) {

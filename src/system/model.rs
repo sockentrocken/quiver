@@ -1,6 +1,9 @@
 use mlua::prelude::*;
 use raylib::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::ffi::CString;
+
+use super::general;
 
 //================================================================
 
@@ -63,8 +66,19 @@ impl Drop for Model {
     }
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct Mesh {
+    vertex: Vec<general::Vector3>,
+}
+
 impl mlua::UserData for Model {
-    fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
+    fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
+        field.add_field_method_get("mesh", |_, this| unsafe {
+            let mut mesh: Vec<Mesh> = Vec::new();
+
+            Ok((1))
+        });
+    }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
         /* entry

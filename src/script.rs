@@ -34,6 +34,15 @@ impl Script {
             }
         };
         let global = lua.globals();
+
+        global.set(
+            "print",
+            lua.create_function(|_, text: String| {
+                println!("{}", text);
+                Ok(())
+            })?,
+        )?;
+
         let quiver = lua.create_table()?;
 
         Self::system(&lua, &quiver)?;

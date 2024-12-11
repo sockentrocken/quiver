@@ -272,8 +272,8 @@ r#"* Return: `{name}` – {info}
     }
 
     fn write_meta_class(&mut self, path: &str, _name: &str, line: usize) {
-        let class: Class = serde_json::from_str(&self.comment_line).unwrap_or_else(|_| {
-            panic!("Meta::write_meta_class(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
+        let class: Class = serde_json::from_str(&self.comment_line).unwrap_or_else(|e| {
+            panic!("Meta::write_meta_class(): Could not deserialize class. Error: {e}, Path: {path}, Line: {line}, Text: {}", self.comment_line)
         });
 
         let mut data = Self::META_CLASS_HEADER.to_string();
@@ -312,8 +312,8 @@ r#"* Return: `{name}` – {info}
     }
 
     fn write_meta_entry(&mut self, path: &str, _name: &str, line: usize) {
-        let entry: Entry = serde_json::from_str(&self.comment_line).unwrap_or_else(|_| {
-            panic!("Meta::write_meta_entry(): Could not deserialize class. Path: {path}, Line: {line}, Text: {}", self.comment_line)
+        let entry: Entry = serde_json::from_str(&self.comment_line).unwrap_or_else(|e| {
+            panic!("Meta::write_meta_entry(): Could not deserialize entry. Error: {e}, Path: {path}, Line: {line}, Text: {}", self.comment_line)
         });
 
         let mut data = Self::META_ENTRY_HEADER.to_string();
