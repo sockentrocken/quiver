@@ -6,43 +6,42 @@ use std::io::{BufRead, BufReader, BufWriter, Write};
 
 const PATH_SYSTEM: &str = "src/system/";
 
-/// This function is responsible for parsing the src/system/ folder and finding every special comment
-/// in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
+// this function is responsible for parsing the src/system/ folder and finding every special comment in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
 fn main() {
-    // Create parser object.
+    // create parser object.
     let mut parser = Parser::new();
 
-    // Read every file in the API directory.
+    // read every file in the API directory.
     for file in std::fs::read_dir(PATH_SYSTEM).unwrap() {
-        // Convert to string.
+        // convert to string.
         let file = file.expect("build.rs: Could not unwrap file.");
 
-        // Get file path.
+        // get file path.
         let path = file.path();
         let path = path
             .to_str()
             .expect("build.rs: Could not convert file path to string.");
 
-        // Get file name.
+        // get file name.
         let name = file.file_name();
         let name = name
             .to_str()
             .expect("build.rs: Could not convert file name to string.");
 
-        // Don't parse a mod.rs file.
+        // don't parse a mod.rs file.
         if name == "mod.rs" {
             continue;
         }
 
-        // Open file.
+        // open file.
         let file = File::open(path)
             .unwrap_or_else(|_| panic!("build.rs: Could not open file \"{path}\"."));
         let file = BufReader::new(file).lines();
 
-        // Create GitHub wiki documentation file.
+        // create GitHub wiki documentation file.
         parser.new_wiki(name);
 
-        // For each line in the file...
+        // for each line in the file...
         for (i, line) in file.map_while(Result::ok).enumerate() {
             parser.parse(path, name, &line, i);
             //wiki.parse(path, name, &line, i);
@@ -53,19 +52,12 @@ fn main() {
 //================================================================
 
 struct Parser {
-    /// True if currently writing a class comment.
     class: bool,
-    /// True if currently writing a entry comment.
     entry: bool,
-    /// True if currently in example code.
     example: bool,
-    /// Working buffer for the current comment.
     comment_line: String,
-    /// Working buffer for the current example.
     example_line: String,
-    /// The wiki file.
     wiki_file: Option<BufWriter<File>>,
-    /// The meta file.
     meta_file: BufWriter<File>,
 }
 
@@ -189,7 +181,7 @@ r#"* Return: `{name}` – {info}
 
 "#;
 
-    /// Create a new instance.
+    // create a new instance.
     pub fn new() -> Self {
         let meta_file = File::create(format!("src/asset/{}", Self::META_FILE))
             .unwrap_or_else(|_| panic!("build.rs: Could not create \"{}\" file.", Self::META_FILE));
@@ -210,7 +202,7 @@ r#"* Return: `{name}` – {info}
         }
     }
 
-    /// Create a new instance.
+    // create a new instance.
     pub fn new_wiki(&mut self, name: &str) {
         let name = &name[0..name.len() - 3];
 
@@ -221,24 +213,24 @@ r#"* Return: `{name}` – {info}
         self.wiki_file = Some(file);
     }
 
-    /// Parse a line from a file.
+    // parse a line from a file.
     pub fn parse(&mut self, path: &str, name: &str, text: &str, line: usize) {
         let text = text.trim();
 
         if text == "*/" {
-            // We were in class mode; write a class out.
+            // we were in class mode; write a class out.
             if self.class {
                 self.write_meta_class(path, name, line);
                 self.write_wiki_class(path, name, line);
             }
 
-            // We were in entry mode; write a entry out.
+            // we were in entry mode; write a entry out.
             if self.entry {
                 self.write_meta_entry(path, name, line);
                 self.write_wiki_entry(path, name, line);
             }
 
-            // Reset mode.
+            // reset mode.
             self.class = false;
             self.entry = false;
             self.example = false;
@@ -246,28 +238,28 @@ r#"* Return: `{name}` – {info}
             self.example_line.clear();
         }
 
-        // We are currently writing an example comment. Push a new line.
+        // we are currently writing an example comment. push a new line.
         if self.example {
             self.example_line.push_str(text);
             self.example_line.push('\n');
         }
 
-        // Example comment. Enable example mode.
+        // example comment. enable example mode.
         if text == "example" {
             self.example = true;
         }
 
-        // We are currently writing either a class or an entry comment, and we are not currently writing an example comment. Push a new line.
+        // we are currently writing either a class or an entry comment, and we are not currently writing an example comment. push a new line.
         if (self.class || self.entry) && !self.example {
             self.comment_line.push_str(text);
         }
 
-        // Class comment. Enable class mode.
+        // class comment. enable class mode.
         if text == "/* class" {
             self.class = true;
         }
 
-        // Entry comment. Enable entry mode.
+        // entry comment. enable entry mode.
         if text == "/* entry" {
             self.entry = true;
         }
@@ -491,7 +483,7 @@ r#"* Return: `{name}` – {info}
 
 //================================================================
 
-/// A representation of a Lua class.
+// a representation of a Lua class.
 #[derive(Deserialize, Serialize)]
 struct Class {
     pub version: String,
@@ -500,7 +492,7 @@ struct Class {
     pub member: Option<Vec<Variable>>,
 }
 
-/// A representation of a Lua function.
+// a representation of a Lua function.
 #[derive(Deserialize, Serialize)]
 struct Entry {
     pub version: String,
@@ -510,7 +502,7 @@ struct Entry {
     pub result: Option<Vec<Variable>>,
 }
 
-/// A representation of a Lua variable.
+// a representation of a Lua variable.
 #[derive(Deserialize, Serialize)]
 struct Variable {
     pub name: String,

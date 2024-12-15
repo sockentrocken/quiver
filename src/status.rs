@@ -20,23 +20,30 @@ impl Status {
     pub const LOGO: &'static [u8] = include_bytes!("asset/logo.png");
     pub const ICON: &'static [u8] = include_bytes!("asset/icon.png");
 
+    // get a new status instance.
     #[rustfmt::skip]
     pub fn new(handle: &mut RaylibHandle, thread: &RaylibThread) -> Self {
         let info = Info::new();
 
         match info {
+            // info does exist and did not fail to read, create script instance.
             Ok(info) => match Script::new(&info) {
+                // script is OK, run Quiver normally.
                 Ok(script)  => Self::Success(script),
+                // script is  not OK, go-to failure state.
                 Err(script) => Self::Failure(Window::new(handle, thread), None, script.to_string()),
             },
             Err(info) => match info {
+                // info does exist, but there was an error parsing.
                 InfoResult::Failure(info) => Self::Failure(Window::new(handle, thread), None, info.to_string()),
-                InfoResult::Missing       => Self::Missing(Window::new(handle, thread)),
+                // info does not exist.
+                InfoResult::Missing => Self::Missing(Window::new(handle, thread)),
             },
         }
     }
 
     pub fn window() -> (RaylibHandle, RaylibThread, RaylibAudio) {
+        // create RL context.
         let (mut handle, thread) = raylib::init()
             .resizable()
             .msaa_4x()
@@ -45,28 +52,30 @@ impl Status {
             .title("Quiver")
             .build();
 
-        let icon = Image::load_image_from_mem(".png", Self::ICON)
-            .map_err(|e| Self::panic(&e.to_string()))
-            .unwrap();
-
-        handle.set_window_icon(icon);
-
+        // create RL audio context.
         let audio = RaylibAudio::init_audio_device()
             .map_err(|e| Self::panic(&e.to_string()))
             .unwrap();
 
+        // load default Quiver icon.
+        let icon = Image::load_image_from_mem(".png", Self::ICON)
+            .map_err(|e| Self::panic(&e.to_string()))
+            .unwrap();
+        handle.set_window_icon(icon);
+
         (handle, thread, audio)
     }
 
-    #[rustfmt::skip]
+    // missing state, info_quiver.json does not exist.
     pub fn missing(
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         window: &mut Window,
     ) -> Option<Status> {
-        window.draw(handle, thread)
+        window.missing(handle, thread)
     }
 
+    // success state.
     pub fn success(
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
@@ -79,11 +88,15 @@ impl Status {
                     unsafe {
                         ffi::PollInputEvents();
                     }
+
+                    // return true, reload Quiver.
                     Some(Status::new(handle, thread))
                 } else {
+                    // return false, close Quiver.
                     Some(Status::Closure)
                 }
             }
+            // error, go to failure state.
             Err(result) => Some(Status::Failure(
                 Window::new(handle, thread),
                 Some(script.clone()),
@@ -92,6 +105,7 @@ impl Status {
         }
     }
 
+    // failure state.
     pub fn failure(
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
@@ -99,6 +113,7 @@ impl Status {
         script: &Option<Script>,
         text: &str,
     ) -> Option<Status> {
+        // a script instance is available, and a crash-handler was set in Lua.
         if let Some(script) = script {
             if script.fail.is_some() {
                 match script.fail(text) {
@@ -108,67 +123,28 @@ impl Status {
                             unsafe {
                                 ffi::PollInputEvents();
                             }
+
+                            // return true, reload Quiver.
                             return Some(Status::new(handle, thread));
                         } else {
+                            // return false, close Quiver.
                             return Some(Status::Closure);
                         }
                     }
+                    // an error in the crash-handler...just panic to avoid causing an infinite loop.
                     Err(result) => {
-                        return Some(Status::Failure(
-                            Window::new(handle, thread),
-                            Some(script.clone()),
-                            result.to_string(),
-                        ))
+                        Status::panic(&result);
+                        return None;
                     }
                 }
             }
         }
 
-        let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::WHITE);
-
-        window.begin();
-
-        let draw_shape = Vector2::new(
-            draw.get_screen_width() as f32,
-            draw.get_screen_height() as f32,
-        );
-        let card_shape = Rectangle::new(0.0, 0.0, draw_shape.x, 48.0);
-
-        window.card_sharp(&mut draw, card_shape, Window::COLOR_PRIMARY_MAIN);
-
-        window.point(Vector2::new(20.0, 12.0));
-        window.text(&mut draw, "Fatal Error", Window::COLOR_TEXT);
-
-        window.point(Vector2::new(20.0, 72.0));
-        window.text(&mut draw, text, Color::BLACK);
-
-        window.point(Vector2::new(20.0, draw_shape.y - 136.0));
-        if window.button(&mut draw, "Load Module") {
-            drop(draw);
-            return Some(Status::new(handle, thread));
-        }
-        if window.button(&mut draw, "Copy Report") {
-            let text =
-                std::ffi::CString::new(text).expect("Status::failure(): Could not unwrap text.");
-
-            unsafe {
-                ffi::SetClipboardText(text.as_ptr());
-            }
-        }
-        if window.button(&mut draw, "Exit Quiver") {
-            return Some(Status::Closure);
-        }
-
-        drop(draw);
-
-        if handle.window_should_close() {
-            Some(Status::Closure)
-        } else {
-            None
-        }
+        // no script instance is available, or a custom crash-handler has not been set.
+        window.failure(handle, thread, text)
     }
 
+    // panic window, useful for when no RL context is available to display an error.
     pub fn panic(text: &str) {
         rfd::MessageDialog::new()
             .set_level(rfd::MessageLevel::Error)
@@ -176,8 +152,11 @@ impl Status {
             .set_description(text)
             .set_buttons(rfd::MessageButtons::Ok)
             .show();
+        panic!("{}", text);
     }
 }
+
+//================================================================
 
 #[derive(Debug)]
 pub enum InfoResult {
@@ -192,22 +171,28 @@ pub struct Info {
 }
 
 impl Info {
-    pub const FILE_INFO: &'static str = "info.json";
+    pub const FILE_INFO: &'static str = "info_quiver.json";
 
     pub fn new() -> Result<Self, InfoResult> {
+        // get the path to the info file.
         let data = std::path::Path::new(Self::FILE_INFO);
 
+        // file does exist, read it.
         if data.is_file() {
+            // read file.
             let file = std::fs::read_to_string(data)
                 .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))?;
+            // return.
             serde_json::from_str(&file)
                 .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))
         } else {
+            // file does not exist, return missing.
             Err(InfoResult::Missing)
         }
     }
 
     pub fn dump(&self) {
+        // write the info file out as a .json.
         std::fs::write(
             Self::FILE_INFO,
             serde_json::to_string_pretty(self)
