@@ -104,7 +104,7 @@ r#"---
 "#;
 
     #[rustfmt::skip]
-    const META_FIELD: &'static str =
+    const META_MEMBER: &'static str =
 r#"---@field {name} {kind} # {info}
 "#;
 
@@ -136,6 +136,7 @@ r#"---@return {kind} {name} # {info}
     #[rustfmt::skip]
     const WIKI_CLASS_HEADER: &'static str =
 r#"## {name}
+*Available since version: {version}*
 
 ```lua
 {code}
@@ -152,7 +153,7 @@ r#"[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/{p
 "#;
 
     #[rustfmt::skip]
-    const WIKI_FIELD: &'static str =
+    const WIKI_MEMBER: &'static str =
 r#"* Field: `{name}` – {info}
 
 "#;
@@ -160,6 +161,7 @@ r#"* Field: `{name}` – {info}
     #[rustfmt::skip]
     const WIKI_ENTRY_HEADER: &'static str =
 r#"## {name}
+*Available since version: {version}*
 
 ```lua
 {code}
@@ -247,7 +249,7 @@ r#"* Return: `{name}` – {info}
         // We are currently writing an example comment. Push a new line.
         if self.example {
             self.example_line.push_str(text);
-            self.example_line.push_str("\n");
+            self.example_line.push('\n');
         }
 
         // Example comment. Enable example mode.
@@ -293,7 +295,7 @@ r#"* Return: `{name}` – {info}
 
         if let Some(class_member) = class.member {
             for member in class_member {
-                let field = Self::META_FIELD;
+                let field = Self::META_MEMBER;
                 let field = field.replace("{name}", &member.name);
                 let field = field.replace("{kind}", &member.kind);
                 let field = field.replace("{info}", &member.info);
@@ -384,6 +386,7 @@ r#"* Return: `{name}` – {info}
 
         let mut data = Self::WIKI_CLASS_HEADER.to_string();
         data = data.replace("{name}", &class.name);
+        data = data.replace("{version}", &class.version);
         data = data.replace("{code}", &format!("{} = {{}}", class.name));
         data = data.replace("{info}", &class.info);
 
@@ -395,7 +398,7 @@ r#"* Return: `{name}` – {info}
 
         if let Some(class_member) = class.member {
             for member in class_member {
-                let field = Self::WIKI_FIELD;
+                let field = Self::WIKI_MEMBER;
                 let field = field.replace("{name}", &member.name);
                 let field = field.replace("{info}", &member.info);
                 data.push_str(&field);
@@ -419,6 +422,7 @@ r#"* Return: `{name}` – {info}
         });
 
         let mut data = Self::WIKI_ENTRY_HEADER.to_string();
+        data = data.replace("{version}", &entry.version);
         data = data.replace("{info}", &entry.info);
 
         let mut data_member = String::new();
@@ -490,6 +494,7 @@ r#"* Return: `{name}` – {info}
 /// A representation of a Lua class.
 #[derive(Deserialize, Serialize)]
 struct Class {
+    pub version: String,
     pub name: String,
     pub info: String,
     pub member: Option<Vec<Variable>>,
@@ -498,6 +503,7 @@ struct Class {
 /// A representation of a Lua function.
 #[derive(Deserialize, Serialize)]
 struct Entry {
+    pub version: String,
     pub name: String,
     pub info: String,
     pub member: Option<Vec<Variable>>,

@@ -16,7 +16,7 @@ pub const PAD_RANGE_UPPER: i32 = 17;
 //================================================================
 
 /* class
-{ "name": "quiver.input", "info": "The input API." }
+{ "version": "1.0.0", "name": "quiver.input", "info": "The input API." }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
@@ -28,7 +28,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     //================================================================
 
     /* class
-    { "name": "quiver.input.board", "info": "The board input API." }
+    { "version": "1.0.0", "name": "quiver.input.board", "info": "The board input API." }
     */
     let board = lua.create_table()?;
 
@@ -44,7 +44,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     //================================================================
 
     /* class
-    { "name": "quiver.input.mouse", "info": "The mouse input API." }
+    { "version": "1.0.0", "name": "quiver.input.mouse", "info": "The mouse input API." }
     */
     let mouse = lua.create_table()?;
 
@@ -69,7 +69,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     //================================================================
 
     /* class
-    { "name": "quiver.input.pad", "info": "The pad input API." }
+    { "version": "1.0.0", "name": "quiver.input.pad", "info": "The pad input API." }
     */
     let pad = lua.create_table()?;
 
@@ -94,7 +94,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.set_active",
+    "version": "1.0.0", "name": "quiver.input.mouse.set_active",
     "info": "Set the active state of the mouse.",
     "member": [
         { "name": "state", "info": "Current state.", "kind": "boolean" }
@@ -115,7 +115,7 @@ fn set_mouse_active(_: &Lua, value: bool) -> mlua::Result<()> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.set_hidden",
+    "version": "1.0.0", "name": "quiver.input.mouse.set_hidden",
     "info": "Set the hidden state of the mouse.",
     "member": [
         { "name": "state", "info": "Current state.", "kind": "boolean" }
@@ -136,7 +136,7 @@ fn set_mouse_hidden(_: &Lua, value: bool) -> mlua::Result<()> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_hidden",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_hidden",
     "info": "Get the hidden state of the mouse.",
     "result": [
         { "name": "state", "info": "Current state.", "kind": "boolean" }
@@ -149,7 +149,7 @@ fn get_mouse_hidden(_: &Lua, _: ()) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_screen",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_screen",
     "info": "Check if the mouse is currently over the screen.",
     "result": [
         { "name": "state", "info": "Current state.", "kind": "boolean" }
@@ -162,7 +162,7 @@ fn get_mouse_screen(_: &Lua, _: ()) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_point",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_point",
     "info": "Get the current point of the mouse.",
     "result": [
         { "name": "point", "info": "The point of the mouse.", "kind": "vector_2" }
@@ -172,13 +172,13 @@ fn get_mouse_screen(_: &Lua, _: ()) -> mlua::Result<bool> {
 fn get_mouse_point(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     unsafe {
         let value = ffi::GetMousePosition();
-        lua.to_value(&crate::system::general::Vector2::new(value.x, value.y))
+        lua.to_value(&Vector2::new(value.x, value.y))
     }
 }
 
 /* entry
 {
-    "name": "quiver.input.mouse.set_point",
+    "version": "1.0.0", "name": "quiver.input.mouse.set_point",
     "info": "Set the current point of the mouse.",
     "member": [
         { "name": "point", "info": "The point of the mouse.", "kind": "vector_2" }
@@ -187,7 +187,7 @@ fn get_mouse_point(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
 */
 fn set_mouse_point(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
     unsafe {
-        let point: crate::system::general::Vector2 = lua.from_value(point)?;
+        let point: Vector2 = lua.from_value(point)?;
         ffi::SetMousePosition(point.x as i32, point.y as i32);
         Ok(())
     }
@@ -195,7 +195,7 @@ fn set_mouse_point(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_delta",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_delta",
     "info": "Get the current delta (i.e. mouse movement) of the mouse.",
     "result": [
         { "name": "delta", "info": "The delta of the mouse.", "kind": "vector_2" }
@@ -205,13 +205,13 @@ fn set_mouse_point(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
 fn get_mouse_delta(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     unsafe {
         let value = ffi::GetMouseDelta();
-        lua.to_value(&crate::system::general::Vector2::new(value.x, value.y))
+        lua.to_value(&Vector2::new(value.x, value.y))
     }
 }
 
 /* entry
 {
-    "name": "quiver.input.mouse.set_shift",
+    "version": "1.0.0", "name": "quiver.input.mouse.set_shift",
     "info": "Set the current shift of the mouse.",
     "member": [
         { "name": "shift", "info": "The shift of the mouse.", "kind": "vector_2" }
@@ -220,7 +220,7 @@ fn get_mouse_delta(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
 */
 fn set_mouse_shift(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
     unsafe {
-        let point: crate::system::general::Vector2 = lua.from_value(point)?;
+        let point: Vector2 = lua.from_value(point)?;
         ffi::SetMouseOffset(point.x as i32, point.y as i32);
         Ok(())
     }
@@ -228,7 +228,7 @@ fn set_mouse_shift(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.set_scale",
+    "version": "1.0.0", "name": "quiver.input.mouse.set_scale",
     "info": "Set the current scale of the mouse.",
     "member": [
         { "name": "scale", "info": "The scale of the mouse.", "kind": "vector_2" }
@@ -237,7 +237,7 @@ fn set_mouse_shift(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
 */
 fn set_mouse_scale(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
     unsafe {
-        let point: crate::system::general::Vector2 = lua.from_value(point)?;
+        let point: Vector2 = lua.from_value(point)?;
         ffi::SetMouseScale(point.x, point.y);
         Ok(())
     }
@@ -245,7 +245,7 @@ fn set_mouse_scale(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.set_cursor",
+    "version": "1.0.0", "name": "quiver.input.mouse.set_cursor",
     "info": "Set the current cursor of the mouse.",
     "member": [
         { "name": "cursor", "info": "The cursor of the mouse.", "kind": "cursor_mouse" }
@@ -267,7 +267,7 @@ fn set_mouse_cursor(_: &Lua, value: i32) -> mlua::Result<()> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_wheel",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_wheel",
     "info": "Get the current delta (i.e. mouse wheel movement) of the mouse wheel.",
     "result": [
         { "name": "delta", "info": "The delta of the mouse wheel.", "kind": "vector_2" }
@@ -277,13 +277,13 @@ fn set_mouse_cursor(_: &Lua, value: i32) -> mlua::Result<()> {
 fn get_mouse_wheel(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     unsafe {
         let value = ffi::GetMouseWheelMoveV();
-        lua.to_value(&crate::system::general::Vector2::new(value.x, value.y))
+        lua.to_value(&Vector2::new(value.x, value.y))
     }
 }
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_up",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_up",
     "info": "Get the state of an input (up).",
     "member": [
         { "name": "mouse", "info": "The mouse button to check for.", "kind": "input_mouse" }
@@ -300,7 +300,7 @@ fn get_mouse_up(_: &Lua, value: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_down",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_down",
     "info": "Get the state of an input (down).",
     "member": [
         { "name": "mouse", "info": "The mouse button to check for.", "kind": "input_mouse" }
@@ -317,7 +317,7 @@ fn get_mouse_down(_: &Lua, value: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_press",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_press",
     "info": "Get the state of an input (press).",
     "member": [
         { "name": "mouse", "info": "The mouse button to check for.", "kind": "input_mouse" }
@@ -334,7 +334,7 @@ fn get_mouse_press(_: &Lua, value: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.mouse.get_release",
+    "version": "1.0.0", "name": "quiver.input.mouse.get_release",
     "info": "Get the state of an input (release).",
     "member": [
         { "name": "mouse", "info": "The mouse button to check for.", "kind": "input_mouse" }
@@ -353,7 +353,7 @@ fn get_mouse_release(_: &Lua, value: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.board.get_up",
+    "version": "1.0.0", "name": "quiver.input.board.get_up",
     "info": "Get the state of an input (up).",
     "member": [
         { "name": "board", "info": "The board button to check for.", "kind": "input_board" }
@@ -370,7 +370,7 @@ fn get_board_up(_: &Lua, value: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.board.get_down",
+    "version": "1.0.0", "name": "quiver.input.board.get_down",
     "info": "Get the state of an input (down).",
     "member": [
         { "name": "board", "info": "The board button to check for.", "kind": "input_board" }
@@ -387,7 +387,7 @@ fn get_board_down(_: &Lua, value: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.board.get_press",
+    "version": "1.0.0", "name": "quiver.input.board.get_press",
     "info": "Get the state of an input (press).",
     "member": [
         { "name": "board", "info": "The board button to check for.", "kind": "input_board" }
@@ -404,7 +404,7 @@ fn get_board_press(_: &Lua, value: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.board.get_release",
+    "version": "1.0.0", "name": "quiver.input.board.get_release",
     "info": "Get the state of an input (release).",
     "member": [
         { "name": "board", "info": "The board button to check for.", "kind": "input_board" }
@@ -423,7 +423,7 @@ fn get_board_release(_: &Lua, value: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_state",
+    "version": "1.0.0", "name": "quiver.input.pad.get_state",
     "info": "Get the state of a pad.",
     "member": [
         { "name": "index", "info": "The index of the pad to check for.", "kind": "number" }
@@ -439,7 +439,7 @@ fn get_pad_state(_: &Lua, index: i32) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_name",
+    "version": "1.0.0", "name": "quiver.input.pad.get_name",
     "info": "Get the name of a pad.",
     "member": [
         { "name": "index", "info": "The index of the pad to check for.", "kind": "number" }
@@ -458,7 +458,7 @@ fn get_pad_name(_: &Lua, index: i32) -> mlua::Result<String> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_queue",
+    "version": "1.0.0", "name": "quiver.input.pad.get_queue",
     "info": "Get the last pad button press.",
     "result": [
         { "name": "input", "info": "The last pad button press.", "kind": "input_pad" }
@@ -471,7 +471,7 @@ fn get_pad_queue(_: &Lua, _: ()) -> mlua::Result<i32> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_axis_count",
+    "version": "1.0.0", "name": "quiver.input.pad.get_axis_count",
     "info": "Get the axis count of a pad.",
     "member": [
         { "name": "index", "info": "The index of the pad to check for.", "kind": "number" }
@@ -487,7 +487,7 @@ fn get_pad_axis_count(_: &Lua, index: i32) -> mlua::Result<i32> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_axis_state",
+    "version": "1.0.0", "name": "quiver.input.pad.get_axis_state",
     "info": "Get the axis state of a pad.",
     "member": [
         { "name": "index", "info": "The index of the pad to check for.", "kind": "number" },
@@ -504,7 +504,7 @@ fn get_pad_axis_state(_: &Lua, (index, axis): (i32, i32)) -> mlua::Result<f32> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_up",
+    "version": "1.0.0", "name": "quiver.input.pad.get_up",
     "info": "Get the state of an input (up).",
     "member": [
         { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
@@ -521,7 +521,7 @@ fn get_pad_up(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_down",
+    "version": "1.0.0", "name": "quiver.input.pad.get_down",
     "info": "Get the state of an input (down).",
     "member": [
         { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
@@ -538,7 +538,7 @@ fn get_pad_down(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_press",
+    "version": "1.0.0", "name": "quiver.input.pad.get_press",
     "info": "Get the state of an input (press).",
     "member": [
         { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
@@ -555,7 +555,7 @@ fn get_pad_press(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
 
 /* entry
 {
-    "name": "quiver.input.pad.get_release",
+    "version": "1.0.0", "name": "quiver.input.pad.get_release",
     "info": "Get the state of an input (release).",
     "member": [
         { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }

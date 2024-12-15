@@ -5,7 +5,7 @@ use std::ffi::CString;
 //================================================================
 
 /* class
-{ "name": "quiver.sound", "info": "The sound API." }
+{ "version": "1.0.0", "name": "quiver.sound", "info": "The sound API." }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
@@ -21,13 +21,14 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 type RLSound = ffi::Sound;
 
 /* class
-{ "name": "sound", "info": "An unique handle for sound in memory." }
+{ "version": "1.0.0", "name": "sound", "info": "An unique handle for sound in memory." }
 */
 struct Sound(RLSound);
 
 impl Sound {
     /* entry
     {
+        "version": "1.0.0",
         "name": "quiver.sound.new",
         "info": "Create a new sound resource.",
         "member": [
@@ -44,7 +45,7 @@ impl Sound {
         unsafe {
             let data = ffi::LoadSound(name.as_ptr());
 
-            if ffi::IsSoundReady(data) {
+            if ffi::IsSoundValid(data) {
                 Ok(Self(data))
             } else {
                 Err(mlua::Error::RuntimeError(format!(
@@ -68,7 +69,7 @@ impl mlua::UserData for Sound {
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
         /* entry
-        { "name": "sound:play", "info": "Play the sound." }
+        { "version": "1.0.0", "name": "sound:play", "info": "Play the sound." }
         */
         method.add_method("play", |_, this, ()| unsafe {
             ffi::PlaySound(this.0);
@@ -77,6 +78,7 @@ impl mlua::UserData for Sound {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "sound:get_playing",
             "info": "Check if sound is currently playing.",
             "result": [
@@ -89,7 +91,7 @@ impl mlua::UserData for Sound {
         });
 
         /* entry
-        { "name": "sound:stop", "info": "Stop the sound." }
+        { "version": "1.0.0", "name": "sound:stop", "info": "Stop the sound." }
         */
         method.add_method("stop", |_, this, ()| unsafe {
             ffi::StopSound(this.0);
@@ -97,7 +99,7 @@ impl mlua::UserData for Sound {
         });
 
         /* entry
-        { "name": "sound:pause", "info": "Pause the sound." }
+        { "version": "1.0.0", "name": "sound:pause", "info": "Pause the sound." }
         */
         method.add_method("pause", |_, this, ()| unsafe {
             ffi::PauseSound(this.0);
@@ -105,7 +107,7 @@ impl mlua::UserData for Sound {
         });
 
         /* entry
-        { "name": "sound:resume", "info": "Resume the sound." }
+        { "version": "1.0.0", "name": "sound:resume", "info": "Resume the sound." }
         */
         method.add_method("resume", |_, this, ()| unsafe {
             ffi::ResumeSound(this.0);
@@ -114,6 +116,7 @@ impl mlua::UserData for Sound {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "sound:set_volume",
             "info": "Set volume for the sound. (range: 0.0 - 1.0)",
             "member": [
@@ -128,6 +131,7 @@ impl mlua::UserData for Sound {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "sound:set_pitch",
             "info": "Set pitch for the sound.",
             "member": [
@@ -142,6 +146,7 @@ impl mlua::UserData for Sound {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "sound:set_pan",
             "info": "Set pan for the sound. (range: 0.0 - 1.0; 0.5 is center)",
             "member": [

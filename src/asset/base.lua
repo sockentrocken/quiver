@@ -15,7 +15,10 @@ function vector_2:new(x, y)
         __sub = function(a, b) return vector_2:new(a.x - b.x, a.y - b.y) end,
         __mul = function(a, b) return vector_2:new(a.x * b.x, a.y * b.y) end,
         __div = function(a, b) return vector_2:new(a.x / b.x, a.y / b.y) end,
-        __tostring = function(a) return "{ x:"..tostring(a.x).." y:"..tostring(a.y).." }"..tostring(a.z).." }" end
+        __tostring = function(a)
+            return "{ x:" .. tostring(a.x) .. " y:" .. tostring(a.y) .. " }" .. tostring(a.z) ..
+                " }"
+        end
     })
     i.x = x
     i.y = y
@@ -57,7 +60,10 @@ function vector_3:new(x, y, z)
         __sub = function(a, b) return vector_3:new(a.x - b.x, a.y - b.y, a.z - b.z) end,
         __mul = function(a, b) return vector_3:new(a.x * b.x, a.y * b.y, a.z * b.z) end,
         __div = function(a, b) return vector_3:new(a.x / b.x, a.y / b.y, a.z / b.z) end,
-        __tostring = function(a) return "{ x:"..tostring(a.x).." y:"..tostring(a.y).." z:"..tostring(a.z).." }" end
+        __tostring = function(a)
+            return "{ x:" .. tostring(a.x) .. " y:" .. tostring(a.y) .. " z:" .. tostring(a.z) ..
+                " }"
+        end
     })
     i.x = x
     i.y = y
@@ -168,21 +174,27 @@ function color:black()
 end
 
 ---@class box_2
----@field min vector_2
----@field max vector_2
+---@field x      number
+---@field y      number
+---@field width  number
+---@field height number
 box_2 = {
     _type = "box_2",
-    min = vector_2:zero(),
-    max = vector_2:zero(),
+    x = 0.0,
+    y = 0.0,
+    width = 0.0,
+    height = 0.0,
 }
 
-function box_2:new(min, max)
+function box_2:new(x, y, width, height)
     local i = {}
     setmetatable(i, {
         __index = self
     })
-    i.min = min
-    i.max = max
+    i.x = x
+    i.y = y
+    i.width = width
+    i.height = height
     return i
 end
 
@@ -365,4 +377,3 @@ INPUT_PAD = {
     GAMEPAD_BUTTON_LEFT_THUMB = 16,
     GAMEPAD_BUTTON_RIGHT_THUMB = 17,
 }
-

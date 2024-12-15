@@ -9,7 +9,7 @@ type RLTexture = raylib::core::texture::Texture2D;
 //================================================================
 
 /* class
-{ "name": "quiver.texture", "info": "The texture API." }
+{ "version": "1.0.0", "name": "quiver.texture", "info": "The texture API." }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
@@ -26,8 +26,8 @@ fn texture_draw(
     lua: &Lua,
     (texture, point, angle, scale, color): (&ffi::Texture, LuaValue, f32, f32, LuaValue),
 ) -> mlua::Result<()> {
-    let point: crate::system::general::Vector2 = lua.from_value(point)?;
-    let color: crate::system::general::Color = lua.from_value(color)?;
+    let point: Vector2 = lua.from_value(point)?;
+    let color: Color = lua.from_value(color)?;
 
     unsafe {
         ffi::DrawTextureEx(*texture, point.into(), angle, scale, color.into());
@@ -46,10 +46,10 @@ fn texture_pro_draw(
         LuaValue,
     ),
 ) -> mlua::Result<()> {
-    let rec_a: crate::system::general::Box2 = lua.from_value(rec_a)?;
-    let rec_b: crate::system::general::Box2 = lua.from_value(rec_b)?;
-    let point: crate::system::general::Vector2 = lua.from_value(point)?;
-    let color: crate::system::general::Color = lua.from_value(color)?;
+    let rec_a: Rectangle = lua.from_value(rec_a)?;
+    let rec_b: Rectangle = lua.from_value(rec_b)?;
+    let point: Vector2 = lua.from_value(point)?;
+    let color: Color = lua.from_value(color)?;
 
     unsafe {
         ffi::DrawTexturePro(
@@ -66,6 +66,7 @@ fn texture_pro_draw(
 
 /* class
 {
+    "version": "1.0.0",
     "name": "texture",
     "info": "An unique handle for a texture in memory.",
     "field": [
@@ -78,10 +79,7 @@ struct Texture(RLTexture);
 impl mlua::UserData for Texture {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
         field.add_field_method_get("size", |lua: &Lua, this| {
-            lua.to_value(&crate::system::general::Vector2::new(
-                this.0.width as f32,
-                this.0.height as f32,
-            ))
+            lua.to_value(&Vector2::new(this.0.width as f32, this.0.height as f32))
         });
     }
 
@@ -133,6 +131,7 @@ impl mlua::UserData for Texture {
 impl Texture {
     /* entry
     {
+        "version": "1.0.0",
         "name": "quiver.texture.new",
         "info": "Create a new texture resource.",
         "member": [
@@ -149,7 +148,7 @@ impl Texture {
         unsafe {
             let data = ffi::LoadTexture(name.as_ptr());
 
-            if ffi::IsTextureReady(data) {
+            if ffi::IsTextureValid(data) {
                 Ok(Self(RLTexture::from_raw(data)))
             } else {
                 Err(mlua::Error::RuntimeError(format!(

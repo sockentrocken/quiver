@@ -5,7 +5,7 @@ use std::ffi::CString;
 //================================================================
 
 /* class
-{ "name": "quiver.font", "info": "The font API." }
+{ "version": "1.0.0", "name": "quiver.font", "info": "The font API." }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
@@ -21,7 +21,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 type RLFont = raylib::core::text::Font;
 
 /* class
-{ "name": "font", "info": "An unique handle to a font in memory." }
+{ "version": "1.0.0", "name": "font", "info": "An unique handle to a font in memory." }
 */
 struct Font(RLFont);
 
@@ -31,7 +31,7 @@ impl mlua::UserData for Font {
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
         /* entry
         {
-            "name": "font.draw",
+            "version": "1.0.0", "name": "font.draw",
             "info": "Draw a font.",
             "member": [
                 { "name": "label", "info": "Label of font to draw.", "kind": "string"   },
@@ -53,8 +53,8 @@ impl mlua::UserData for Font {
                     f32,
                     LuaValue,
                 )| {
-                    let point : crate::system::general::Vector2 = lua.from_value(point)?;
-                    let color : crate::system::general::Color   = lua.from_value(color)?;
+                    let point : Vector2 = lua.from_value(point)?;
+                    let color : Color   = lua.from_value(color)?;
                     let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
                     unsafe {
@@ -69,7 +69,7 @@ impl mlua::UserData for Font {
 impl Font {
     /* entry
     {
-        "name": "quiver.font.new",
+        "version": "1.0.0", "name": "quiver.font.new",
         "info": "Create a new font resource.",
         "member": [
             { "name": "path", "info": "Path to font file.", "kind": "string" }
@@ -85,7 +85,7 @@ impl Font {
         unsafe {
             let data = ffi::LoadFont(name.as_ptr());
 
-            if ffi::IsFontReady(data) {
+            if ffi::IsFontValid(data) {
                 Ok(Self(RLFont::from_raw(data)))
             } else {
                 Err(mlua::Error::RuntimeError(format!(

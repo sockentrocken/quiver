@@ -83,8 +83,6 @@ impl Script {
         music::set_global(lua, table)?;
         font::set_global(lua, table)?;
 
-        rapier::set_global(lua, table)?;
-
         Ok(())
     }
 

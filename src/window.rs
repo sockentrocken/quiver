@@ -7,7 +7,7 @@ use raylib::prelude::*;
 //================================================================
 
 pub struct Window {
-    data: [widget::Data; 64],
+    data: [widget::Data; Self::WIDGET_COUNT],
     font: Font,
     pub logo: Texture2D,
     point: Vector2,

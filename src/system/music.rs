@@ -5,7 +5,7 @@ use std::ffi::CString;
 //================================================================
 
 /* class
-{ "name": "quiver.music", "info": "The music API." }
+{ "version": "1.0.0", "name": "quiver.music", "info": "The music API." }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
@@ -21,13 +21,14 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 type RLMusic = ffi::Music;
 
 /* class
-{ "name": "music", "info": "An unique handle for music in memory." }
+{ "version": "1.0.0", "name": "music", "info": "An unique handle for music in memory." }
 */
 struct Music(RLMusic);
 
 impl Music {
     /* entry
     {
+        "version": "1.0.0",
         "name": "quiver.music.new",
         "info": "Create a new music resource.",
         "member": [
@@ -44,7 +45,7 @@ impl Music {
         unsafe {
             let data = ffi::LoadMusicStream(name.as_ptr());
 
-            if ffi::IsMusicReady(data) {
+            if ffi::IsMusicValid(data) {
                 Ok(Self(data))
             } else {
                 Err(mlua::Error::RuntimeError(format!(
@@ -68,7 +69,7 @@ impl mlua::UserData for Music {
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
         /* entry
-        { "name": "music:play", "info": "Play the music." }
+        { "version": "1.0.0", "name": "music:play", "info": "Play the music." }
         */
         method.add_method("play", |_, this, ()| unsafe {
             ffi::PlayMusicStream(this.0);
@@ -77,6 +78,7 @@ impl mlua::UserData for Music {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "music:get_playing",
             "info": "Check if music is currently playing.",
             "result": [
@@ -89,7 +91,7 @@ impl mlua::UserData for Music {
         });
 
         /* entry
-        { "name": "music:stop", "info": "Stop the music." }
+        { "version": "1.0.0", "name": "music:stop", "info": "Stop the music." }
         */
         method.add_method("stop", |_, this, ()| unsafe {
             ffi::StopMusicStream(this.0);
@@ -97,7 +99,7 @@ impl mlua::UserData for Music {
         });
 
         /* entry
-        { "name": "music:pause", "info": "Pause the music." }
+        { "version": "1.0.0", "name": "music:pause", "info": "Pause the music." }
         */
         method.add_method("pause", |_, this, ()| unsafe {
             ffi::PauseMusicStream(this.0);
@@ -105,7 +107,7 @@ impl mlua::UserData for Music {
         });
 
         /* entry
-        { "name": "music:resume", "info": "Resume the music." }
+        { "version": "1.0.0", "name": "music:resume", "info": "Resume the music." }
         */
         method.add_method("resume", |_, this, ()| unsafe {
             ffi::ResumeMusicStream(this.0);
@@ -114,6 +116,7 @@ impl mlua::UserData for Music {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "music:set_volume",
             "info": "Set volume for the music. (range: 0.0 - 1.0)",
             "member": [
@@ -128,6 +131,7 @@ impl mlua::UserData for Music {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "music:set_pitch",
             "info": "Set pitch for the music.",
             "member": [
@@ -142,6 +146,7 @@ impl mlua::UserData for Music {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "music:set_pan",
             "info": "Set pan for the music. (range: 0.0 - 1.0; 0.5 is center)",
             "member": [
@@ -155,7 +160,7 @@ impl mlua::UserData for Music {
         });
 
         /* entry
-        { "name": "music:update", "info": "Update the music." }
+        { "version": "1.0.0", "name": "music:update", "info": "Update the music." }
         */
         method.add_method("update", |_, this, ()| unsafe {
             ffi::UpdateMusicStream(this.0);
@@ -164,6 +169,7 @@ impl mlua::UserData for Music {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "music:set_position",
             "info": "Set position for the music.",
             "member": [
@@ -178,6 +184,7 @@ impl mlua::UserData for Music {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "music:get_length",
             "info": "Get time length for the music.",
             "result": [
@@ -191,6 +198,7 @@ impl mlua::UserData for Music {
 
         /* entry
         {
+            "version": "1.0.0",
             "name": "music:get_played",
             "info": "Get time played for the music.",
             "result": [

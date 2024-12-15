@@ -18,14 +18,19 @@ mod draw_general {
     use super::*;
 
     /* class
-    { "name": "quiver.draw", "info": "The drawing API." }
+    { "version": "1.0.0", "name": "quiver.draw", "info": "The drawing API." }
     */
     #[rustfmt::skip]
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw = lua.create_table()?;
 
-        draw.set("begin", lua.create_function(self::begin)?)?;
-        draw.set("close", lua.create_function(self::close)?)?;
+        draw.set("begin",       lua.create_function(self::begin)?)?;
+        //draw.set("begin_blend", lua.create_function(self::begin_blend)?)?;
+        //draw.set("begin_shape", lua.create_function(self::begin_shape)?)?;
+        //draw.set("get_screen_to_world_3d", lua.create_function(self::begin_shape)?)?;
+        //draw.set("get_world_to_screen_3d", lua.create_function(self::begin_shape)?)?;
+        //draw.set("get_screen_to_world_2d", lua.create_function(self::begin_shape)?)?;
+        //draw.set("get_world_to_screen_2d", lua.create_function(self::begin_shape)?)?;
         draw.set("clear", lua.create_function(self::clear)?)?;
 
         table.set("draw", draw)?;
@@ -34,20 +39,21 @@ mod draw_general {
     }
 
     /* entry
-    { "name": "quiver.draw.begin", "info": "Initialize drawing to the screen. **MUST** call *quiver.draw.close* after drawing is done." }
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.begin",
+        "info": "Initialize drawing to the screen.",
+        "member": [
+            { "name": "closure", "info": "The draw code.", "kind": "function" }
+        ]
+    }
     */
-    fn begin(_: &Lua, _: ()) -> mlua::Result<()> {
+    fn begin(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
         unsafe {
             ffi::BeginDrawing();
-            Ok(())
-        }
-    }
 
-    /* entry
-    { "name": "quiver.draw.close", "info": "Finalize drawing to the screen." }
-    */
-    fn close(_: &Lua, _: ()) -> mlua::Result<()> {
-        unsafe {
+            call.call::<()>(())?;
+
             ffi::EndDrawing();
             Ok(())
         }
@@ -55,7 +61,7 @@ mod draw_general {
 
     /* entry
     {
-        "name": "quiver.draw.clear",
+        "version": "1.0.0", "name": "quiver.draw.clear",
         "info": "Clear the screen with a color.",
         "member": [
             { "name": "color", "info": "The color to use for clearing.", "kind": "color" }
@@ -63,7 +69,7 @@ mod draw_general {
     }
     */
     fn clear(lua: &Lua, color: LuaValue) -> mlua::Result<()> {
-        let value: general::Color = lua.from_value(color)?;
+        let value: Color = lua.from_value(color)?;
 
         unsafe {
             ffi::ClearBackground(value.into());
@@ -76,14 +82,13 @@ mod draw_2d {
     use super::*;
 
     /* class
-    { "name": "quiver.draw_2d", "info": "The 2D drawing API." }
+    { "version": "1.0.0", "name": "quiver.draw_2d", "info": "The 2D drawing API." }
     */
     #[rustfmt::skip]
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw_2d = lua.create_table()?;
 
         draw_2d.set("begin", lua.create_function(self::begin)?)?;
-        draw_2d.set("close", lua.create_function(self::close)?)?;
         draw_2d.set("draw_box_2", lua.create_function(self::draw_box_2)?)?;
         draw_2d.set("draw_text", lua.create_function(self::draw_text)?)?;
 
@@ -94,32 +99,23 @@ mod draw_2d {
 
     /* entry
     {
+        "version": "1.0.0",
         "name": "quiver.draw_2d.begin",
-        "info": "Initialize the 2D draw mode. **MUST** call *quiver.draw_2d.close* after 2D drawing is done.",
+        "info": "Initialize the 2D draw mode.",
         "member": [
-            { "name": "camera", "info": "The 2D camera to use for drawing.", "kind": "camera_2d" }
+            { "name": "camera",   "info": "The 2D camera.", "kind": "camera_2d" },
+            { "name": "function", "info": "The draw code.", "kind": "function"  }
         ]
     }
-    example
-    local camera_2d = Camera2D:new(Vector2:zero(), Vector2:zero(), 0.0, 1.0)
-    quiver.draw_2d.begin(camera_2d)
-    [...]
-    quiver.draw_2d.close()
     */
-    fn begin(lua: &Lua, camera: LuaValue) -> mlua::Result<()> {
+    fn begin(lua: &Lua, (camera, call): (LuaValue, mlua::Function)) -> mlua::Result<()> {
         let value: general::Camera2D = lua.from_value(camera)?;
 
         unsafe {
             ffi::BeginMode2D(value.into());
-            Ok(())
-        }
-    }
 
-    /* entry
-    { "name": "quiver.draw_2d.close", "info": "Finalize the 2D draw mode." }
-    */
-    fn close(_: &Lua, _: ()) -> mlua::Result<()> {
-        unsafe {
+            call.call::<()>(())?;
+
             ffi::EndMode2D();
             Ok(())
         }
@@ -127,7 +123,7 @@ mod draw_2d {
 
     /* entry
     {
-        "name": "quiver.draw_2d.draw_box_2",
+        "version": "1.0.0", "name": "quiver.draw_2d.draw_box_2",
         "info": "Draw 2D box.",
         "member": [
             { "name": "shape", "info": "The shape of the box.", "kind": "box_2"    },
@@ -141,9 +137,9 @@ mod draw_2d {
         lua: &Lua,
         (shape, point, angle, color): (LuaValue, LuaValue, f32, LuaValue),
     ) -> mlua::Result<()> {
-        let shape: general::Box2 = lua.from_value(shape)?;
-        let point: general::Vector2 = lua.from_value(point)?;
-        let color: general::Color = lua.from_value(color)?;
+        let shape: Rectangle = lua.from_value(shape)?;
+        let point: Vector2 = lua.from_value(point)?;
+        let color: Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawRectanglePro(shape.into(), point.into(), angle, color.into());
@@ -153,7 +149,7 @@ mod draw_2d {
 
     /* entry
     {
-        "name": "quiver.draw_2d.draw_text",
+        "version": "1.0.0", "name": "quiver.draw_2d.draw_text",
         "info": "Draw text.",
         "member": [
             { "name": "label", "info": "The label of the text.", "kind": "string"   },
@@ -168,8 +164,8 @@ mod draw_2d {
         (text, point, scale, color): (String, LuaValue, i32, LuaValue),
     ) -> mlua::Result<()> {
         let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
-        let point: general::Vector2 = lua.from_value(point)?;
-        let color: general::Color = lua.from_value(color)?;
+        let point: Vector2 = lua.from_value(point)?;
+        let color: Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawText(
@@ -188,14 +184,13 @@ mod draw_3d {
     use super::*;
 
     /* class
-    { "name": "quiver.draw_3d", "info": "The 3D drawing API." }
+    { "version": "1.0.0", "name": "quiver.draw_3d", "info": "The 3D drawing API." }
     */
     #[rustfmt::skip]
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw_3d = lua.create_table()?;
 
         draw_3d.set("begin", lua.create_function(self::begin)?)?;
-        draw_3d.set("close", lua.create_function(self::close)?)?;
         draw_3d.set("draw_grid", lua.create_function(self::draw_grid)?)?;
         draw_3d.set("draw_cube", lua.create_function(self::draw_cube)?)?;
         draw_3d.set("draw_ball", lua.create_function(self::draw_ball)?)?;
@@ -208,27 +203,23 @@ mod draw_3d {
 
     /* entry
     {
+        "version": "1.0.0",
         "name": "quiver.draw_3d.begin",
-        "info": "Initialize the 3D draw mode. **MUST** call *quiver.draw_3d.close* after 3D drawing is done.",
+        "info": "Initialize the 3D draw mode.",
         "member": [
-            { "name": "camera", "info": "The 3D camera to use for drawing.", "kind": "camera_3d" }
+            { "name": "camera",   "info": "The 2D camera.", "kind": "camera_3d" },
+            { "name": "function", "info": "The draw code.", "kind": "function"  }
         ]
     }
     */
-    fn begin(lua: &Lua, camera: LuaValue) -> mlua::Result<()> {
+    fn begin(lua: &Lua, (camera, call): (LuaValue, mlua::Function)) -> mlua::Result<()> {
         let value: general::Camera3D = lua.from_value(camera)?;
 
         unsafe {
             ffi::BeginMode3D(value.into());
-            Ok(())
-        }
-    }
 
-    /* entry
-    { "name": "quiver.draw_3d.close", "info": "Finalize the 3D draw mode." }
-    */
-    fn close(_: &Lua, _: ()) -> mlua::Result<()> {
-        unsafe {
+            call.call::<()>(())?;
+
             ffi::EndMode3D();
             Ok(())
         }
@@ -236,7 +227,7 @@ mod draw_3d {
 
     /* entry
     {
-        "name": "quiver.draw_3d.draw_grid",
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_grid",
         "info": "Draw a grid.",
         "member": [
             { "name": "slice", "info": "The slice count of the grid.", "kind": "number" },
@@ -253,7 +244,7 @@ mod draw_3d {
 
     /* entry
     {
-        "name": "quiver.draw_3d.draw_cube",
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_cube",
         "info": "Draw a cube.",
         "member": [
             { "name": "point", "info": "The point of the cube.", "kind": "vector_3" },
@@ -266,9 +257,9 @@ mod draw_3d {
         lua: &Lua,
         (point, shape, color): (LuaValue, LuaValue, LuaValue),
     ) -> mlua::Result<()> {
-        let point: general::Vector3 = lua.from_value(point)?;
-        let shape: general::Vector3 = lua.from_value(shape)?;
-        let color: general::Color = lua.from_value(color)?;
+        let point: Vector3 = lua.from_value(point)?;
+        let shape: Vector3 = lua.from_value(shape)?;
+        let color: Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawCubeV(point.into(), shape.into(), color.into());
@@ -278,7 +269,7 @@ mod draw_3d {
 
     /* entry
     {
-        "name": "quiver.draw_3d.draw_cube",
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_cube",
         "info": "Draw a ball.",
         "member": [
             { "name": "point", "info": "The point of the ball.", "kind": "vector_3" },
@@ -288,8 +279,8 @@ mod draw_3d {
     }
     */
     fn draw_ball(lua: &Lua, (point, shape, color): (LuaValue, f32, LuaValue)) -> mlua::Result<()> {
-        let point: general::Vector3 = lua.from_value(point)?;
-        let color: general::Color = lua.from_value(color)?;
+        let point: Vector3 = lua.from_value(point)?;
+        let color: Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawSphere(point.into(), shape, color.into());
@@ -299,7 +290,7 @@ mod draw_3d {
 
     /* entry
     {
-        "name": "quiver.draw_3d.draw_box_3",
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_box_3",
         "info": "Draw a 3D box.",
         "member": [
             { "name": "shape", "info": "The shape of the ball.", "kind": "box_3" },
@@ -308,8 +299,8 @@ mod draw_3d {
     }
     */
     fn draw_box_3(lua: &Lua, (box_3, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
-        let box_3: general::Box3 = lua.from_value(box_3)?;
-        let color: general::Color = lua.from_value(color)?;
+        let box_3: BoundingBox = lua.from_value(box_3)?;
+        let color: Color = lua.from_value(color)?;
 
         unsafe {
             ffi::DrawBoundingBox(box_3.into(), color.into());

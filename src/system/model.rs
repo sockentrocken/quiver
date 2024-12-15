@@ -1,14 +1,11 @@
 use mlua::prelude::*;
 use raylib::prelude::*;
-use serde::{Deserialize, Serialize};
 use std::ffi::CString;
-
-use super::general;
 
 //================================================================
 
 /* class
-{ "name": "quiver.model", "info": "The model API." }
+{ "version": "1.0.0", "name": "quiver.model", "info": "The model API." }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
@@ -24,13 +21,14 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 type RLModel = ffi::Model;
 
 /* class
-{ "name": "model", "info": "An unique handle for a model in memory." }
+{ "version": "1.0.0", "name": "model", "info": "An unique handle for a model in memory." }
 */
 pub struct Model(pub RLModel);
 
 impl Model {
     /* entry
     {
+        "version": "1.0.0",
         "name": "quiver.model.new",
         "info": "Create a new Model resource.",
         "member": [
@@ -47,7 +45,7 @@ impl Model {
         unsafe {
             let data = ffi::LoadModel(name.as_ptr());
 
-            if ffi::IsModelReady(data) {
+            if ffi::IsModelValid(data) {
                 Ok(Self(data))
             } else {
                 Err(mlua::Error::RuntimeError(format!(
@@ -66,23 +64,12 @@ impl Drop for Model {
     }
 }
 
-#[derive(Deserialize, Serialize)]
-pub struct Mesh {
-    vertex: Vec<general::Vector3>,
-}
-
 impl mlua::UserData for Model {
-    fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
-        field.add_field_method_get("mesh", |_, this| unsafe {
-            let mut mesh: Vec<Mesh> = Vec::new();
-
-            Ok((1))
-        });
-    }
+    fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
         /* entry
-        { "name": "model:draw_wire", "info": "Draw the model (wire-frame render)." }
+        { "version": "1.0.0", "name": "model:draw_wire", "info": "Draw the model (wire-frame render)." }
         */
         method.add_method("draw_wire", |_, this, ()| unsafe {
             ffi::DrawModelWires(this.0, Vector3::zero().into(), 1.0, Color::RED.into());
