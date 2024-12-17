@@ -1,3 +1,27 @@
+/*
+* MIT License
+*
+* Copyright (c) 2024 sockentrocken
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
 use mlua::prelude::*;
 use rapier3d::control::{CharacterAutostep, CharacterLength, KinematicCharacterController};
 use rapier3d::prelude::*;
@@ -140,14 +164,7 @@ impl mlua::UserData for Rapier {
         }
         */
         method.add_method_mut("character_controller", |lua, this, _: ()| {
-            let mut controller = KinematicCharacterController::default();
-            controller.autostep = Some(CharacterAutostep {
-                max_height: CharacterLength::Relative(0.5),
-                min_width: CharacterLength::Relative(0.5),
-                include_dynamic_bodies: true,
-            });
-
-            println!("{controller:?}");
+            let controller = KinematicCharacterController::default();
 
             let collider =
                 ColliderBuilder::cuboid(0.5, 1.0, 0.5).translation(vector![4.0, 2.0, 0.0]);
@@ -201,7 +218,8 @@ impl mlua::UserData for Rapier {
                     QueryFilter::default()
                         // Make sure the character we are trying to move isn’t considered an obstacle.
                         .exclude_collider(collider),
-                    |_| {}, // We don’t care about events in this example.
+                    |collision| {
+                    }, // We don’t care about events in this example.
                 );
 
                 let c = this.collider_set.get_mut(collider).unwrap();
