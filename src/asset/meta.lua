@@ -313,6 +313,85 @@ function quiver.input.pad.get_press(pad) end
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L565)
 function quiver.input.pad.get_release(pad) end
 
+---The Rapier API.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L11)
+---@class quiver.rapier
+quiver.rapier = {}
+
+---An unique handle for a Rapier simulation.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L25)
+---@class rapier
+rapier = {}
+
+---Create a new Rapier simulation.
+---@return rapier rapier # Rapier simulation.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L52)
+function quiver.rapier.new() end
+
+---Cast a ray.
+---@param ray ray # 
+---@param time number # 
+---@param filter table # 
+---@return boolean pick # 
+---@return number time # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L77)
+function rapier:cast_ray(ray,time,filter) end
+
+---Set the collider shape.
+---@param collider table # Collider.
+---@param shape vector_3 # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L112)
+function rapier:collider_set_shape(collider,shape) end
+
+---Create a kinematic character controller.
+---@return table controller # Controller.
+---@return table collider # Collider.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L142)
+function rapier:character_controller() end
+
+---Move a kinematic character controller.
+---@param controller table # Controller.
+---@param collider table # Collider.
+---@param velocity vector_3 # Velocity.
+---@param time_step number # Time step.
+---@return vector_3 translation # Translation.
+---@return boolean floor # Currently on floor.
+---@return boolean slide # Currently on slide.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L180)
+function rapier:move_character_controller(controller,collider,velocity,time_step) end
+
+---Create a convex mesh collider out of a point cloud.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L226)
+function rapier:collider_convex_mesh() end
+
+---Step the Rapier simulation.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L244)
+function rapier:step() end
+
+---Render the Rapier simulation.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L271)
+function rapier:debug_render() end
+
 ---The texture API.
 ---
 --- ---
@@ -325,14 +404,36 @@ quiver.texture = {}
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L77)
 ---@class texture
+---@field shape vector_2 # Shape of the texture.
 texture = {}
+
+---Draw a texture.
+---@param point vector_2 # 
+---@param angle number # 
+---@param scale number # 
+---@param color color # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L100)
+function texture:draw(point,angle,scale,color) end
+
+---Draw a texture (pro).
+---@param box_a box_2 # 
+---@param box_b box_2 # 
+---@param point vector_2 # 
+---@param angle number # 
+---@param color color # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L121)
+function texture:draw_pro(box_a,box_b,point,angle,color) end
 
 ---Create a new texture resource.
 ---@param path string # Path to texture file.
 ---@return texture texture # Texture resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L145)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L155)
 function quiver.texture.new(path) end
 
 ---The model API.
@@ -345,23 +446,41 @@ quiver.model = {}
 ---An unique handle for a model in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L26)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L35)
 ---@class model
+---@field mesh_count number # Mesh count.
+---@field bone_count number # Bone count.
+---@field material_count number # Material count.
 model = {}
 
 ---Create a new Model resource.
 ---@param path string # Path to model file.
----@return Model Model # Model resource.
+---@return model Model # Model resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L42)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L51)
 function quiver.model.new(path) end
 
----Draw the model (wire-frame render).
+---Bind a texture to the model.
+---@param texture texture # Texture to bind to model.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L74)
-function model:draw_wire() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L86)
+function model:bind(texture) end
+
+---Draw the model.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L102)
+function model:draw() end
+
+---Get the vertex data of a specific mesh in the model.
+---@param index number # Index of mesh.
+---@return table table # Vector3 table.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L120)
+function model:mesh_vertex(index) end
 
 ---The drawing API.
 ---
@@ -371,33 +490,87 @@ function model:draw_wire() end
 quiver.draw = {}
 
 ---Initialize drawing to the screen.
----@param closure function # The draw code.
+---@param call function # The draw code.
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L51)
-function quiver.draw.begin(closure) end
+function quiver.draw.begin(call) end
+
+---Initialize drawing (blend mode) to the screen.
+---@param call function # The draw code.
+---@param mode function # The draw code.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L74)
+function quiver.draw.begin_blend(call,mode) end
+
+---Initialize drawing (scissor mode) to the screen.
+---@param call function # The draw code.
+---@param view box_2 # The clip test region.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L96)
+function quiver.draw.begin_scissor(call,view) end
+
+---Get a ray for a 2D screen-space point.
+---@param camera camera_3d # The current camera.
+---@param point vector_2 # The screen-space point.
+---@param shape vector_2 # The size of the view-port.
+---@return ray ray # The 3D ray, beginning at the screen-space point, in 3D space.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L129)
+function quiver.draw.get_screen_to_world_3d(camera,point,shape) end
+
+---Get a 2D screen-space point for a 3D world-space point.
+---@param camera camera_3d # The current camera.
+---@param point vector_3 # The world-space point.
+---@param shape vector_2 # The size of the view-port.
+---@return vector_2 point # The 2D screen-space point.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L164)
+function quiver.draw.get_world_to_screen_3d(camera,point,shape) end
+
+---Get a world-space point for a 2D screen-space point.
+---@param camera camera_2d # The current camera.
+---@param point vector_2 # The screen-space point.
+---@return vector_2 point # The 2D world-space point.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L198)
+function quiver.draw.get_screen_to_world_2d(camera,point) end
+
+---Get a screen-space point for a 2D world-space point.
+---@param camera camera_2d # The current camera.
+---@param point vector_2 # The world-space point.
+---@return vector_2 point # The 2D screen-space point.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L226)
+function quiver.draw.get_world_to_screen_2d(camera,point) end
 
 ---Clear the screen with a color.
 ---@param color color # The color to use for clearing.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L71)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L249)
 function quiver.draw.clear(color) end
 
 ---The 2D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L87)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L265)
 ---@class quiver.draw_2d
 quiver.draw_2d = {}
 
 ---Initialize the 2D draw mode.
+---@param call function # The draw code.
 ---@param camera camera_2d # The 2D camera.
----@param function function # The draw code.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L111)
-function quiver.draw_2d.begin(camera,function) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L291)
+function quiver.draw_2d.begin(call,camera) end
 
 ---Draw 2D box.
 ---@param shape box_2 # The shape of the box.
@@ -406,7 +579,7 @@ function quiver.draw_2d.begin(camera,function) end
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L136)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L316)
 function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
 
 ---Draw text.
@@ -416,30 +589,51 @@ function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
 ---@param color color # The color of the text.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L162)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L342)
 function quiver.draw_2d.draw_text(label,point,scale,color) end
+
+---Draw a circle.
+---@param point vector_2 # 
+---@param radius number # 
+---@param color color # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L374)
+function quiver.draw_2d.draw_circle(point,radius,color) end
+
+---Draw the sector of a circle.
+---@param point vector_2 # 
+---@param radius number # 
+---@param begin_angle number # 
+---@param close_angle number # 
+---@param segment_count number # 
+---@param color color # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L402)
+function quiver.draw_2d.draw_circle_sector(point,radius,begin_angle,close_angle,segment_count,color) end
 
 ---The 3D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L189)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L436)
 ---@class quiver.draw_3d
 quiver.draw_3d = {}
 
 ---Initialize the 3D draw mode.
+---@param call function # The draw code.
 ---@param camera camera_3d # The 2D camera.
----@param function function # The draw code.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L215)
-function quiver.draw_3d.begin(camera,function) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L462)
+function quiver.draw_3d.begin(call,camera) end
 
 ---Draw a grid.
 ---@param slice number # The slice count of the grid.
 ---@param space number # The space shift of the grid.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L238)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L485)
 function quiver.draw_3d.draw_grid(slice,space) end
 
 ---Draw a cube.
@@ -448,7 +642,7 @@ function quiver.draw_3d.draw_grid(slice,space) end
 ---@param color color # The color of the cube.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L256)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L503)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a ball.
@@ -457,7 +651,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L281)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L528)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a 3D box.
@@ -465,7 +659,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L301)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L548)
 function quiver.draw_3d.draw_box_3(shape,color) end
 
 ---The general API.

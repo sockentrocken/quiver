@@ -18,10 +18,19 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     Ok(())
 }
 
-type RLModel = ffi::Model;
+type RLModel = raylib::models::Model;
 
 /* class
-{ "version": "1.0.0", "name": "model", "info": "An unique handle for a model in memory." }
+{
+    "version": "1.0.0",
+    "name": "model",
+    "info": "An unique handle for a model in memory.",
+    "member": [
+        { "name": "mesh_count",     "info": "Mesh count.",     "kind": "number" },
+        { "name": "bone_count",     "info": "Bone count.",     "kind": "number" },
+        { "name": "material_count", "info": "Material count.", "kind": "number" }
+    ]
+}
 */
 pub struct Model(pub RLModel);
 
@@ -35,7 +44,7 @@ impl Model {
             { "name": "path", "info": "Path to model file.", "kind": "string" }
         ],
         "result": [
-            { "name": "Model", "info": "Model resource.", "kind": "Model" }
+            { "name": "Model", "info": "Model resource.", "kind": "model" }
         ]
     }
     */
@@ -46,7 +55,7 @@ impl Model {
             let data = ffi::LoadModel(name.as_ptr());
 
             if ffi::IsModelValid(data) {
-                Ok(Self(data))
+                Ok(Self(RLModel::from_raw(data)))
             } else {
                 Err(mlua::Error::RuntimeError(format!(
                     "Model::new(): Could not load file \"{path}\"."
@@ -56,24 +65,61 @@ impl Model {
     }
 }
 
-impl Drop for Model {
-    fn drop(&mut self) {
-        unsafe {
-            ffi::UnloadModel(self.0);
-        }
-    }
-}
-
 impl mlua::UserData for Model {
-    fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
+    fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
+        field.add_field_method_get("mesh_count", |_, this| Ok(this.0.meshCount));
+        field.add_field_method_get("material_count", |_, this| Ok(this.0.materialCount));
+        field.add_field_method_get("bone_count", |_, this| Ok(this.0.boneCount));
+    }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
         /* entry
-        { "version": "1.0.0", "name": "model:draw_wire", "info": "Draw the model (wire-frame render)." }
+        {
+            "version": "1.0.0",
+            "name": "model:bind",
+            "info": "Bind a texture to the model.",
+            "member": [
+                { "name": "texture", "info": "Texture to bind to model.", "kind": "texture" }
+            ]
+        }
         */
-        method.add_method("draw_wire", |_, this, ()| unsafe {
-            ffi::DrawModelWires(this.0, Vector3::zero().into(), 1.0, Color::RED.into());
+        method.add_method_mut("bind", |_, this, texture: LuaAnyUserData| {
+            if texture.is::<crate::system::texture::Texture>() {
+                let texture = texture.borrow::<crate::system::texture::Texture>().unwrap();
+                let texture = &*texture;
+
+                this.0.materials_mut()[0].maps_mut()
+                    [MaterialMapIndex::MATERIAL_MAP_ALBEDO as usize]
+                    .texture = *texture.0;
+            }
+
             Ok(())
+        });
+
+        /* entry
+        { "version": "1.0.0", "name": "model:draw", "info": "Draw the model." }
+        */
+        method.add_method("draw", |_, this, ()| unsafe {
+            ffi::DrawModel(*this.0, Vector3::zero().into(), 1.0, Color::WHITE.into());
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:mesh_vertex",
+            "info": "Get the vertex data of a specific mesh in the model.",
+            "member": [
+                { "name": "index", "info": "Index of mesh.", "kind": "number" }
+            ],
+            "result": [
+                { "name": "table", "info": "Vector3 table.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method("mesh_vertex", |lua, this, index: usize| {
+            let mesh = &this.0.meshes()[index];
+            lua.to_value(mesh.vertices())
         });
     }
 }

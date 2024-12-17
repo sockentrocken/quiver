@@ -83,15 +83,19 @@ quiver = {}
     #[rustfmt::skip]
     const META_CLASS_HEADER: &'static str =
 r#"---{info}
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/{path}#L{line})
+"#;
+
+    #[rustfmt::skip]
+    const META_CLASS_MIDDLE: &'static str =
+r#"---@class {name}
 "#;
 
     #[rustfmt::skip]
     const META_CLASS_FOOTER: &'static str =
-r#"---
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/{path}#L{line})
----@class {name}
-{name} = {}
+r#"{name} = {}
 
 "#;
 
@@ -272,6 +276,8 @@ r#"* Return: `{name}` – {info}
 
         let mut data = Self::META_CLASS_HEADER.to_string();
         data = data.replace("{info}", &class.info);
+        data = data.replace("{path}", path);
+        data = data.replace("{line}", &format!("{}", line + 2));
 
         if self.example {
             data.push_str("---```lua\n");
@@ -285,8 +291,11 @@ r#"* Return: `{name}` – {info}
             data.push_str("---```\n");
         }
 
-        if let Some(class_member) = class.member {
-            for member in class_member {
+        data.push_str(Self::META_CLASS_MIDDLE);
+        data = data.replace("{name}", &class.name);
+
+        if let Some(entry_member) = &class.member {
+            for member in entry_member {
                 let field = Self::META_MEMBER;
                 let field = field.replace("{name}", &member.name);
                 let field = field.replace("{kind}", &member.kind);
@@ -297,8 +306,6 @@ r#"* Return: `{name}` – {info}
 
         data.push_str(Self::META_CLASS_FOOTER);
         data = data.replace("{name}", &class.name);
-        data = data.replace("{path}", path);
-        data = data.replace("{line}", &format!("{}", line + 2));
 
         self.meta_file
             .write_all(data.as_bytes())

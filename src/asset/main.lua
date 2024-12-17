@@ -31,17 +31,17 @@ end
 --[[----------------------------------------------------------------]]
 
 function draw()
-    quiver.draw.clear(color:new(1.0, 1.0, 1.0, 1.0))
+    quiver.draw.clear(color:new(255.0, 255.0, 255.0, 255.0))
 
     local x = math.sin(time)
     local z = math.cos(time)
 
     -- Begin the 3D draw mode.
-    quiver.draw_3d.begin(camera_3d:new(vector_3:new(x * 4.0, 4.0, z * 4.0), vector_3:zero(),
-        vector_3:new(0.0, 1.0, 0.0), 90.0), draw_3d)
+    quiver.draw_3d.begin(draw_3d, camera_3d:new(vector_3:new(x * 4.0, 4.0, z * 4.0), vector_3:zero(),
+        vector_3:new(0.0, 1.0, 0.0), 90.0))
 
     -- Begin the 2D draw mode.
-    quiver.draw_2d.begin(camera_2d:new(vector_2:zero(), vector_2:zero(), 0.0, 1.0), draw_2d)
+    quiver.draw_2d.begin(draw_2d, camera_2d:new(vector_2:zero(), vector_2:zero(), 0.0, 1.0))
 end
 
 --[[----------------------------------------------------------------]]
@@ -51,14 +51,14 @@ function draw_3d()
     quiver.draw_3d.draw_grid(64.0, 1.0)
 
     -- Draw a cube.
-    quiver.draw_3d.draw_cube(vector_3:zero(), vector_3:one(), color:new(1.0, 0.0, 0.0, 1.0))
+    quiver.draw_3d.draw_cube(vector_3:zero(), vector_3:one(), color:new(255.0, 0.0, 0.0, 255.0))
 end
 
 --[[----------------------------------------------------------------]]
 
 function draw_2d()
     -- Draw text.
-    quiver.draw_2d.draw_text("Hello, world!", vector_2:new(16.0, 16.0), 32.0, color:new(1.0, 0.0, 0.0, 1.0))
+    quiver.draw_2d.draw_text("Hello, world!", vector_2:new(16.0, 16.0), 32.0, color:new(255.0, 0.0, 0.0, 255.0))
 end
 
 --[[----------------------------------------------------------------]]

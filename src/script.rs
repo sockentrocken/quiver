@@ -134,6 +134,7 @@ impl Script {
 
         // set the standard Quiver library.
         general::set_global(lua, &quiver)?;
+        rapier::set_global(lua, &quiver)?;
         window::set_global(lua, &quiver)?;
         draw::set_global(lua, &quiver)?;
         input::set_global(lua, &quiver)?;

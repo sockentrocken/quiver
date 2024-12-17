@@ -2,7 +2,6 @@
 ---@field x number
 ---@field y number
 vector_2 = {
-    _type = "vector_2",
     x = 0.0,
     y = 0.0,
 }
@@ -46,7 +45,6 @@ end
 ---@field y number
 ---@field z number
 vector_3 = {
-    _type = "vector_3",
     x = 0.0,
     y = 0.0,
     z = 0.0,
@@ -97,7 +95,6 @@ end
 ---@field angle number
 ---@field zoom  number
 camera_2d = {
-    _type = "camera_2d",
     shift = vector_2:zero(),
     focus = vector_2:zero(),
     angle = 0.0,
@@ -179,7 +176,6 @@ end
 ---@field width  number
 ---@field height number
 box_2 = {
-    _type = "box_2",
     x = 0.0,
     y = 0.0,
     width = 0.0,
@@ -202,7 +198,6 @@ end
 ---@field min vector_3
 ---@field max vector_3
 box_3 = {
-    _type = "box_3",
     min = vector_3:zero(),
     max = vector_3:zero(),
 }
@@ -214,6 +209,24 @@ function box_3:new(min, max)
     })
     i.min = min
     i.max = max
+    return i
+end
+
+---@class ray
+---@field position  vector_3
+---@field direction vector_3
+ray = {
+    position  = vector_3:zero(),
+    direction = vector_3:zero(),
+}
+
+function ray:new(position, direction)
+    local i = {}
+    setmetatable(i, {
+        __index = self
+    })
+    i.position  = position
+    i.direction = direction
     return i
 end
 

@@ -10,6 +10,7 @@ use crate::status::*;
 //================================================================
 
 // the main entry-point.
+#[rustfmt::skip]
 fn main() {
     // create the RL context.
     let (mut handle, thread, _audio) = Status::window();

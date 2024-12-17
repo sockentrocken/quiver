@@ -69,28 +69,33 @@ fn texture_pro_draw(
     "version": "1.0.0",
     "name": "texture",
     "info": "An unique handle for a texture in memory.",
-    "field": [
+    "member": [
         { "name": "shape", "info": "Shape of the texture.", "kind": "vector_2" }
     ]
 }
 */
-struct Texture(RLTexture);
+pub struct Texture(pub RLTexture);
 
 impl mlua::UserData for Texture {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
-        field.add_field_method_get("size", |lua: &Lua, this| {
+        field.add_field_method_get("shape", |lua: &Lua, this| {
             lua.to_value(&Vector2::new(this.0.width as f32, this.0.height as f32))
         });
     }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
-        /*
-        ---Draw the texture.
-        ---@param point vector_2 The point of the texture.
-        ---@param angle number   The angle of the texture.
-        ---@param scale number   The scale of the texture.
-        ---@param color color    The color of the texture.
-        function texture:draw(point, angle, scale, color) end
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "texture:draw",
+            "info": "Draw a texture.",
+            "member": [
+                { "name": "point", "info": "", "kind": "vector_2" },
+                { "name": "angle", "info": "", "kind": "number"   },
+                { "name": "scale", "info": "", "kind": "number"   },
+                { "name": "color", "info": "", "kind": "color"    }
+            ]
+        }
         */
         method.add_method(
             "draw",
@@ -99,14 +104,19 @@ impl mlua::UserData for Texture {
             },
         );
 
-        /*
-        ---Draw the texture (pro variant).
-        ---@param box_a box_2    The source rectangle of the texture.
-        ---@param box_b box_2    The target rectangle of the texture.
-        ---@param point vector_2 The point of the texture.
-        ---@param angle number   The angle of the texture.
-        ---@param color color    The color of the texture.
-        function texture:draw_pro(box_a, box_b, point, angle, color) end
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "texture:draw_pro",
+            "info": "Draw a texture (pro).",
+            "member": [
+                { "name": "box_a", "info": "", "kind": "box_2"    },
+                { "name": "box_b", "info": "", "kind": "box_2"    },
+                { "name": "point", "info": "", "kind": "vector_2" },
+                { "name": "angle", "info": "", "kind": "number"   },
+                { "name": "color", "info": "", "kind": "color"    }
+            ]
+        }
         */
         method.add_method(
                 "draw_pro",

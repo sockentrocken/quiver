@@ -42,15 +42,17 @@ impl Status {
         }
     }
 
+    // create a RL context.
     pub fn window() -> (RaylibHandle, RaylibThread, RaylibAudio) {
-        // create RL context.
+        // create RL window, thread.
         let (mut handle, thread) = raylib::init()
             .resizable()
             .msaa_4x()
-            .vsync()
             .size(1024, 768)
             .title("Quiver")
             .build();
+
+        handle.set_target_fps(144);
 
         // create RL audio context.
         let audio = RaylibAudio::init_audio_device()
@@ -97,11 +99,15 @@ impl Status {
                 }
             }
             // error, go to failure state.
-            Err(result) => Some(Status::Failure(
-                Window::new(handle, thread),
-                Some(script.clone()),
-                result.to_string(),
-            )),
+            Err(result) => {
+                handle.enable_cursor();
+
+                Some(Status::Failure(
+                    Window::new(handle, thread),
+                    Some(script.clone()),
+                    result.to_string(),
+                ))
+            }
         }
     }
 

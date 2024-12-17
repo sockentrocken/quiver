@@ -6,6 +6,7 @@ use raylib::prelude::*;
 
 //================================================================
 
+// window structure, responsible for drawing the missing/failure interface.
 pub struct Window {
     data: [gizmo::Data; Self::GIZMO_COUNT],
     font: Font,
@@ -17,8 +18,9 @@ pub struct Window {
 
 impl Window {
     const COLOR_PRIMARY_MAIN: Color = Color::new(255, 87, 34, 255);
-    const COLOR_PRIMARY_SIDE: Color = Color::new(230, 74, 25, 255);
-    const COLOR_TEXT: Color = Color::new(255, 255, 255, 255);
+    const COLOR_PRIMARY_SIDE: Color = Color::new(255, 152, 0, 255);
+    const COLOR_TEXT_WHITE: Color = Color::new(255, 255, 255, 255);
+    const COLOR_TEXT_BLACK: Color = Color::new(33, 33, 33, 255);
 
     //================================================================
 
@@ -109,7 +111,11 @@ impl Window {
 
         // create a new info file for a module, which doesn't exist yet.
         if self.button(&mut draw, "New Module") {
-            let module = rfd::FileDialog::new().set_directory("/").pick_folder();
+            let path = std::env::current_dir()
+                .map_err(|e| Status::panic(&e.to_string()))
+                .unwrap();
+
+            let module = rfd::FileDialog::new().set_directory(path).pick_folder();
 
             if let Some(module) = module {
                 Script::new_module(&module.display().to_string());
@@ -121,7 +127,11 @@ impl Window {
 
         // create a new info file for a module.
         if self.button(&mut draw, "Load Module") {
-            let module = rfd::FileDialog::new().set_directory("/").pick_folder();
+            let path = std::env::current_dir()
+                .map_err(|e| Status::panic(&e.to_string()))
+                .unwrap();
+
+            let module = rfd::FileDialog::new().set_directory(path).pick_folder();
 
             if let Some(module) = module {
                 Script::load_module(&module.display().to_string());
@@ -168,9 +178,14 @@ impl Window {
             &mut draw,
             "Fatal Error",
             Vector2::new(20.0, 12.0),
-            Color::BLACK,
+            Self::COLOR_TEXT_WHITE,
         );
-        self.font(&mut draw, text, Vector2::new(20.0, 72.0), Color::BLACK);
+        self.font(
+            &mut draw,
+            text,
+            Vector2::new(20.0, 72.0),
+            Self::COLOR_TEXT_BLACK,
+        );
 
         // button footer.
         self.point(Vector2::new(20.0, draw_shape.y - 136.0));
@@ -276,7 +291,12 @@ impl Window {
             data.get_shape(&rectangle),
             data.get_color(&Window::COLOR_PRIMARY_SIDE),
         );
-        self.font(draw, text, text_point, data.get_color(&Self::COLOR_TEXT));
+        self.font(
+            draw,
+            text,
+            text_point,
+            data.get_color(&Self::COLOR_TEXT_WHITE),
+        );
 
         // increment the point of the next gizmo.
         self.point.y += Self::BUTTON_SHAPE.y + Self::BUTTON_SHIFT;

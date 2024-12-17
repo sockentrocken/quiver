@@ -24,13 +24,13 @@ mod draw_general {
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw = lua.create_table()?;
 
-        draw.set("begin",       lua.create_function(self::begin)?)?;
-        //draw.set("begin_blend", lua.create_function(self::begin_blend)?)?;
-        //draw.set("begin_shape", lua.create_function(self::begin_shape)?)?;
-        //draw.set("get_screen_to_world_3d", lua.create_function(self::begin_shape)?)?;
-        //draw.set("get_world_to_screen_3d", lua.create_function(self::begin_shape)?)?;
-        //draw.set("get_screen_to_world_2d", lua.create_function(self::begin_shape)?)?;
-        //draw.set("get_world_to_screen_2d", lua.create_function(self::begin_shape)?)?;
+        draw.set("begin",         lua.create_function(self::begin)?)?;
+        draw.set("begin_blend",   lua.create_function(self::begin_blend)?)?;
+        draw.set("begin_scissor", lua.create_function(self::begin_scissor)?)?;
+        draw.set("get_screen_to_world_3d", lua.create_function(self::get_screen_to_world_3d)?)?;
+        draw.set("get_world_to_screen_3d", lua.create_function(self::get_world_to_screen_3d)?)?;
+        draw.set("get_screen_to_world_2d", lua.create_function(self::get_screen_to_world_2d)?)?;
+        draw.set("get_world_to_screen_2d", lua.create_function(self::get_world_to_screen_2d)?)?;
         draw.set("clear", lua.create_function(self::clear)?)?;
 
         table.set("draw", draw)?;
@@ -44,7 +44,7 @@ mod draw_general {
         "name": "quiver.draw.begin",
         "info": "Initialize drawing to the screen.",
         "member": [
-            { "name": "closure", "info": "The draw code.", "kind": "function" }
+            { "name": "call", "info": "The draw code.", "kind": "function" }
         ]
     }
     */
@@ -56,6 +56,184 @@ mod draw_general {
 
             ffi::EndDrawing();
             Ok(())
+        }
+    }
+
+    // to-do: blend mode enumerator. error if mode is outside of the enum range.
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.begin_blend",
+        "info": "Initialize drawing (blend mode) to the screen.",
+        "member": [
+            { "name": "call", "info": "The draw code.", "kind": "function" },
+            { "name": "mode", "info": "The draw code.", "kind": "function" }
+        ]
+    }
+    */
+    fn begin_blend(_: &Lua, (call, mode): (mlua::Function, i32)) -> mlua::Result<()> {
+        unsafe {
+            ffi::BeginBlendMode(mode);
+
+            call.call::<()>(())?;
+
+            ffi::EndBlendMode();
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.begin_scissor",
+        "info": "Initialize drawing (scissor mode) to the screen.",
+        "member": [
+            { "name": "call", "info": "The draw code.",        "kind": "function" },
+            { "name": "view", "info": "The clip test region.", "kind": "box_2"    }
+        ]
+    }
+    */
+    fn begin_scissor(lua: &Lua, (call, view): (mlua::Function, LuaValue)) -> mlua::Result<()> {
+        let view: Rectangle = lua.from_value(view)?;
+
+        unsafe {
+            ffi::BeginScissorMode(
+                view.x as i32,
+                view.y as i32,
+                view.width as i32,
+                view.height as i32,
+            );
+
+            call.call::<()>(())?;
+
+            ffi::EndScissorMode();
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.get_screen_to_world_3d",
+        "info": "Get a ray for a 2D screen-space point.",
+        "member": [
+            { "name": "camera", "info": "The current camera.",        "kind": "camera_3d" },
+            { "name": "point",  "info": "The screen-space point.",    "kind": "vector_2"  },
+            { "name": "shape",  "info": "The size of the view-port.", "kind": "vector_2"  }
+        ],
+        "result": [
+            { "name": "ray", "info": "The 3D ray, beginning at the screen-space point, in 3D space.", "kind": "ray" }
+        ]
+    }
+    */
+    fn get_screen_to_world_3d(
+        lua: &Lua,
+        (camera, point, shape): (LuaValue, LuaValue, LuaValue),
+    ) -> mlua::Result<LuaValue> {
+        let camera: general::Camera3D = lua.from_value(camera)?;
+        let point: Vector2 = lua.from_value(point)?;
+        let shape: Vector2 = lua.from_value(shape)?;
+
+        unsafe {
+            let ray = ffi::GetScreenToWorldRayEx(
+                point.into(),
+                camera.into(),
+                shape.x as i32,
+                shape.y as i32,
+            );
+
+            lua.to_value(&Ray::from(ray))
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.get_world_to_screen_3d",
+        "info": "Get a 2D screen-space point for a 3D world-space point.",
+        "member": [
+            { "name": "camera", "info": "The current camera.",        "kind": "camera_3d" },
+            { "name": "point",  "info": "The world-space point.",     "kind": "vector_3"  },
+            { "name": "shape",  "info": "The size of the view-port.", "kind": "vector_2"  }
+        ],
+        "result": [
+            { "name": "point", "info": "The 2D screen-space point.", "kind": "vector_2" }
+        ]
+    }
+    */
+    fn get_world_to_screen_3d(
+        lua: &Lua,
+        (camera, point, shape): (LuaValue, LuaValue, LuaValue),
+    ) -> mlua::Result<LuaValue> {
+        let camera: general::Camera3D = lua.from_value(camera)?;
+        let point: Vector3 = lua.from_value(point)?;
+        let shape: Vector2 = lua.from_value(shape)?;
+
+        unsafe {
+            let point = ffi::GetWorldToScreenEx(
+                point.into(),
+                camera.into(),
+                shape.x as i32,
+                shape.y as i32,
+            );
+
+            lua.to_value(&Vector2::from(point))
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.get_screen_to_world_2d",
+        "info": "Get a world-space point for a 2D screen-space point.",
+        "member": [
+            { "name": "camera", "info": "The current camera.",     "kind": "camera_2d" },
+            { "name": "point",  "info": "The screen-space point.", "kind": "vector_2"  }
+        ],
+        "result": [
+            { "name": "point", "info": "The 2D world-space point.", "kind": "vector_2" }
+        ]
+    }
+    */
+    fn get_screen_to_world_2d(
+        lua: &Lua,
+        (camera, point): (LuaValue, LuaValue),
+    ) -> mlua::Result<LuaValue> {
+        let camera: general::Camera2D = lua.from_value(camera)?;
+        let point: Vector2 = lua.from_value(point)?;
+
+        unsafe {
+            let point = ffi::GetScreenToWorld2D(point.into(), camera.into());
+
+            lua.to_value(&Vector2::from(point))
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.get_world_to_screen_2d",
+        "info": "Get a screen-space point for a 2D world-space point.",
+        "member": [
+            { "name": "camera", "info": "The current camera.",    "kind": "camera_2d" },
+            { "name": "point",  "info": "The world-space point.", "kind": "vector_2"  }
+        ],
+        "result": [
+            { "name": "point", "info": "The 2D screen-space point.", "kind": "vector_2" }
+        ]
+    }
+    */
+    fn get_world_to_screen_2d(
+        lua: &Lua,
+        (camera, point): (LuaValue, LuaValue),
+    ) -> mlua::Result<LuaValue> {
+        let camera: general::Camera2D = lua.from_value(camera)?;
+        let point: Vector2 = lua.from_value(point)?;
+
+        unsafe {
+            let point = ffi::GetWorldToScreen2D(point.into(), camera.into());
+
+            lua.to_value(&Vector2::from(point))
         }
     }
 
@@ -91,6 +269,8 @@ mod draw_2d {
         draw_2d.set("begin", lua.create_function(self::begin)?)?;
         draw_2d.set("draw_box_2", lua.create_function(self::draw_box_2)?)?;
         draw_2d.set("draw_text", lua.create_function(self::draw_text)?)?;
+        draw_2d.set("draw_circle", lua.create_function(self::draw_circle)?)?;
+        draw_2d.set("draw_circle_sector", lua.create_function(self::draw_circle_sector)?)?;
 
         table.set("draw_2d", draw_2d)?;
 
@@ -103,12 +283,12 @@ mod draw_2d {
         "name": "quiver.draw_2d.begin",
         "info": "Initialize the 2D draw mode.",
         "member": [
-            { "name": "camera",   "info": "The 2D camera.", "kind": "camera_2d" },
-            { "name": "function", "info": "The draw code.", "kind": "function"  }
+            { "name": "call",   "info": "The draw code.", "kind": "function"  },
+            { "name": "camera", "info": "The 2D camera.", "kind": "camera_2d" }
         ]
     }
     */
-    fn begin(lua: &Lua, (camera, call): (LuaValue, mlua::Function)) -> mlua::Result<()> {
+    fn begin(lua: &Lua, (call, camera): (mlua::Function, LuaValue)) -> mlua::Result<()> {
         let value: general::Camera2D = lua.from_value(camera)?;
 
         unsafe {
@@ -178,6 +358,73 @@ mod draw_2d {
             Ok(())
         }
     }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_circle",
+        "info": "Draw a circle.",
+        "member": [
+            { "name": "point",  "info": "", "kind": "vector_2" },
+            { "name": "radius", "info": "", "kind": "number"   },
+            { "name": "color",  "info": "", "kind": "color"    }
+        ]
+    }
+    */
+    fn draw_circle(
+        lua: &Lua,
+        (point, radius, color): (LuaValue, f32, LuaValue),
+    ) -> mlua::Result<()> {
+        let point: Vector2 = lua.from_value(point)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawCircleV(point.into(), radius, color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_circle_sector",
+        "info": "Draw the sector of a circle.",
+        "member": [
+            { "name": "point",         "info": "", "kind": "vector_2" },
+            { "name": "radius",        "info": "", "kind": "number"   },
+            { "name": "begin_angle",   "info": "", "kind": "number"   },
+            { "name": "close_angle",   "info": "", "kind": "number"   },
+            { "name": "segment_count", "info": "", "kind": "number"   },
+            { "name": "color",         "info": "", "kind": "color"    }
+        ]
+    }
+    */
+    fn draw_circle_sector(
+        lua: &Lua,
+        (point, radius, begin_angle, close_angle, segment_count, color): (
+            LuaValue,
+            f32,
+            f32,
+            f32,
+            i32,
+            LuaValue,
+        ),
+    ) -> mlua::Result<()> {
+        let point: Vector2 = lua.from_value(point)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawCircleSector(
+                point.into(),
+                radius,
+                begin_angle,
+                close_angle,
+                segment_count,
+                color.into(),
+            );
+            Ok(())
+        }
+    }
 }
 
 mod draw_3d {
@@ -207,12 +454,12 @@ mod draw_3d {
         "name": "quiver.draw_3d.begin",
         "info": "Initialize the 3D draw mode.",
         "member": [
-            { "name": "camera",   "info": "The 2D camera.", "kind": "camera_3d" },
-            { "name": "function", "info": "The draw code.", "kind": "function"  }
+            { "name": "call",   "info": "The draw code.", "kind": "function"  },
+            { "name": "camera", "info": "The 2D camera.", "kind": "camera_3d" }
         ]
     }
     */
-    fn begin(lua: &Lua, (camera, call): (LuaValue, mlua::Function)) -> mlua::Result<()> {
+    fn begin(lua: &Lua, (call, camera): (mlua::Function, LuaValue)) -> mlua::Result<()> {
         let value: general::Camera3D = lua.from_value(camera)?;
 
         unsafe {
