@@ -39,6 +39,12 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 
     table.set("model", model)?;
 
+    let model_animation = lua.create_table()?;
+
+    model_animation.set("new", lua.create_function(self::ModelAnimation::new)?)?;
+
+    table.set("model_animation", model_animation)?;
+
     Ok(())
 }
 
@@ -68,7 +74,7 @@ impl Model {
             { "name": "path", "info": "Path to model file.", "kind": "string" }
         ],
         "result": [
-            { "name": "Model", "info": "Model resource.", "kind": "model" }
+            { "name": "model", "info": "Model resource.", "kind": "model" }
         ]
     }
     */
@@ -121,12 +127,58 @@ impl mlua::UserData for Model {
         });
 
         /* entry
-        { "version": "1.0.0", "name": "model:draw", "info": "Draw the model." }
+        {
+            "version": "1.0.0",
+            "name": "model:draw",
+            "info": "Draw the model.",
+            "member": [
+                { "name": "point", "info": "", "kind": "vector_3" },
+                { "name": "scale", "info": "", "kind": "number"   },
+                { "name": "color", "info": "", "kind": "color"    }
+            ]
+        }
         */
-        method.add_method("draw", |_, this, ()| unsafe {
-            ffi::DrawModel(*this.0, Vector3::zero().into(), 1.0, Color::WHITE.into());
-            Ok(())
-        });
+        method.add_method(
+            "draw",
+            |lua, this, (point, scale, color): (LuaValue, f32, LuaValue)| unsafe {
+                let point: Vector3 = lua.from_value(point)?;
+                let color: Color = lua.from_value(color)?;
+
+                ffi::DrawModel(*this.0, point.into(), scale, color.into());
+                Ok(())
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:draw_transform",
+            "info": "Draw the model with a transformation.",
+            "member": [
+                { "name": "point", "info": "", "kind": "vector_3" },
+                { "name": "angle", "info": "", "kind": "vector_4" },
+                { "name": "scale", "info": "", "kind": "vector_3" },
+                { "name": "color", "info": "", "kind": "color"    }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "draw_transform",
+            |lua, this, (point, angle, scale, color): (LuaValue, LuaValue, LuaValue, LuaValue)| unsafe {
+                let point: Vector3 = lua.from_value(point)?;
+                let angle: Vector4 = lua.from_value(angle)?;
+                let scale: Vector3 = lua.from_value(scale)?;
+                let color: Color = lua.from_value(color)?;
+
+                this.0.transform = (angle.to_matrix() * Matrix::scale(scale.x, scale.y, scale.z)).into();
+
+                ffi::DrawModel(*this.0, point.into(), 1.0, color.into());
+
+                this.0.transform = Matrix::identity().into();
+
+                Ok(())
+            },
+        );
 
         /* entry
         {
@@ -145,5 +197,94 @@ impl mlua::UserData for Model {
             let mesh = &this.0.meshes()[index];
             lua.to_value(mesh.vertices())
         });
+    }
+}
+
+type RLModelAnimation = raylib::models::ModelAnimation;
+
+/* class
+{
+    "version": "1.0.0",
+    "name": "model_animation",
+    "info": "An unique handle for a model animation in memory."
+}
+*/
+pub struct ModelAnimation(pub Vec<RLModelAnimation>);
+
+impl ModelAnimation {
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.model_animation.new",
+        "info": "Create a new ModelAnimation resource.",
+        "member": [
+            { "name": "path", "info": "Path to model file.", "kind": "string" }
+        ],
+        "result": [
+            { "name": "model_animation", "info": "ModelAnimation resource.", "kind": "model_animation" }
+        ]
+    }
+    */
+    fn new(_: &Lua, path: String) -> mlua::Result<Self> {
+        let name = CString::new(path.clone()).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+        unsafe {
+            let mut count = 0;
+            let data = ffi::LoadModelAnimations(name.as_ptr(), &mut count);
+            let mut list: Vec<RLModelAnimation> = Vec::new();
+
+            if count == 0 {
+                return Err(mlua::Error::RuntimeError(format!(
+                    "ModelAnimation::new(): Could not load file \"{path}\"."
+                )));
+            }
+
+            for x in 0..count {
+                let animation = data.wrapping_add(x.try_into().unwrap());
+
+                println!("Pushing animation {x}");
+
+                list.push(RLModelAnimation::from_raw(*animation));
+            }
+
+            Ok(Self(list))
+        }
+    }
+}
+
+impl mlua::UserData for ModelAnimation {
+    fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
+
+    fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model_animation:update",
+            "info": "Update model with new model animation data.",
+            "member": [
+                { "name": "model", "info": "", "kind": "model"  },
+                { "name": "index", "info": "", "kind": "number" },
+                { "name": "frame", "info": "", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method(
+            "update",
+            |_, this, (model, index, frame): (LuaAnyUserData, usize, usize)| {
+                let animation = this.0.get(index).unwrap();
+
+                if model.is::<Model>() {
+                    let model = model.borrow::<Model>().unwrap();
+
+                    unsafe {
+                        ffi::UpdateModelAnimation(*model.0, **animation, frame.try_into().unwrap());
+                    }
+                } else {
+                    panic!("not model");
+                }
+
+                Ok(())
+            },
+        );
     }
 }

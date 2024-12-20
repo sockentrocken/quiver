@@ -466,6 +466,7 @@ mod draw_3d {
         draw_3d.set("draw_cube", lua.create_function(self::draw_cube)?)?;
         draw_3d.set("draw_ball", lua.create_function(self::draw_ball)?)?;
         draw_3d.set("draw_box_3", lua.create_function(self::draw_box_3)?)?;
+        draw_3d.set("draw_ray", lua.create_function(self::draw_ray)?)?;
 
         table.set("draw_3d", draw_3d)?;
 
@@ -575,6 +576,26 @@ mod draw_3d {
 
         unsafe {
             ffi::DrawBoundingBox(box_3.into(), color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_ray",
+        "info": "Draw a ray.",
+        "member": [
+            { "name": "ray",   "info": "The ray.",              "kind": "ray"   },
+            { "name": "color", "info": "The color of the ray.", "kind": "color" }
+        ]
+    }
+    */
+    fn draw_ray(lua: &Lua, (ray, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
+        let ray: Ray = lua.from_value(ray)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawRay(ray.into(), color.into());
             Ok(())
         }
     }

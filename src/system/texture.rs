@@ -29,6 +29,7 @@ use std::ffi::CString;
 //================================================================
 
 type RLTexture = raylib::core::texture::Texture2D;
+type RLRenderTexture = raylib::core::texture::RenderTexture2D;
 
 //================================================================
 
@@ -42,6 +43,12 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     texture.set("new", lua.create_function(self::Texture::new)?)?;
 
     table.set("texture", texture)?;
+
+    let render_texture = lua.create_table()?;
+
+    render_texture.set("new", lua.create_function(self::RenderTexture::new)?)?;
+
+    table.set("render_texture", render_texture)?;
 
     Ok(())
 }
@@ -188,6 +195,136 @@ impl Texture {
                 Err(mlua::Error::RuntimeError(format!(
                     "Texture::new(): Could not load file \"{path}\"."
                 )))
+            }
+        }
+    }
+}
+
+/* class
+{
+    "version": "1.0.0",
+    "name": "render_texture",
+    "info": "An unique handle for a render texture in memory.",
+    "member": [
+        { "name": "shape", "info": "Shape of the texture.", "kind": "vector_2" }
+    ]
+}
+*/
+pub struct RenderTexture(pub RLRenderTexture);
+
+impl mlua::UserData for RenderTexture {
+    fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
+        field.add_field_method_get("shape", |lua: &Lua, this| {
+            lua.to_value(&Vector2::new(this.0.width() as f32, this.0.height() as f32))
+        });
+    }
+
+    fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "render_texture:begin",
+            "info": "Initialize drawing to the render texture.",
+            "member": [
+                { "name": "call", "info": "The draw code.", "kind": "function" }
+            ]
+        }
+        */
+        method.add_method("begin", |_: &Lua, this, call: mlua::Function| {
+            unsafe {
+                ffi::BeginTextureMode(*this.0);
+
+                call.call::<()>(())?;
+
+                ffi::EndTextureMode();
+            }
+
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "render_texture:draw",
+            "info": "Draw a texture.",
+            "member": [
+                { "name": "point", "info": "", "kind": "vector_2" },
+                { "name": "angle", "info": "", "kind": "number"   },
+                { "name": "scale", "info": "", "kind": "number"   },
+                { "name": "color", "info": "", "kind": "color"    }
+            ]
+        }
+        */
+        method.add_method(
+            "draw",
+            |lua: &Lua, this, (point, angle, scale, color): (LuaValue, f32, f32, LuaValue)| {
+                Ok(texture_draw(
+                    lua,
+                    (&this.0.texture, point, angle, scale, color),
+                ))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "render_texture:draw_pro",
+            "info": "Draw a texture (pro).",
+            "member": [
+                { "name": "box_a", "info": "", "kind": "box_2"    },
+                { "name": "box_b", "info": "", "kind": "box_2"    },
+                { "name": "point", "info": "", "kind": "vector_2" },
+                { "name": "angle", "info": "", "kind": "number"   },
+                { "name": "color", "info": "", "kind": "color"    }
+            ]
+        }
+        */
+        method.add_method(
+                "draw_pro",
+                |lua: &Lua,
+                 this,
+                 (box_a, box_b, point, angle, color): (
+                    LuaValue,
+                    LuaValue,
+                    LuaValue,
+                    f32,
+                    LuaValue,
+                )| {
+                    Ok(texture_pro_draw(
+                        lua,
+                        (&this.0.texture, box_a, box_b, point, angle, color),
+                    ))
+                },
+            );
+    }
+}
+
+impl RenderTexture {
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.render_texture.new",
+        "info": "Create a new render texture resource.",
+        "member": [
+            { "name": "shape", "info": "", "kind": "vector_2" }
+        ],
+        "result": [
+            { "name": "render_texture", "info": "Render texture resource.", "kind": "render_texture" }
+        ]
+    }
+    */
+    fn new(lua: &Lua, shape: LuaValue) -> mlua::Result<Self> {
+        let shape: Vector2 = lua.from_value(shape)?;
+
+        unsafe {
+            let data = ffi::LoadRenderTexture(shape.x as i32, shape.y as i32);
+
+            if ffi::IsRenderTextureValid(data) {
+                Ok(Self(RLRenderTexture::from_raw(data)))
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "RenderTexture::new(): Could not load render texture.".to_string(),
+                ))
             }
         }
     }

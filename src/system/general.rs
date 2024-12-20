@@ -40,6 +40,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     general.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
     general.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
     general.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
+    general.set("get_memory", lua.create_function(self::get_memory)?)?;
     //general.set("get_clipboard_text",  lua.create_function(self::get_clipboard_text)?)?;
     //general.set("set_clipboard_text",  lua.create_function(self::set_clipboard_text)?)?;
     //general.set("get_clipboard_image", lua.create_function(self::get_clipboard_image)?)?;
@@ -134,6 +135,17 @@ fn set_frame_rate(_: &Lua, rate: i32) -> mlua::Result<()> {
         ffi::SetTargetFPS(rate);
         Ok(())
     }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.get_memory",
+    "info": ""
+}
+*/
+fn get_memory(lua: &Lua, _: ()) -> mlua::Result<usize> {
+    Ok(lua.used_memory())
 }
 
 //================================================================

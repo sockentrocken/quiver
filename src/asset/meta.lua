@@ -316,14 +316,14 @@ function quiver.input.pad.get_release(pad) end
 ---The Rapier API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L35)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L36)
 ---@class quiver.rapier
 quiver.rapier = {}
 
 ---An unique handle for a Rapier simulation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L49)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L50)
 ---@class rapier
 rapier = {}
 
@@ -331,34 +331,75 @@ rapier = {}
 ---@return rapier rapier # Rapier simulation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L76)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L77)
 function quiver.rapier.new() end
 
 ---Cast a ray.
 ---@param ray ray # 
 ---@param time number # 
----@param filter table # 
+---@param filter_rigid table # 
+---@param filter_collider table # 
 ---@return boolean pick # 
 ---@return number time # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L101)
-function rapier:cast_ray(ray,time,filter) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L103)
+function rapier:cast_ray(ray,time,filter_rigid,filter_collider) end
+
+---Create a rigid body.
+---@param data rigid_body_info # Rigid body data.
+---@return table rigid_body # Rigid body.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L169)
+function rapier:create_rigid_body(data) end
+
+---Create a collider.
+---@param data collider_info # Collider data.
+---@return table collider # Collider.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L242)
+function rapier:create_collider(data) end
+
+---
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L287)
+function rapier:create_sphere() end
 
 ---Set the collider shape.
 ---@param collider table # Collider.
 ---@param shape vector_3 # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L136)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L317)
 function rapier:collider_set_shape(collider,shape) end
+
+---
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L343)
+function rapier:set_rigid_body_data() end
+
+---
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L364)
+function rapier:get_rigid_body_data() end
+
+---
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L377)
+function rapier:get_collider_data() end
 
 ---Create a kinematic character controller.
 ---@return table controller # Controller.
 ---@return table collider # Collider.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L166)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L394)
 function rapier:character_controller() end
 
 ---Move a kinematic character controller.
@@ -371,38 +412,38 @@ function rapier:character_controller() end
 ---@return boolean slide # Currently on slide.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L197)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L425)
 function rapier:move_character_controller(controller,collider,velocity,time_step) end
 
 ---Create a convex mesh collider out of a point cloud.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L244)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L485)
 function rapier:collider_convex_mesh() end
 
 ---Step the Rapier simulation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L262)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L503)
 function rapier:step() end
 
 ---Render the Rapier simulation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L289)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L530)
 function rapier:debug_render() end
 
 ---The texture API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L38)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L39)
 ---@class quiver.texture
 quiver.texture = {}
 
 ---An unique handle for a texture in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L101)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L108)
 ---@class texture
 ---@field shape vector_2 # Shape of the texture.
 texture = {}
@@ -414,7 +455,7 @@ texture = {}
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L124)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L131)
 function texture:draw(point,angle,scale,color) end
 
 ---Draw a texture (pro).
@@ -425,7 +466,7 @@ function texture:draw(point,angle,scale,color) end
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L145)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L152)
 function texture:draw_pro(box_a,box_b,point,angle,color) end
 
 ---Create a new texture resource.
@@ -433,8 +474,52 @@ function texture:draw_pro(box_a,box_b,point,angle,color) end
 ---@return texture texture # Texture resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L179)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L186)
 function quiver.texture.new(path) end
+
+---An unique handle for a render texture in memory.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L213)
+---@class render_texture
+---@field shape vector_2 # Shape of the texture.
+render_texture = {}
+
+---Initialize drawing to the render texture.
+---@param call function # The draw code.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L233)
+function render_texture:begin(call) end
+
+---Draw a texture.
+---@param point vector_2 # 
+---@param angle number # 
+---@param scale number # 
+---@param color color # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L258)
+function render_texture:draw(point,angle,scale,color) end
+
+---Draw a texture (pro).
+---@param box_a box_2 # 
+---@param box_b box_2 # 
+---@param point vector_2 # 
+---@param angle number # 
+---@param color color # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L282)
+function render_texture:draw_pro(box_a,box_b,point,angle,color) end
+
+---Create a new render texture resource.
+---@param shape vector_2 # 
+---@return render_texture render_texture # Render texture resource.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L316)
+function quiver.render_texture.new(shape) end
 
 ---The model API.
 ---
@@ -446,7 +531,7 @@ quiver.model = {}
 ---An unique handle for a model in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L59)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L65)
 ---@class model
 ---@field mesh_count number # Mesh count.
 ---@field bone_count number # Bone count.
@@ -455,32 +540,69 @@ model = {}
 
 ---Create a new Model resource.
 ---@param path string # Path to model file.
----@return model Model # Model resource.
+---@return model model # Model resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L75)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L81)
 function quiver.model.new(path) end
 
 ---Bind a texture to the model.
 ---@param texture texture # Texture to bind to model.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L110)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L116)
 function model:bind(texture) end
 
 ---Draw the model.
+---@param point vector_3 # 
+---@param scale number # 
+---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L126)
-function model:draw() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L141)
+function model:draw(point,scale,color) end
+
+---Draw the model with a transformation.
+---@param point vector_3 # 
+---@param angle vector_4 # 
+---@param scale vector_3 # 
+---@param color color # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L165)
+function model:draw_transform(point,angle,scale,color) end
 
 ---Get the vertex data of a specific mesh in the model.
 ---@param index number # Index of mesh.
 ---@return table table # Vector3 table.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L144)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L196)
 function model:mesh_vertex(index) end
+
+---An unique handle for a model animation in memory.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L212)
+---@class model_animation
+model_animation = {}
+
+---Create a new ModelAnimation resource.
+---@param path string # Path to model file.
+---@return model_animation model_animation # ModelAnimation resource.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L228)
+function quiver.model_animation.new(path) end
+
+---Update model with new model animation data.
+---@param model model # 
+---@param index number # 
+---@param frame number # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L271)
+function model_animation:update(model,index,frame) end
 
 ---The drawing API.
 ---
@@ -625,7 +747,7 @@ quiver.draw_3d = {}
 ---@param camera camera_3d # The 2D camera.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L486)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L487)
 function quiver.draw_3d.begin(call,camera) end
 
 ---Draw a grid.
@@ -633,7 +755,7 @@ function quiver.draw_3d.begin(call,camera) end
 ---@param space number # The space shift of the grid.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L509)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L510)
 function quiver.draw_3d.draw_grid(slice,space) end
 
 ---Draw a cube.
@@ -642,7 +764,7 @@ function quiver.draw_3d.draw_grid(slice,space) end
 ---@param color color # The color of the cube.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L527)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L528)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a ball.
@@ -651,7 +773,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L552)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L553)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a 3D box.
@@ -659,8 +781,16 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L572)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L573)
 function quiver.draw_3d.draw_box_3(shape,color) end
+
+---Draw a ray.
+---@param ray ray # The ray.
+---@param color color # The color of the ray.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L593)
+function quiver.draw_3d.draw_ray(ray,color) end
 
 ---The general API.
 ---
@@ -672,49 +802,55 @@ quiver.general = {}
 ---Load the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L57)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L58)
 function quiver.general.load() end
 
 ---Exit the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L61)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L62)
 function quiver.general.exit() end
 
 ---Set a key to exit Quiver.
 ---@param key input_board # Key to exit Quiver with.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L71)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L72)
 function quiver.general.set_exit_key(key) end
 
 ---Get the current time. Will count up since the initialization of the window.
 ---@return number time # Current time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L93)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L94)
 function quiver.general.get_time() end
 
 ---Get the current frame time.
 ---@return number frame_time # Current frame time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L106)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L107)
 function quiver.general.get_frame_time() end
 
 ---Get the current frame rate.
 ---@return number frame_rate # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L119)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L120)
 function quiver.general.get_frame_rate() end
 
 ---set the current frame rate.
 ---@param frame_rate number # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L132)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L133)
 function quiver.general.set_frame_rate(frame_rate) end
+
+---
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L147)
+function quiver.general.get_memory() end
 
 ---The font API.
 ---

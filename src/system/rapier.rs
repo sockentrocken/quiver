@@ -23,9 +23,10 @@
 */
 
 use mlua::prelude::*;
-use rapier3d::control::{CharacterAutostep, CharacterLength, KinematicCharacterController};
+use rapier3d::control::KinematicCharacterController;
 use rapier3d::prelude::*;
 use raylib::prelude::*;
+use serde::Deserialize;
 
 //================================================================
 
@@ -90,7 +91,8 @@ impl mlua::UserData for Rapier {
             "member": [
                 { "name": "ray",    "info": "", "kind": "ray"    },
                 { "name": "time",   "info": "", "kind": "number" },
-                { "name": "filter", "info": "", "kind": "table"  }
+                { "name": "filter_rigid", "info": "", "kind": "table"  },
+                { "name": "filter_collider", "info": "", "kind": "table"  }
             ],
             "result": [
                 { "name": "pick", "info": "", "kind": "boolean" },
@@ -100,9 +102,19 @@ impl mlua::UserData for Rapier {
         */
         method.add_method_mut(
             "cast_ray",
-            |lua, this, (ray, time, filter): (LuaValue, f32, LuaValue)| {
+            |lua, this, (ray, time, filter_rigid, filter_collider): (LuaValue, f32, LuaValue, LuaValue)| {
                 let ray: raylib::math::Ray = lua.from_value(ray)?;
-                let filter: ColliderHandle = lua.from_value(filter)?;
+                let filter_rigid: Vec<RigidBodyHandle> = lua.from_value(filter_rigid)?;
+                let filter_collider: Vec<ColliderHandle> = lua.from_value(filter_collider)?;
+                let mut query = QueryFilter::new();
+
+                for f in filter_rigid {
+                    query = query.exclude_rigid_body(f);
+                }
+
+                for f in filter_collider {
+                    query = query.exclude_collider(f);
+                }
 
                 if let Some(hit) = this.query_pipeline.cast_ray_and_get_normal(
                     &this.rigid_body_set,
@@ -113,14 +125,183 @@ impl mlua::UserData for Rapier {
                     ),
                     time,
                     true,
-                    QueryFilter::new().exclude_collider(filter),
+                    query,
                 ) {
-                    return lua.to_value(&hit.1);
+                    let collider = this.collider_set.get(hit.0).unwrap();
+
+                    return Ok((
+                        collider.user_data,
+                        lua.to_value(&collider)?,
+                        lua.to_value(&hit.1)?,
+                    ));
                 }
 
-                Ok(mlua::Nil)
+                Ok((u128::MAX, mlua::Nil, mlua::Nil))
             },
         );
+
+        #[derive(Deserialize)]
+        struct RigidBodyInfo {
+            kind: RigidBodyType,
+            user: Option<u128>,
+            position: Option<Vector3>,
+            rotation: Option<Vector3>,
+            lin_velocity: Option<Vector3>,
+            ang_velocity: Option<Vector3>,
+            gravity_scale: Option<f32>,
+            can_sleep: Option<bool>,
+            continous: Option<bool>,
+        }
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:create_rigid_body",
+            "info": "Create a rigid body.",
+            "member": [
+                { "name": "data", "info": "Rigid body data.", "kind": "rigid_body_info" }
+            ],
+            "result": [
+                { "name": "rigid_body", "info": "Rigid body.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method_mut("create_rigid_body", |lua, this, data: LuaValue| {
+            let info: RigidBodyInfo = lua.from_value(data)?;
+
+            let mut rigid_body = match info.kind {
+                RigidBodyType::Dynamic => RigidBodyBuilder::dynamic(),
+                RigidBodyType::Fixed => RigidBodyBuilder::fixed(),
+                RigidBodyType::KinematicPositionBased => {
+                    RigidBodyBuilder::kinematic_position_based()
+                }
+                RigidBodyType::KinematicVelocityBased => {
+                    RigidBodyBuilder::kinematic_velocity_based()
+                }
+            };
+
+            if let Some(data) = info.user {
+                rigid_body = rigid_body.user_data(data);
+            }
+            if let Some(data) = info.position {
+                rigid_body = rigid_body.translation(vector![data.x, data.y, data.z]);
+            }
+            if let Some(data) = info.rotation {
+                rigid_body = rigid_body.rotation(vector![data.x, data.y, data.z]);
+            }
+            if let Some(data) = info.lin_velocity {
+                rigid_body = rigid_body.linvel(vector![data.x, data.y, data.z]);
+            }
+            if let Some(data) = info.ang_velocity {
+                rigid_body = rigid_body.angvel(vector![data.x, data.y, data.z]);
+            }
+            if let Some(data) = info.gravity_scale {
+                rigid_body = rigid_body.gravity_scale(data);
+            }
+            if let Some(data) = info.can_sleep {
+                rigid_body = rigid_body.can_sleep(data);
+            }
+            if let Some(data) = info.continous {
+                rigid_body = rigid_body.ccd_enabled(data);
+            }
+
+            lua.to_value(&this.rigid_body_set.insert(rigid_body))
+        });
+
+        #[derive(Deserialize)]
+        enum ColliderKind {
+            Ball(f32),
+            Cube(f32, f32, f32),
+        }
+
+        #[derive(Deserialize)]
+        struct ColliderInfo {
+            kind: ColliderKind,
+            user: Option<u128>,
+            rigid_body: Option<RigidBodyHandle>,
+            position: Option<Vector3>,
+            rotation: Option<Vector3>,
+            density: Option<f32>,
+            friction: Option<f32>,
+            sensor: Option<bool>,
+        }
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:create_collider",
+            "info": "Create a collider.",
+            "member": [
+                { "name": "data", "info": "Collider data.", "kind": "collider_info" }
+            ],
+            "result": [
+                { "name": "collider", "info": "Collider.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method_mut("create_collider", |lua, this, data: LuaValue| {
+            let info: ColliderInfo = lua.from_value(data)?;
+
+            let mut collider = match info.kind {
+                ColliderKind::Ball(x) => ColliderBuilder::ball(x),
+                ColliderKind::Cube(x, y, z) => ColliderBuilder::cuboid(x, y, z),
+            };
+
+            if let Some(data) = info.user {
+                collider = collider.user_data(data);
+            }
+            if let Some(data) = info.position {
+                collider = collider.translation(vector![data.x, data.y, data.z]);
+            }
+            if let Some(data) = info.rotation {
+                collider = collider.rotation(vector![data.x, data.y, data.z]);
+            }
+            if let Some(data) = info.density {
+                collider = collider.density(data);
+            }
+            if let Some(data) = info.friction {
+                collider = collider.friction(data);
+            }
+            if let Some(data) = info.sensor {
+                collider = collider.sensor(data);
+            }
+
+            if let Some(rigid_body) = info.rigid_body {
+                lua.to_value(&this.collider_set.insert_with_parent(
+                    collider,
+                    rigid_body,
+                    &mut this.rigid_body_set,
+                ))
+            } else {
+                lua.to_value(&this.collider_set.insert(collider))
+            }
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:create_sphere",
+            "info": ""
+        }
+        */
+        method.add_method_mut("create_sphere", |lua, this, index: u128| {
+            let rigid_body = RigidBodyBuilder::dynamic()
+                .user_data(index)
+                .translation(vector![0.0, 10.0, 0.0])
+                .build();
+            let collider = ColliderBuilder::ball(0.5)
+                .user_data(index)
+                .restitution(0.7)
+                .build();
+            let rigid_body = this.rigid_body_set.insert(rigid_body);
+            let collider = this.collider_set.insert_with_parent(
+                collider,
+                rigid_body,
+                &mut this.rigid_body_set,
+            );
+
+            Ok((lua.to_value(&rigid_body)?, lua.to_value(&collider)?))
+        });
 
         /* entry
         {
@@ -151,6 +332,53 @@ impl mlua::UserData for Rapier {
                 Ok(())
             },
         );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_rigid_body_data",
+            "info": ""
+        }
+        */
+        method.add_method_mut(
+            "set_rigid_body_data",
+            |lua, this, (rigid_body, data): (LuaValue, LuaValue)| {
+                let rigid_body: RigidBodyHandle = lua.from_value(rigid_body)?;
+                let data: Vector3 = lua.from_value(data)?;
+
+                let rigid_body = this.rigid_body_set.get_mut(rigid_body).unwrap();
+
+                rigid_body.set_linvel(vector![data.x, data.y, data.z], true);
+
+                Ok(())
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:get_rigid_body_data",
+            "info": ""
+        }
+        */
+        method.add_method_mut("get_rigid_body_data", |lua, this, rigid_body: LuaValue| {
+            let rigid_body: RigidBodyHandle = lua.from_value(rigid_body)?;
+
+            lua.to_value(&this.rigid_body_set.get(rigid_body).unwrap())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:get_collider_data",
+            "info": ""
+        }
+        */
+        method.add_method_mut("get_collider_data", |lua, this, collider: LuaValue| {
+            let collider: ColliderHandle = lua.from_value(collider)?;
+
+            lua.to_value(&this.collider_set.get(collider).unwrap())
+        });
 
         /* entry
         {
@@ -201,6 +429,8 @@ impl mlua::UserData for Rapier {
                 let collider: ColliderHandle = lua.from_value(collider)?;
                 let velocity: Vector3 = lua.from_value(velocity)?;
 
+                let mut collision_list = vec![];
+
                 let c = this.collider_set.get(collider).unwrap();
 
                 let corrected_movement = controller.move_shape(
@@ -218,8 +448,19 @@ impl mlua::UserData for Rapier {
                     QueryFilter::default()
                         // Make sure the character we are trying to move isn’t considered an obstacle.
                         .exclude_collider(collider),
-                    |collision| {
-                    }, // We don’t care about events in this example.
+                    |collision| collision_list.push(collision), // We don’t care about events in this example.
+                );
+
+                controller.solve_character_collision_impulses(
+                    time_step,
+                    &mut this.rigid_body_set,
+                    &this.collider_set,
+                    &this.query_pipeline,
+                    c.shape(),
+                    c.mass(),
+                    &collision_list,
+                    QueryFilter::default()
+                        .exclude_collider(collider),
                 );
 
                 let c = this.collider_set.get_mut(collider).unwrap();

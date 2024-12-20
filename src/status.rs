@@ -76,7 +76,7 @@ impl Status {
             .title("Quiver")
             .build();
 
-        handle.set_target_fps(144);
+        //handle.set_target_fps(144);
 
         // create RL audio context.
         let audio = RaylibAudio::init_audio_device()
@@ -125,6 +125,14 @@ impl Status {
             // error, go to failure state.
             Err(result) => {
                 handle.enable_cursor();
+                unsafe {
+                    ffi::EndMode3D();
+                    ffi::EndMode2D();
+                    ffi::EndTextureMode();
+                    ffi::EndShaderMode();
+                    ffi::EndBlendMode();
+                    ffi::EndDrawing();
+                }
 
                 Some(Status::Failure(
                     Window::new(handle, thread),
