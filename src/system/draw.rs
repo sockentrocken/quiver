@@ -48,14 +48,14 @@ mod draw_general {
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw = lua.create_table()?;
 
-        draw.set("begin",         lua.create_function(self::begin)?)?;
-        draw.set("begin_blend",   lua.create_function(self::begin_blend)?)?;
-        draw.set("begin_scissor", lua.create_function(self::begin_scissor)?)?;
+        draw.set("begin",                  lua.create_function(self::begin)?)?;
+        draw.set("begin_blend",            lua.create_function(self::begin_blend)?)?;
+        draw.set("begin_scissor",          lua.create_function(self::begin_scissor)?)?;
         draw.set("get_screen_to_world_3d", lua.create_function(self::get_screen_to_world_3d)?)?;
         draw.set("get_world_to_screen_3d", lua.create_function(self::get_world_to_screen_3d)?)?;
         draw.set("get_screen_to_world_2d", lua.create_function(self::get_screen_to_world_2d)?)?;
         draw.set("get_world_to_screen_2d", lua.create_function(self::get_world_to_screen_2d)?)?;
-        draw.set("clear", lua.create_function(self::clear)?)?;
+        draw.set("clear",                  lua.create_function(self::clear)?)?;
 
         table.set("draw", draw)?;
 
@@ -181,7 +181,8 @@ mod draw_general {
             { "name": "shape",  "info": "The size of the view-port.", "kind": "vector_2"  }
         ],
         "result": [
-            { "name": "point", "info": "The 2D screen-space point.", "kind": "vector_2" }
+            { "name": "point_x", "info": "The 2D screen-space point (X).", "kind": "number" },
+            { "name": "point_y", "info": "The 2D screen-space point (Y).", "kind": "number" }
         ]
     }
     */

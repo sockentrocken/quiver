@@ -28,8 +28,8 @@ use std::ffi::CString;
 
 //================================================================
 
-type RLTexture = raylib::core::texture::Texture2D;
-type RLRenderTexture = raylib::core::texture::RenderTexture2D;
+type RLTexture = ffi::Texture2D;
+type RLRenderTexture = ffi::RenderTexture2D;
 
 //================================================================
 
@@ -118,6 +118,54 @@ impl mlua::UserData for Texture {
         /* entry
         {
             "version": "1.0.0",
+            "name": "texture:set_mipmap",
+            "info": "Set the mipmap for a texture."
+        }
+        */
+        method.add_method_mut("set_mipmap", |_: &Lua, this, _: ()| {
+            unsafe {
+                ffi::GenTextureMipmaps(&mut this.0);
+            }
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "texture:set_filter",
+            "info": "Set the filter for a texture.",
+            "member": [
+                { "name": "filter", "info": "Texture filter.", "kind": "texture_filter" }
+            ]
+        }
+        */
+        method.add_method_mut("set_filter", |_: &Lua, this, filter: i32| {
+            unsafe {
+                ffi::SetTextureFilter(this.0, filter);
+            }
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "texture:set_wrap",
+            "info": "Set the wrap for a texture.",
+            "member": [
+                { "name": "wrap", "info": "Texture wrap.", "kind": "texture_wrap" }
+            ]
+        }
+        */
+        method.add_method_mut("set_wrap", |_: &Lua, this, wrap: i32| {
+            unsafe {
+                ffi::SetTextureWrap(this.0, wrap);
+            }
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "texture:draw",
             "info": "Draw a texture.",
             "member": [
@@ -190,12 +238,20 @@ impl Texture {
             let data = ffi::LoadTexture(name.as_ptr());
 
             if ffi::IsTextureValid(data) {
-                Ok(Self(RLTexture::from_raw(data)))
+                Ok(Self(data))
             } else {
                 Err(mlua::Error::RuntimeError(format!(
                     "Texture::new(): Could not load file \"{path}\"."
                 )))
             }
+        }
+    }
+}
+
+impl Drop for Texture {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::UnloadTexture(self.0);
         }
     }
 }
@@ -215,7 +271,10 @@ pub struct RenderTexture(pub RLRenderTexture);
 impl mlua::UserData for RenderTexture {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
         field.add_field_method_get("shape", |lua: &Lua, this| {
-            lua.to_value(&Vector2::new(this.0.width() as f32, this.0.height() as f32))
+            lua.to_value(&Vector2::new(
+                this.0.texture.width as f32,
+                this.0.texture.height as f32,
+            ))
         });
     }
 
@@ -232,7 +291,7 @@ impl mlua::UserData for RenderTexture {
         */
         method.add_method("begin", |_: &Lua, this, call: mlua::Function| {
             unsafe {
-                ffi::BeginTextureMode(*this.0);
+                ffi::BeginTextureMode(this.0);
 
                 call.call::<()>(())?;
 
@@ -320,12 +379,20 @@ impl RenderTexture {
             let data = ffi::LoadRenderTexture(shape.x as i32, shape.y as i32);
 
             if ffi::IsRenderTextureValid(data) {
-                Ok(Self(RLRenderTexture::from_raw(data)))
+                Ok(Self(data))
             } else {
                 Err(mlua::Error::RuntimeError(
                     "RenderTexture::new(): Could not load render texture.".to_string(),
                 ))
             }
+        }
+    }
+}
+
+impl Drop for RenderTexture {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::UnloadRenderTexture(self.0);
         }
     }
 }

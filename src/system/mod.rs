@@ -43,6 +43,7 @@ pub mod window;
 pub mod font;
 pub mod model;
 pub mod music;
+pub mod shader;
 pub mod sound;
 pub mod texture;
 

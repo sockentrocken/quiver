@@ -28,8 +28,30 @@ use crate::system::*;
 //================================================================
 
 use mlua::prelude::*;
+use serde::{Deserialize, Serialize};
 
 //================================================================
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct ModuleWindow {
+    pub sync: bool,
+    pub msaa: bool,
+    pub high_scale: bool,
+    pub name: String,
+    pub shape: (i32, i32),
+}
+
+impl Default for ModuleWindow {
+    fn default() -> Self {
+        Self {
+            sync: true,
+            msaa: true,
+            high_scale: false,
+            name: "Quiver".to_string(),
+            shape: (1024, 768),
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct Script {
@@ -46,6 +68,7 @@ impl Script {
     const NAME_MAIN: &'static str = "main.lua";
     const NAME_BASE: &'static str = "base.lua";
     const NAME_META: &'static str = "meta.lua";
+    const CALL_INFO: &'static str = "info";
     const CALL_MAIN: &'static str = "main";
     const CALL_FAIL: &'static str = "fail";
 
@@ -167,6 +190,7 @@ impl Script {
         sound::set_global(lua, &quiver)?;
         music::set_global(lua, &quiver)?;
         font::set_global(lua, &quiver)?;
+        shader::set_global(lua, &quiver)?;
 
         // set the quiver table as a global value.
         global.set("quiver", quiver)?;

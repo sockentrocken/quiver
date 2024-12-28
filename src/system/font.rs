@@ -35,9 +35,29 @@ use std::ffi::CString;
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let font = lua.create_table()?;
 
-    font.set("new", lua.create_function(self::Font::new)?)?;
+    font.set("new",                 lua.create_function(self::Font::new)?)?;
+    font.set("new_default",         lua.create_function(self::Font::new_default)?)?;
+    font.set("set_text_line_space", lua.create_function(set_text_line_space)?)?;
 
     table.set("font", font)?;
+
+    Ok(())
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.font.set_text_line_space",
+    "info": "Set the vertical space between each line-break.",
+    "member": [
+        { "name": "space", "info": "Vertical space.", "kind": "number" }
+    ]
+}
+*/
+fn set_text_line_space(_: &Lua, space: i32) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetTextLineSpacing(space);
+    }
 
     Ok(())
 }
@@ -55,7 +75,8 @@ impl mlua::UserData for Font {
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
         /* entry
         {
-            "version": "1.0.0", "name": "font.draw",
+            "version": "1.0.0",
+            "name": "font.draw",
             "info": "Draw a font.",
             "member": [
                 { "name": "label", "info": "Label of font to draw.", "kind": "string"   },
@@ -87,13 +108,42 @@ impl mlua::UserData for Font {
                     }
                 },
             );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "font.measure_text",
+            "info": "Measure the size of a given text on screen, with a given font.",
+            "member": [
+                { "name": "label", "info": "Label of font to measure.", "kind": "string" },
+                { "name": "scale", "info": "Scale of font to measure.", "kind": "number" },
+                { "name": "space", "info": "Space of font to measure.", "kind": "number" }
+            ],
+            "result": [
+                { "name": "size_x", "info": "Size of text (X).", "kind": "number" },
+                { "name": "size_y", "info": "Size of text (Y).", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method(
+            "measure_text",
+            |_: &Lua, this, (text, scale, space): (String, f32, f32)| {
+                let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+                unsafe {
+                    let result = ffi::MeasureTextEx(*this.0, text.as_ptr(), scale, space);
+                    Ok((result.x, result.y))
+                }
+            },
+        );
     }
 }
 
 impl Font {
     /* entry
     {
-        "version": "1.0.0", "name": "quiver.font.new",
+        "version": "1.0.0",
+        "name": "quiver.font.new",
         "info": "Create a new font resource.",
         "member": [
             { "name": "path", "info": "Path to font file.", "kind": "string" }
@@ -116,6 +166,24 @@ impl Font {
                     "Font::new(): Could not load file \"{path}\"."
                 )))
             }
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.font.new_default",
+        "info": "Create a new font resource (default font).",
+        "result": [
+            { "name": "font", "info": "Font resource.", "kind": "font" }
+        ]
+    }
+    */
+    fn new_default(_: &Lua, _: ()) -> mlua::Result<Self> {
+        unsafe {
+            let data = ffi::GetFontDefault();
+
+            Ok(Self(RLFont::from_raw(data)))
         }
     }
 }

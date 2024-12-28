@@ -120,7 +120,18 @@ impl mlua::UserData for Model {
 
                 this.0.materials_mut()[0].maps_mut()
                     [MaterialMapIndex::MATERIAL_MAP_ALBEDO as usize]
-                    .texture = *texture.0;
+                    .texture = texture.0;
+            }
+
+            Ok(())
+        });
+
+        method.add_method_mut("bind_shader", |_, this, shader: LuaAnyUserData| {
+            if shader.is::<crate::system::shader::Shader>() {
+                let shader = shader.borrow::<crate::system::shader::Shader>().unwrap();
+                let shader = &*shader;
+
+                this.0.materials_mut()[0].shader = *shader.0;
             }
 
             Ok(())

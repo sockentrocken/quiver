@@ -35,29 +35,32 @@ use std::ffi::CString;
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let window = lua.create_table()?;
 
-    window.set("set_fullscreen", lua.create_function(self::set_window_fullscreen)?)?;
-    window.set("set_borderless", lua.create_function(self::set_window_borderless)?)?;
-    window.set("set_minimize", lua.create_function(self::set_window_minimize)?)?;
-    window.set("set_maximize", lua.create_function(self::set_window_maximize)?)?;
-    window.set("set_focus", lua.create_function(self::set_window_focus)?)?;
-    window.set("set_restore", lua.create_function(self::set_window_restore)?)?;
-    window.set("set_name", lua.create_function(self::set_window_name)?)?;
-    window.set("set_monitor", lua.create_function(self::set_window_monitor)?)?;
-    window.set("set_shape", lua.create_function(self::set_window_shape)?)?;
-    window.set("set_shape_min", lua.create_function(self::set_window_shape_min)?)?;
-    window.set("set_shape_max", lua.create_function(self::set_window_shape_max)?)?;
-    window.set("set_alpha", lua.create_function(self::set_window_alpha)?)?;
-    window.set("set_point", lua.create_function(self::set_window_point)?)?;
-    window.set("get_fullscreen", lua.create_function(self::get_window_fullscreen)?)?;
-    window.set("get_minimize", lua.create_function(self::get_window_minimize)?)?;
-    window.set("get_maximize", lua.create_function(self::get_window_maximize)?)?;
-    window.set("get_focus", lua.create_function(self::get_window_focus)?)?;
-    window.set("get_resize", lua.create_function(self::get_window_resize)?)?;
-    window.set("get_hidden", lua.create_function(self::get_window_hidden)?)?;
-    window.set("get_shape", lua.create_function(self::get_window_shape)?)?;
-    window.set("get_point", lua.create_function(self::get_window_point)?)?;
-    window.set("get_scale", lua.create_function(self::get_window_scale)?)?;
-    window.set("get_close", lua.create_function(self::get_window_close)?)?;
+    window.set("set_state", lua.create_function(self::set_state)?)?;
+    window.set("set_fullscreen", lua.create_function(self::set_fullscreen)?)?;
+    window.set("set_borderless", lua.create_function(self::set_borderless)?)?;
+    window.set("set_minimize", lua.create_function(self::set_minimize)?)?;
+    window.set("set_maximize", lua.create_function(self::set_maximize)?)?;
+    window.set("set_focus", lua.create_function(self::set_focus)?)?;
+    window.set("set_restore", lua.create_function(self::set_restore)?)?;
+    window.set("set_name", lua.create_function(self::set_name)?)?;
+    window.set("set_monitor", lua.create_function(self::set_monitor)?)?;
+    window.set("set_shape", lua.create_function(self::set_shape)?)?;
+    window.set("set_shape_min", lua.create_function(self::set_shape_min)?)?;
+    window.set("set_shape_max", lua.create_function(self::set_shape_max)?)?;
+    window.set("set_alpha", lua.create_function(self::set_alpha)?)?;
+    window.set("set_point", lua.create_function(self::set_point)?)?;
+
+    window.set("get_state", lua.create_function(self::get_state)?)?;
+    window.set("get_fullscreen", lua.create_function(self::get_fullscreen)?)?;
+    window.set("get_minimize", lua.create_function(self::get_minimize)?)?;
+    window.set("get_maximize", lua.create_function(self::get_maximize)?)?;
+    window.set("get_focus", lua.create_function(self::get_focus)?)?;
+    window.set("get_resize", lua.create_function(self::get_resize)?)?;
+    window.set("get_hidden", lua.create_function(self::get_hidden)?)?;
+    window.set("get_shape", lua.create_function(self::get_shape)?)?;
+    window.set("get_point", lua.create_function(self::get_point)?)?;
+    window.set("get_scale", lua.create_function(self::get_scale)?)?;
+    window.set("get_close", lua.create_function(self::get_close)?)?;
 
     table.set("window", window)?;
 
@@ -65,9 +68,49 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 }
 
 /* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.window.get_state",
+    "info": "Get the state of a window flag.",
+    "member": [
+        { "name": "flag", "info": "Window flag.", "kind": "window_flag" }
+    ],
+    "result": [
+        { "name": "state", "info": "Window flag state.", "kind": "boolean" }
+    ]
+}
+*/
+fn get_state(_: &Lua, flag: u32) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsWindowState(flag)) }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.window.set_state",
+    "info": "Set the state of a window flag.",
+    "member": [
+        { "name": "flag",  "info": "Window flag.",       "kind": "window_flag" },
+        { "name": "state", "info": "Window flag state.", "kind": "boolean"     }
+    ]
+}
+*/
+fn set_state(_: &Lua, (flag, state): (u32, bool)) -> mlua::Result<()> {
+    unsafe {
+        if state {
+            ffi::SetWindowState(flag);
+        } else {
+            ffi::ClearWindowState(flag);
+        }
+
+        Ok(())
+    }
+}
+
+/* entry
 { "version": "1.0.0", "name": "quiver.window.set_fullscreen", "info": "Set the window to full-screen mode." }
 */
-fn set_window_fullscreen(_: &Lua, _: ()) -> mlua::Result<()> {
+fn set_fullscreen(_: &Lua, _: ()) -> mlua::Result<()> {
     unsafe {
         ffi::ToggleFullscreen();
         Ok(())
@@ -77,7 +120,7 @@ fn set_window_fullscreen(_: &Lua, _: ()) -> mlua::Result<()> {
 /* entry
 { "version": "1.0.0", "name": "quiver.window.set_borderless", "info": "Set the window to border-less mode." }
 */
-fn set_window_borderless(_: &Lua, _: ()) -> mlua::Result<()> {
+fn set_borderless(_: &Lua, _: ()) -> mlua::Result<()> {
     unsafe {
         ffi::ToggleBorderlessWindowed();
         Ok(())
@@ -87,7 +130,7 @@ fn set_window_borderless(_: &Lua, _: ()) -> mlua::Result<()> {
 /* entry
 { "version": "1.0.0", "name": "quiver.window.set_minimize", "info": "Minimize the window." }
 */
-fn set_window_minimize(_: &Lua, _: ()) -> mlua::Result<()> {
+fn set_minimize(_: &Lua, _: ()) -> mlua::Result<()> {
     unsafe {
         ffi::MinimizeWindow();
         Ok(())
@@ -97,7 +140,7 @@ fn set_window_minimize(_: &Lua, _: ()) -> mlua::Result<()> {
 /* entry
 { "version": "1.0.0", "name": "quiver.window.set_maximize", "info": "Maximize the window." }
 */
-fn set_window_maximize(_: &Lua, _: ()) -> mlua::Result<()> {
+fn set_maximize(_: &Lua, _: ()) -> mlua::Result<()> {
     unsafe {
         ffi::MaximizeWindow();
         Ok(())
@@ -107,7 +150,7 @@ fn set_window_maximize(_: &Lua, _: ()) -> mlua::Result<()> {
 /* entry
 { "version": "1.0.0", "name": "quiver.window.set_focus", "info": "Focus the window." }
 */
-fn set_window_focus(_: &Lua, _: ()) -> mlua::Result<()> {
+fn set_focus(_: &Lua, _: ()) -> mlua::Result<()> {
     unsafe {
         ffi::SetWindowFocused();
         Ok(())
@@ -117,7 +160,7 @@ fn set_window_focus(_: &Lua, _: ()) -> mlua::Result<()> {
 /* entry
 { "version": "1.0.0", "name": "quiver.window.set_restore", "info": "Restore the window." }
 */
-fn set_window_restore(_: &Lua, _: ()) -> mlua::Result<()> {
+fn set_restore(_: &Lua, _: ()) -> mlua::Result<()> {
     unsafe {
         ffi::RestoreWindow();
         Ok(())
@@ -127,7 +170,7 @@ fn set_window_restore(_: &Lua, _: ()) -> mlua::Result<()> {
 /* entry
 { "version": "1.0.0", "name": "quiver.window.set_name", "info": "Set the window name." }
 */
-fn set_window_name(_: &Lua, text: String) -> mlua::Result<()> {
+fn set_name(_: &Lua, text: String) -> mlua::Result<()> {
     let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
     unsafe {
@@ -146,7 +189,7 @@ fn set_window_name(_: &Lua, text: String) -> mlua::Result<()> {
     ]
 }
 */
-fn set_window_monitor(_: &Lua, index: i32) -> mlua::Result<()> {
+fn set_monitor(_: &Lua, index: i32) -> mlua::Result<()> {
     unsafe {
         ffi::SetWindowMonitor(index);
         Ok(())
@@ -163,7 +206,7 @@ fn set_window_monitor(_: &Lua, index: i32) -> mlua::Result<()> {
     ]
 }
 */
-fn set_window_shape(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
+fn set_shape(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
     let shape: Vector2 = lua.from_value(shape)?;
 
     unsafe {
@@ -182,7 +225,7 @@ fn set_window_shape(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
     ]
 }
 */
-fn set_window_shape_min(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
+fn set_shape_min(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
     let shape: Vector2 = lua.from_value(shape)?;
 
     unsafe {
@@ -201,7 +244,7 @@ fn set_window_shape_min(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
     ]
 }
 */
-fn set_window_shape_max(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
+fn set_shape_max(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
     let shape: Vector2 = lua.from_value(shape)?;
 
     unsafe {
@@ -220,7 +263,7 @@ fn set_window_shape_max(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
     ]
 }
 */
-fn set_window_alpha(_: &Lua, alpha: f32) -> mlua::Result<()> {
+fn set_alpha(_: &Lua, alpha: f32) -> mlua::Result<()> {
     unsafe {
         ffi::SetWindowOpacity(alpha);
         Ok(())
@@ -237,7 +280,7 @@ fn set_window_alpha(_: &Lua, alpha: f32) -> mlua::Result<()> {
     ]
 }
 */
-fn set_window_point(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
+fn set_point(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
     let shape: Vector2 = lua.from_value(shape)?;
 
     unsafe {
@@ -258,7 +301,7 @@ fn set_window_point(lua: &Lua, shape: LuaValue) -> mlua::Result<()> {
     ]
 }
 */
-fn get_window_fullscreen(_: &Lua, _: ()) -> mlua::Result<bool> {
+fn get_fullscreen(_: &Lua, _: ()) -> mlua::Result<bool> {
     unsafe { Ok(ffi::IsWindowFullscreen()) }
 }
 
@@ -272,7 +315,7 @@ fn get_window_fullscreen(_: &Lua, _: ()) -> mlua::Result<bool> {
     ]
 }
 */
-fn get_window_minimize(_: &Lua, _: ()) -> mlua::Result<bool> {
+fn get_minimize(_: &Lua, _: ()) -> mlua::Result<bool> {
     unsafe { Ok(ffi::IsWindowMinimized()) }
 }
 
@@ -286,7 +329,7 @@ fn get_window_minimize(_: &Lua, _: ()) -> mlua::Result<bool> {
     ]
 }
 */
-fn get_window_maximize(_: &Lua, _: ()) -> mlua::Result<bool> {
+fn get_maximize(_: &Lua, _: ()) -> mlua::Result<bool> {
     unsafe { Ok(ffi::IsWindowMaximized()) }
 }
 
@@ -300,7 +343,7 @@ fn get_window_maximize(_: &Lua, _: ()) -> mlua::Result<bool> {
     ]
 }
 */
-fn get_window_focus(_: &Lua, _: ()) -> mlua::Result<bool> {
+fn get_focus(_: &Lua, _: ()) -> mlua::Result<bool> {
     unsafe { Ok(ffi::IsWindowFocused()) }
 }
 
@@ -314,7 +357,7 @@ fn get_window_focus(_: &Lua, _: ()) -> mlua::Result<bool> {
     ]
 }
 */
-fn get_window_resize(_: &Lua, _: ()) -> mlua::Result<bool> {
+fn get_resize(_: &Lua, _: ()) -> mlua::Result<bool> {
     unsafe { Ok(ffi::IsWindowResized()) }
 }
 
@@ -328,7 +371,7 @@ fn get_window_resize(_: &Lua, _: ()) -> mlua::Result<bool> {
     ]
 }
 */
-fn get_window_hidden(_: &Lua, _: ()) -> mlua::Result<bool> {
+fn get_hidden(_: &Lua, _: ()) -> mlua::Result<bool> {
     unsafe { Ok(ffi::IsWindowHidden()) }
 }
 
@@ -342,7 +385,7 @@ fn get_window_hidden(_: &Lua, _: ()) -> mlua::Result<bool> {
     ]
 }
 */
-fn get_window_shape(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+fn get_shape(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     unsafe {
         lua.to_value(&Vector2::new(
             ffi::GetScreenWidth() as f32,
@@ -361,7 +404,7 @@ fn get_window_shape(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     ]
 }
 */
-fn get_window_point(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+fn get_point(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     unsafe {
         let value = ffi::GetWindowPosition();
 
@@ -379,7 +422,7 @@ fn get_window_point(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     ]
 }
 */
-fn get_window_scale(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+fn get_scale(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     unsafe {
         let value = ffi::GetWindowScaleDPI();
 
@@ -397,6 +440,6 @@ fn get_window_scale(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     ]
 }
 */
-fn get_window_close(_: &Lua, _: ()) -> mlua::Result<bool> {
+fn get_close(_: &Lua, _: ()) -> mlua::Result<bool> {
     unsafe { Ok(ffi::WindowShouldClose()) }
 }

@@ -27,6 +27,7 @@ use crate::window::*;
 
 //================================================================
 
+use ffi::SetConfigFlags;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -69,14 +70,10 @@ impl Status {
     // create a RL context.
     pub fn window() -> (RaylibHandle, RaylibThread, RaylibAudio) {
         // create RL window, thread.
-        let (mut handle, thread) = raylib::init()
-            .resizable()
-            .msaa_4x()
-            .size(1024, 768)
-            .title("Quiver")
-            .build();
+        let (mut handle, thread) = raylib::init().title("Quiver").size(1024, 768).build();
 
-        //handle.set_target_fps(144);
+        // cap frame-rate.
+        handle.set_target_fps(60);
 
         // create RL audio context.
         let audio = RaylibAudio::init_audio_device()

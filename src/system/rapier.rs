@@ -410,26 +410,35 @@ impl mlua::UserData for Rapier {
             "name": "rapier:move_character_controller",
             "info": "Move a kinematic character controller.",
             "member": [
-                { "name": "controller", "info": "Controller.", "kind": "table"    },
-                { "name": "collider",   "info": "Collider.",   "kind": "table"    },
-                { "name": "velocity",   "info": "Velocity.",   "kind": "vector_3" },
-                { "name": "time_step",  "info": "Time step.",  "kind": "number"   }
+                { "name": "controller", "info": "Controller.",           "kind": "table"    },
+                { "name": "collider",   "info": "Collider.",             "kind": "table"    },
+                { "name": "velocity",   "info": "Velocity.",             "kind": "vector_3" },
+                { "name": "time_step",  "info": "Time step.",            "kind": "number"   }
             ],
             "result": [
                 { "name": "translation", "info": "Translation.", 		"kind": "vector_3" },
                 { "name": "floor", 		 "info": "Currently on floor.", "kind": "boolean"  },
-                { "name": "slide", 		 "info": "Currently on slide.", "kind": "boolean"  }
+                { "name": "slide", 		 "info": "Currently on slide.", "kind": "boolean"  },
+                { "name": "collision",   "info": "Collision list.",     "kind": "table"    }
             ]
         }
         */
         method.add_method_mut(
             "move_character_controller",
-            |lua, this, (controller, collider, velocity, time_step): (LuaValue, LuaValue, LuaValue, f32)| {
+            |lua,
+             this,
+             (controller, collider, velocity, time_step): (
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                f32,
+            )| {
                 let controller: KinematicCharacterController = lua.from_value(controller)?;
                 let collider: ColliderHandle = lua.from_value(collider)?;
                 let velocity: Vector3 = lua.from_value(velocity)?;
 
                 let mut collision_list = vec![];
+                let mut translation_list = vec![];
 
                 let c = this.collider_set.get(collider).unwrap();
 
@@ -448,7 +457,10 @@ impl mlua::UserData for Rapier {
                     QueryFilter::default()
                         // Make sure the character we are trying to move isn’t considered an obstacle.
                         .exclude_collider(collider),
-                    |collision| collision_list.push(collision), // We don’t care about events in this example.
+                    |collision| {
+                        translation_list.push(collision.hit.normal1);
+                        collision_list.push(collision)
+                    }, // We don’t care about events in this example.
                 );
 
                 controller.solve_character_collision_impulses(
@@ -459,8 +471,7 @@ impl mlua::UserData for Rapier {
                     c.shape(),
                     c.mass(),
                     &collision_list,
-                    QueryFilter::default()
-                        .exclude_collider(collider),
+                    QueryFilter::default().exclude_collider(collider),
                 );
 
                 let c = this.collider_set.get_mut(collider).unwrap();
@@ -468,9 +479,10 @@ impl mlua::UserData for Rapier {
                 c.set_translation(c.translation() + corrected_movement.translation);
 
                 Ok((
-                    lua.to_value(&c.translation()).unwrap(),
+                    lua.to_value(&c.translation())?,
                     corrected_movement.grounded,
                     corrected_movement.is_sliding_down_slope,
+                    lua.to_value(&translation_list)?
                 ))
             },
         );
