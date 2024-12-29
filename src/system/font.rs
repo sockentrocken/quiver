@@ -76,7 +76,7 @@ impl mlua::UserData for Font {
         /* entry
         {
             "version": "1.0.0",
-            "name": "font.draw",
+            "name": "font:draw",
             "info": "Draw a font.",
             "member": [
                 { "name": "label", "info": "Label of font to draw.", "kind": "string"   },
@@ -112,7 +112,7 @@ impl mlua::UserData for Font {
         /* entry
         {
             "version": "1.0.0",
-            "name": "font.measure_text",
+            "name": "font:measure_text",
             "info": "Measure the size of a given text on screen, with a given font.",
             "member": [
                 { "name": "label", "info": "Label of font to measure.", "kind": "string" },

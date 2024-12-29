@@ -91,9 +91,9 @@ impl Shader {
             if ffi::IsShaderValid(data) {
                 Ok(Self(RLShader::from_raw(data)))
             } else {
-                Err(mlua::Error::RuntimeError(format!(
-                    "Shader::new(): Could not load file."
-                )))
+                Err(mlua::Error::RuntimeError(
+                    "Shader::new(): Could not load file.".to_string(),
+                ))
             }
         }
     }

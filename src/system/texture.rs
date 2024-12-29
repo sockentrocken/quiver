@@ -101,7 +101,8 @@ fn texture_pro_draw(
     "name": "texture",
     "info": "An unique handle for a texture in memory.",
     "member": [
-        { "name": "shape", "info": "Shape of the texture.", "kind": "vector_2" }
+        { "name": "shape_x", "info": "Shape of the texture (X).", "kind": "number" },
+        { "name": "shape_y", "info": "Shape of the texture (Y).", "kind": "number" }
     ]
 }
 */
@@ -109,9 +110,8 @@ pub struct Texture(pub RLTexture);
 
 impl mlua::UserData for Texture {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
-        field.add_field_method_get("shape", |lua: &Lua, this| {
-            lua.to_value(&Vector2::new(this.0.width as f32, this.0.height as f32))
-        });
+        field.add_field_method_get("shape_x", |_: &Lua, this| Ok(this.0.width));
+        field.add_field_method_get("shape_y", |_: &Lua, this| Ok(this.0.height));
     }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
@@ -262,7 +262,8 @@ impl Drop for Texture {
     "name": "render_texture",
     "info": "An unique handle for a render texture in memory.",
     "member": [
-        { "name": "shape", "info": "Shape of the texture.", "kind": "vector_2" }
+        { "name": "shape_x", "info": "Shape of the texture (X).", "kind": "number" },
+        { "name": "shape_y", "info": "Shape of the texture (Y).", "kind": "number" }
     ]
 }
 */
@@ -270,12 +271,8 @@ pub struct RenderTexture(pub RLRenderTexture);
 
 impl mlua::UserData for RenderTexture {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
-        field.add_field_method_get("shape", |lua: &Lua, this| {
-            lua.to_value(&Vector2::new(
-                this.0.texture.width as f32,
-                this.0.texture.height as f32,
-            ))
-        });
+        field.add_field_method_get("shape_x", |_: &Lua, this| Ok(this.0.texture.width));
+        field.add_field_method_get("shape_y", |_: &Lua, this| Ok(this.0.texture.height));
     }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {

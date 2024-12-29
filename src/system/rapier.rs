@@ -559,7 +559,7 @@ struct DebugRender;
 impl DebugRenderBackend for DebugRender {
     fn draw_line(
         &mut self,
-        object: DebugRenderObject<'_>,
+        _object: DebugRenderObject<'_>,
         a: nalgebra::OPoint<f32, nalgebra::Const<3>>,
         b: nalgebra::OPoint<f32, nalgebra::Const<3>>,
         color: [f32; 4],

@@ -101,156 +101,195 @@ quiver.input.board = {}
 ---The mouse input API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L73)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L74)
 ---@class quiver.input.mouse
 quiver.input.mouse = {}
 
 ---The pad input API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L98)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L99)
 ---@class quiver.input.pad
 quiver.input.pad = {}
 
----Set the active state of the mouse.
----@param state boolean # Current state.
+---Set the clipboard text.
+---@param text string # Clipboard text.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L128)
-function quiver.input.mouse.set_active(state) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L130)
+function quiver.input.board.set_clipboard_text(text) end
 
----Set the hidden state of the mouse.
----@param state boolean # Current state.
+---Get the clipboard text.
+---@return string text # Clipboard text.
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L149)
-function quiver.input.mouse.set_hidden(state) end
+function quiver.input.board.get_clipboard_text() end
 
----Get the hidden state of the mouse.
----@return boolean state # Current state.
+---Get the last unicode glyph in the queue.
+---@return number key_code # Key-code. If 0, queue is empty.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L170)
-function quiver.input.mouse.get_hidden() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L166)
+function quiver.input.board.get_key_code_queue() end
 
----Check if the mouse is currently over the screen.
----@return boolean state # Current state.
+---Get the last unicode glyph in the queue.
+---@return number uni_code # Uni-code. If 0, queue is empty.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L183)
-function quiver.input.mouse.get_screen() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L180)
+function quiver.input.board.get_uni_code_queue() end
 
----Get the current point of the mouse.
----@return vector_2 point # The point of the mouse.
+---Get the name of a given key.
+---@param board input_board # The board button to get a name for.
+---@return string name # The name.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L196)
-function quiver.input.mouse.get_point() end
-
----Set the current point of the mouse.
----@param point vector_2 # The point of the mouse.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L212)
-function quiver.input.mouse.set_point(point) end
-
----Get the current delta (i.e. mouse movement) of the mouse.
----@return vector_2 delta # The delta of the mouse.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L229)
-function quiver.input.mouse.get_delta() end
-
----Set the current shift of the mouse.
----@param shift vector_2 # The shift of the mouse.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L245)
-function quiver.input.mouse.set_shift(shift) end
-
----Set the current scale of the mouse.
----@param scale vector_2 # The scale of the mouse.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L262)
-function quiver.input.mouse.set_scale(scale) end
-
----Set the current cursor of the mouse.
----@param cursor cursor_mouse # The cursor of the mouse.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L279)
-function quiver.input.mouse.set_cursor(cursor) end
-
----Get the current delta (i.e. mouse wheel movement) of the mouse wheel.
----@return vector_2 delta # The delta of the mouse wheel.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L301)
-function quiver.input.mouse.get_wheel() end
-
----Get the state of an input (up).
----@param mouse input_mouse # The mouse button to check for.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L317)
-function quiver.input.mouse.get_up(mouse) end
-
----Get the state of an input (down).
----@param mouse input_mouse # The mouse button to check for.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L334)
-function quiver.input.mouse.get_down(mouse) end
-
----Get the state of an input (press).
----@param mouse input_mouse # The mouse button to check for.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L351)
-function quiver.input.mouse.get_press(mouse) end
-
----Get the state of an input (release).
----@param mouse input_mouse # The mouse button to check for.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L368)
-function quiver.input.mouse.get_release(mouse) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L197)
+function quiver.input.board.get_name(board) end
 
 ---Get the state of an input (up).
 ---@param board input_board # The board button to check for.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L387)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L218)
 function quiver.input.board.get_up(board) end
 
 ---Get the state of an input (down).
 ---@param board input_board # The board button to check for.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L404)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L236)
 function quiver.input.board.get_down(board) end
 
 ---Get the state of an input (press).
 ---@param board input_board # The board button to check for.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L421)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L254)
 function quiver.input.board.get_press(board) end
 
 ---Get the state of an input (release).
 ---@param board input_board # The board button to check for.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L438)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L272)
 function quiver.input.board.get_release(board) end
+
+---Set the active state of the mouse.
+---@param state boolean # Current state.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L292)
+function quiver.input.mouse.set_active(state) end
+
+---Set the hidden state of the mouse.
+---@param state boolean # Current state.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L314)
+function quiver.input.mouse.set_hidden(state) end
+
+---Get the hidden state of the mouse.
+---@return boolean state # Current state.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L336)
+function quiver.input.mouse.get_hidden() end
+
+---Check if the mouse is currently over the screen.
+---@return boolean state # Current state.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L350)
+function quiver.input.mouse.get_screen() end
+
+---Get the current point of the mouse.
+---@return number point_x # The point of the mouse (X).
+---@return number point_y # The point of the mouse (Y).
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L365)
+function quiver.input.mouse.get_point() end
+
+---Set the current point of the mouse.
+---@param point vector_2 # The point of the mouse.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L382)
+function quiver.input.mouse.set_point(point) end
+
+---Get the current delta (i.e. mouse movement) of the mouse.
+---@return number delta_x # The delta of the mouse (X).
+---@return number delta_y # The delta of the mouse (Y).
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L401)
+function quiver.input.mouse.get_delta() end
+
+---Set the current shift of the mouse.
+---@param shift vector_2 # The shift of the mouse.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L418)
+function quiver.input.mouse.set_shift(shift) end
+
+---Set the current scale of the mouse.
+---@param scale vector_2 # The scale of the mouse.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L436)
+function quiver.input.mouse.set_scale(scale) end
+
+---Set the current cursor of the mouse.
+---@param cursor cursor_mouse # The cursor of the mouse.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L454)
+function quiver.input.mouse.set_cursor(cursor) end
+
+---Get the current delta (i.e. mouse wheel movement) of the mouse wheel.
+---@return number delta_x # The delta of the mouse wheel (X).
+---@return number delta_y # The delta of the mouse wheel (Y).
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L478)
+function quiver.input.mouse.get_wheel() end
+
+---Get the state of an input (up).
+---@param mouse input_mouse # The mouse button to check for.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L495)
+function quiver.input.mouse.get_up(mouse) end
+
+---Get the state of an input (down).
+---@param mouse input_mouse # The mouse button to check for.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L513)
+function quiver.input.mouse.get_down(mouse) end
+
+---Get the state of an input (press).
+---@param mouse input_mouse # The mouse button to check for.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L531)
+function quiver.input.mouse.get_press(mouse) end
+
+---Get the state of an input (release).
+---@param mouse input_mouse # The mouse button to check for.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L549)
+function quiver.input.mouse.get_release(mouse) end
 
 ---Get the state of a pad.
 ---@param index number # The index of the pad to check for.
 ---@return boolean state # The state of the pad.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L460)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L572)
 function quiver.input.pad.get_state(index) end
 
 ---Get the name of a pad.
@@ -258,14 +297,14 @@ function quiver.input.pad.get_state(index) end
 ---@return string name # The name of the pad.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L476)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L589)
 function quiver.input.pad.get_name(index) end
 
 ---Get the last pad button press.
 ---@return input_pad input # The last pad button press.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L492)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L606)
 function quiver.input.pad.get_queue() end
 
 ---Get the axis count of a pad.
@@ -273,7 +312,7 @@ function quiver.input.pad.get_queue() end
 ---@return number axis_count # The axis count of the pad.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L508)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L623)
 function quiver.input.pad.get_axis_count(index) end
 
 ---Get the axis state of a pad.
@@ -282,35 +321,35 @@ function quiver.input.pad.get_axis_count(index) end
 ---@return number axis_state # The axis state of the pad.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L525)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L641)
 function quiver.input.pad.get_axis_state(index,axis) end
 
 ---Get the state of an input (up).
 ---@param pad input_pad # The pad button to check for.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L538)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L655)
 function quiver.input.pad.get_up(pad) end
 
 ---Get the state of an input (down).
 ---@param pad input_pad # The pad button to check for.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L555)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L673)
 function quiver.input.pad.get_down(pad) end
 
 ---Get the state of an input (press).
 ---@param pad input_pad # The pad button to check for.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L572)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L691)
 function quiver.input.pad.get_press(pad) end
 
 ---Get the state of an input (release).
 ---@param pad input_pad # The pad button to check for.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L589)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L709)
 function quiver.input.pad.get_release(pad) end
 
 ---The Rapier API.
@@ -444,9 +483,10 @@ quiver.texture = {}
 ---An unique handle for a texture in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L108)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L109)
 ---@class texture
----@field shape vector_2 # Shape of the texture.
+---@field shape_x number # Shape of the texture (X).
+---@field shape_y number # Shape of the texture (Y).
 texture = {}
 
 ---Set the mipmap for a texture.
@@ -501,16 +541,17 @@ function quiver.texture.new(path) end
 ---An unique handle for a render texture in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L269)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L270)
 ---@class render_texture
----@field shape vector_2 # Shape of the texture.
+---@field shape_x number # Shape of the texture (X).
+---@field shape_y number # Shape of the texture (Y).
 render_texture = {}
 
 ---Initialize drawing to the render texture.
 ---@param call function # The draw code.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L292)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L289)
 function render_texture:begin(call) end
 
 ---Draw a texture.
@@ -520,7 +561,7 @@ function render_texture:begin(call) end
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L317)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L314)
 function render_texture:draw(point,angle,scale,color) end
 
 ---Draw a texture (pro).
@@ -531,7 +572,7 @@ function render_texture:draw(point,angle,scale,color) end
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L341)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L338)
 function render_texture:draw_pro(box_a,box_b,point,angle,color) end
 
 ---Create a new render texture resource.
@@ -539,7 +580,7 @@ function render_texture:draw_pro(box_a,box_b,point,angle,color) end
 ---@return render_texture render_texture # Render texture resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L375)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L372)
 function quiver.render_texture.new(shape) end
 
 ---The model API.
@@ -628,7 +669,7 @@ function model_animation:update(model,index,frame) end
 ---The drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L47)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L49)
 ---@class quiver.draw
 quiver.draw = {}
 
@@ -636,7 +677,7 @@ quiver.draw = {}
 ---@param call function # The draw code.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L75)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L77)
 function quiver.draw.begin(call) end
 
 ---Initialize drawing (blend mode) to the screen.
@@ -644,7 +685,7 @@ function quiver.draw.begin(call) end
 ---@param mode function # The draw code.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L98)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L100)
 function quiver.draw.begin_blend(call,mode) end
 
 ---Initialize drawing (scissor mode) to the screen.
@@ -652,7 +693,7 @@ function quiver.draw.begin_blend(call,mode) end
 ---@param view box_2 # The clip test region.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L120)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L122)
 function quiver.draw.begin_scissor(call,view) end
 
 ---Get a ray for a 2D screen-space point.
@@ -662,7 +703,7 @@ function quiver.draw.begin_scissor(call,view) end
 ---@return ray ray # The 3D ray, beginning at the screen-space point, in 3D space.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L153)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L155)
 function quiver.draw.get_screen_to_world_3d(camera,point,shape) end
 
 ---Get a 2D screen-space point for a 3D world-space point.
@@ -673,38 +714,40 @@ function quiver.draw.get_screen_to_world_3d(camera,point,shape) end
 ---@return number point_y # The 2D screen-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L189)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L191)
 function quiver.draw.get_world_to_screen_3d(camera,point,shape) end
 
 ---Get a world-space point for a 2D screen-space point.
 ---@param camera camera_2d # The current camera.
 ---@param point vector_2 # The screen-space point.
----@return vector_2 point # The 2D world-space point.
+---@return number point_x # The 2D world-space point (X).
+---@return number point_y # The 2D world-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L223)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L226)
 function quiver.draw.get_screen_to_world_2d(camera,point) end
 
 ---Get a screen-space point for a 2D world-space point.
 ---@param camera camera_2d # The current camera.
 ---@param point vector_2 # The world-space point.
----@return vector_2 point # The 2D screen-space point.
+---@return number point_x # The 2D screen-space point (X).
+---@return number point_y # The 2D screen-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L251)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L255)
 function quiver.draw.get_world_to_screen_2d(camera,point) end
 
 ---Clear the screen with a color.
 ---@param color color # The color to use for clearing.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L274)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L278)
 function quiver.draw.clear(color) end
 
 ---The 2D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L290)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L294)
 ---@class quiver.draw_2d
 quiver.draw_2d = {}
 
@@ -713,18 +756,26 @@ quiver.draw_2d = {}
 ---@param camera camera_2d # The 2D camera.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L316)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L323)
 function quiver.draw_2d.begin(call,camera) end
 
----Draw 2D box.
----@param shape box_2 # The shape of the box.
----@param point vector_2 # The point of the box.
----@param angle number # The angle of the box.
----@param color color # The color of the box.
+---Draw pixel.
+---@param point vector_2 # The point of the pixel.
+---@param color color # The color of the pixel.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L341)
-function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L347)
+function quiver.draw_2d.pixel(point,color) end
+
+---Draw line.
+---@param point_a vector_2 # The point A of the line.
+---@param point_b vector_2 # The point B of the line.
+---@param thick number # The thickness of the line.
+---@param color color # The color of the line.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L370)
+function quiver.draw_2d.line(point_a,point_b,thick,color) end
 
 ---Draw text.
 ---@param label string # The label of the text.
@@ -733,8 +784,8 @@ function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
 ---@param color color # The color of the text.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L367)
-function quiver.draw_2d.draw_text(label,point,scale,color) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L397)
+function quiver.draw_2d.text(label,point,scale,color) end
 
 ---Draw a circle.
 ---@param point vector_2 # 
@@ -742,8 +793,8 @@ function quiver.draw_2d.draw_text(label,point,scale,color) end
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L399)
-function quiver.draw_2d.draw_circle(point,radius,color) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L429)
+function quiver.draw_2d.circle(point,radius,color) end
 
 ---Draw the sector of a circle.
 ---@param point vector_2 # 
@@ -754,13 +805,34 @@ function quiver.draw_2d.draw_circle(point,radius,color) end
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L427)
-function quiver.draw_2d.draw_circle_sector(point,radius,begin_angle,close_angle,segment_count,color) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L454)
+function quiver.draw_2d.circle_sector(point,radius,begin_angle,close_angle,segment_count,color) end
+
+---Draw 2D box.
+---@param shape box_2 # The shape of the box.
+---@param point vector_2 # The point of the box.
+---@param angle number # The angle of the box.
+---@param color color # The color of the box.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L494)
+function quiver.draw_2d.box_2(shape,point,angle,color) end
+
+---Draw 2D box.
+---@param shape box_2 # The shape of the box.
+---@param color_a color # The color A (T.L.) of the box.
+---@param color_b color # The color B (B.L.) of the box.
+---@param color_c color # The color C (T.R.) of the box.
+---@param color_d color # The color D (B.R.) of the box.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L522)
+function quiver.draw_2d.box_2_gradient(shape,color_a,color_b,color_c,color_d) end
 
 ---The 3D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L461)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L557)
 ---@class quiver.draw_3d
 quiver.draw_3d = {}
 
@@ -769,7 +841,7 @@ quiver.draw_3d = {}
 ---@param camera camera_3d # The 2D camera.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L488)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L584)
 function quiver.draw_3d.begin(call,camera) end
 
 ---Draw a grid.
@@ -777,7 +849,7 @@ function quiver.draw_3d.begin(call,camera) end
 ---@param space number # The space shift of the grid.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L511)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L607)
 function quiver.draw_3d.draw_grid(slice,space) end
 
 ---Draw a cube.
@@ -786,7 +858,7 @@ function quiver.draw_3d.draw_grid(slice,space) end
 ---@param color color # The color of the cube.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L529)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L625)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a ball.
@@ -795,7 +867,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L554)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L650)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a 3D box.
@@ -803,7 +875,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L574)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L670)
 function quiver.draw_3d.draw_box_3(shape,color) end
 
 ---Draw a ray.
@@ -811,7 +883,7 @@ function quiver.draw_3d.draw_box_3(shape,color) end
 ---@param color color # The color of the ray.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L594)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L690)
 function quiver.draw_3d.draw_ray(ray,color) end
 
 ---The general API.
@@ -982,7 +1054,7 @@ font = {}
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L90)
-function font.draw(label,point,scale,space,color) end
+function font:draw(label,point,scale,space,color) end
 
 ---Measure the size of a given text on screen, with a given font.
 ---@param label string # Label of font to measure.
@@ -993,7 +1065,7 @@ function font.draw(label,point,scale,space,color) end
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L128)
-function font.measure_text(label,scale,space) end
+function font:measure_text(label,scale,space) end
 
 ---Create a new font resource.
 ---@param path string # Path to font file.
@@ -1160,31 +1232,34 @@ function quiver.window.get_resize() end
 function quiver.window.get_hidden() end
 
 ---Get the shape of the window.
----@return vector_2 shape # Shape of the window.
+---@return number shape_x # Shape of the window (X).
+---@return number shape_y # Shape of the window (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L388)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L389)
 function quiver.window.get_shape() end
 
 ---Get the point of the window.
----@return vector_2 point # Point of the window.
+---@return number point_x # Point of the window (X).
+---@return number point_y # Point of the window (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L407)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L404)
 function quiver.window.get_point() end
 
 ---Get the DPI scale of the window.
----@return number scale # Scale of the window.
+---@return number scale_x # Scale of the window (X).
+---@return number scale_y # Scale of the window (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L425)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L423)
 function quiver.window.get_scale() end
 
 ---Get if the window should close.
 ---@return boolean close # True if the window should close.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L443)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L441)
 function quiver.window.get_close() end
 
 ---The music API.

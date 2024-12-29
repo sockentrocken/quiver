@@ -381,17 +381,13 @@ fn get_hidden(_: &Lua, _: ()) -> mlua::Result<bool> {
     "name": "quiver.window.get_shape",
     "info": "Get the shape of the window.",
     "result": [
-        { "name": "shape", "info": "Shape of the window.", "kind": "vector_2" }
+        { "name": "shape_x", "info": "Shape of the window (X).", "kind": "number" },
+        { "name": "shape_y", "info": "Shape of the window (Y).", "kind": "number" }
     ]
 }
 */
-fn get_shape(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
-    unsafe {
-        lua.to_value(&Vector2::new(
-            ffi::GetScreenWidth() as f32,
-            ffi::GetScreenHeight() as f32,
-        ))
-    }
+fn get_shape(_: &Lua, _: ()) -> mlua::Result<(i32, i32)> {
+    unsafe { Ok((ffi::GetScreenWidth(), ffi::GetScreenHeight())) }
 }
 
 /* entry
@@ -400,15 +396,16 @@ fn get_shape(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     "name": "quiver.window.get_point",
     "info": "Get the point of the window.",
     "result": [
-        { "name": "point", "info": "Point of the window.", "kind": "vector_2" }
+        { "name": "point_x", "info": "Point of the window (X).", "kind": "number" },
+        { "name": "point_y", "info": "Point of the window (Y).", "kind": "number" }
     ]
 }
 */
-fn get_point(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+fn get_point(_: &Lua, _: ()) -> mlua::Result<(f32, f32)> {
     unsafe {
         let value = ffi::GetWindowPosition();
 
-        lua.to_value(&Vector2::new(value.x, value.y))
+        Ok((value.x, value.y))
     }
 }
 
@@ -418,15 +415,16 @@ fn get_point(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     "name": "quiver.window.get_scale",
     "info": "Get the DPI scale of the window.",
     "result": [
-        { "name": "scale", "info": "Scale of the window.", "kind": "number" }
+        { "name": "scale_x", "info": "Scale of the window (X).", "kind": "number" },
+        { "name": "scale_y", "info": "Scale of the window (Y).", "kind": "number" }
     ]
 }
 */
-fn get_scale(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+fn get_scale(_: &Lua, _: ()) -> mlua::Result<(f32, f32)> {
     unsafe {
         let value = ffi::GetWindowScaleDPI();
 
-        lua.to_value(&Vector2::new(value.x, value.y))
+        Ok((value.x, value.y))
     }
 }
 

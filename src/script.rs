@@ -68,7 +68,6 @@ impl Script {
     const NAME_MAIN: &'static str = "main.lua";
     const NAME_BASE: &'static str = "base.lua";
     const NAME_META: &'static str = "meta.lua";
-    const CALL_INFO: &'static str = "info";
     const CALL_MAIN: &'static str = "main";
     const CALL_FAIL: &'static str = "fail";
 

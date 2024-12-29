@@ -27,7 +27,6 @@ use crate::window::*;
 
 //================================================================
 
-use ffi::SetConfigFlags;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
 
