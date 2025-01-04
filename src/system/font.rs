@@ -22,6 +22,10 @@
 * SOFTWARE.
 */
 
+use crate::script::*;
+
+//================================================================
+
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
@@ -146,18 +150,20 @@ impl Font {
         "name": "quiver.font.new",
         "info": "Create a new font resource.",
         "member": [
-            { "name": "path", "info": "Path to font file.", "kind": "string" }
+            { "name": "path", "info": "Path to font file.", "kind": "string" },
+            { "name": "size", "info": "Size for font.",     "kind": "number" }
         ],
         "result": [
             { "name": "font", "info": "Font resource.", "kind": "font" }
         ]
     }
     */
-    fn new(_: &Lua, path: String) -> mlua::Result<Self> {
-        let name = CString::new(path.clone()).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    fn new(lua: &Lua, (path, size): (String, i32)) -> mlua::Result<Self> {
+        let name = CString::new(ScriptData::get_path(lua, &path))
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
         unsafe {
-            let data = ffi::LoadFont(name.as_ptr());
+            let data = ffi::LoadFontEx(name.as_ptr(), size, std::ptr::null_mut(), 0);
 
             if ffi::IsFontValid(data) {
                 Ok(Self(RLFont::from_raw(data)))

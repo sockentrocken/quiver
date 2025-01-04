@@ -22,6 +22,10 @@
 * SOFTWARE.
 */
 
+use crate::script::*;
+
+//================================================================
+
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
@@ -64,11 +68,11 @@ impl Shader {
         ]
     }
     */
-    fn new(_: &Lua, (v_path, f_path): (Option<String>, Option<String>)) -> mlua::Result<Self> {
+    fn new(lua: &Lua, (v_path, f_path): (Option<String>, Option<String>)) -> mlua::Result<Self> {
         let v_path = match v_path {
             Some(name) => {
-                let pointer =
-                    CString::new(name).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+                let pointer = CString::new(ScriptData::get_path(lua, &name))
+                    .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
                 pointer.into_raw()
             }
@@ -77,8 +81,8 @@ impl Shader {
 
         let f_path = match f_path {
             Some(name) => {
-                let pointer =
-                    CString::new(name).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+                let pointer = CString::new(ScriptData::get_path(lua, &name))
+                    .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
                 pointer.into_raw()
             }

@@ -28,17 +28,6 @@ use std::ffi::{CStr, CString};
 
 //================================================================
 
-pub const BOARD_RANGE_LOWER: i32 = 0;
-pub const BOARD_RANGE_UPPER: i32 = 384;
-pub const MOUSE_RANGE_LOWER: i32 = 0;
-pub const MOUSE_RANGE_UPPER: i32 = 6;
-pub const CURSOR_RANGE_LOWER: i32 = 0;
-pub const CURSOR_RANGE_UPPER: i32 = 10;
-pub const PAD_RANGE_LOWER: i32 = 0;
-pub const PAD_RANGE_UPPER: i32 = 17;
-
-//================================================================
-
 /* class
 { "version": "1.0.0", "name": "quiver.input", "info": "The input API." }
 */
@@ -62,6 +51,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     board.set("get_up",             lua.create_function(self::get_board_up)?)?;
     board.set("get_down",           lua.create_function(self::get_board_down)?)?;
     board.set("get_press",          lua.create_function(self::get_board_press)?)?;
+    board.set("get_press_repeat",   lua.create_function(self::get_board_press_repeat)?)?;
     board.set("get_release",        lua.create_function(self::get_board_release)?)?;
 
     input.set("board", board)?;
@@ -195,13 +185,9 @@ fn get_board_uni_code_queue(_: &Lua, _: ()) -> mlua::Result<i32> {
 }
 */
 fn get_board_name(_: &Lua, value: i32) -> mlua::Result<String> {
-    if (self::BOARD_RANGE_LOWER..=self::BOARD_RANGE_UPPER).contains(&value) {
-        unsafe {
-            let name = ffi::GetKeyName(value);
-            Ok(CStr::from_ptr(name).to_str().unwrap().to_string())
-        }
-    } else {
-        Err(mlua::Error::runtime("get_board_up(): Unknown value."))
+    unsafe {
+        let name = ffi::GetKeyName(value);
+        Ok(CStr::from_ptr(name).to_str().unwrap().to_string())
     }
 }
 
@@ -216,11 +202,7 @@ fn get_board_name(_: &Lua, value: i32) -> mlua::Result<String> {
 }
 */
 fn get_board_up(_: &Lua, value: i32) -> mlua::Result<bool> {
-    if (self::BOARD_RANGE_LOWER..=self::BOARD_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsKeyUp(value)) }
-    } else {
-        Err(mlua::Error::runtime("get_board_up(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsKeyUp(value)) }
 }
 
 /* entry
@@ -234,11 +216,7 @@ fn get_board_up(_: &Lua, value: i32) -> mlua::Result<bool> {
 }
 */
 fn get_board_down(_: &Lua, value: i32) -> mlua::Result<bool> {
-    if (self::BOARD_RANGE_LOWER..=self::BOARD_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsKeyDown(value)) }
-    } else {
-        Err(mlua::Error::runtime("get_board_down(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsKeyDown(value)) }
 }
 
 /* entry
@@ -252,11 +230,21 @@ fn get_board_down(_: &Lua, value: i32) -> mlua::Result<bool> {
 }
 */
 fn get_board_press(_: &Lua, value: i32) -> mlua::Result<bool> {
-    if (self::BOARD_RANGE_LOWER..=self::BOARD_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsKeyPressed(value)) }
-    } else {
-        Err(mlua::Error::runtime("get_board_press(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsKeyPressed(value)) }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.input.board.get_press_repeat",
+    "info": "Get the state of an input (repeat-press).",
+    "member": [
+        { "name": "board", "info": "The board button to check for.", "kind": "input_board" }
+    ]
+}
+*/
+fn get_board_press_repeat(_: &Lua, value: i32) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsKeyPressedRepeat(value)) }
 }
 
 /* entry
@@ -270,11 +258,7 @@ fn get_board_press(_: &Lua, value: i32) -> mlua::Result<bool> {
 }
 */
 fn get_board_release(_: &Lua, value: i32) -> mlua::Result<bool> {
-    if (self::BOARD_RANGE_LOWER..=self::BOARD_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsKeyReleased(value)) }
-    } else {
-        Err(mlua::Error::runtime("get_board_release(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsKeyReleased(value)) }
 }
 
 //================================================================
@@ -452,15 +436,9 @@ fn set_mouse_scale(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
 }
 */
 fn set_mouse_cursor(_: &Lua, value: i32) -> mlua::Result<()> {
-    if (self::CURSOR_RANGE_LOWER..=self::CURSOR_RANGE_UPPER).contains(&value) {
-        unsafe {
-            ffi::SetMouseCursor(value);
-            Ok(())
-        }
-    } else {
-        Err(mlua::Error::runtime(
-            "set_mouse_cursor(): Unknown cursor value.",
-        ))
+    unsafe {
+        ffi::SetMouseCursor(value);
+        Ok(())
     }
 }
 
@@ -493,11 +471,7 @@ fn get_mouse_wheel(_: &Lua, _: ()) -> mlua::Result<(f32, f32)> {
 }
 */
 fn get_mouse_up(_: &Lua, value: i32) -> mlua::Result<bool> {
-    if (self::MOUSE_RANGE_LOWER..=self::MOUSE_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsMouseButtonUp(value)) }
-    } else {
-        Err(mlua::Error::runtime("get_mouse_up(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsMouseButtonUp(value)) }
 }
 
 /* entry
@@ -511,11 +485,7 @@ fn get_mouse_up(_: &Lua, value: i32) -> mlua::Result<bool> {
 }
 */
 fn get_mouse_down(_: &Lua, value: i32) -> mlua::Result<bool> {
-    if (self::MOUSE_RANGE_LOWER..=self::MOUSE_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsMouseButtonDown(value)) }
-    } else {
-        Err(mlua::Error::runtime("get_mouse_down(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsMouseButtonDown(value)) }
 }
 
 /* entry
@@ -529,11 +499,7 @@ fn get_mouse_down(_: &Lua, value: i32) -> mlua::Result<bool> {
 }
 */
 fn get_mouse_press(_: &Lua, value: i32) -> mlua::Result<bool> {
-    if (self::MOUSE_RANGE_LOWER..=self::MOUSE_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsMouseButtonPressed(value)) }
-    } else {
-        Err(mlua::Error::runtime("get_mouse_press(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsMouseButtonPressed(value)) }
 }
 
 /* entry
@@ -547,11 +513,7 @@ fn get_mouse_press(_: &Lua, value: i32) -> mlua::Result<bool> {
 }
 */
 fn get_mouse_release(_: &Lua, value: i32) -> mlua::Result<bool> {
-    if (self::MOUSE_RANGE_LOWER..=self::MOUSE_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsMouseButtonReleased(value)) }
-    } else {
-        Err(mlua::Error::runtime("get_mouse_release(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsMouseButtonReleased(value)) }
 }
 
 //================================================================
@@ -653,11 +615,7 @@ fn get_pad_axis_state(_: &Lua, (index, axis): (i32, i32)) -> mlua::Result<f32> {
 }
 */
 fn get_pad_up(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
-    if (self::PAD_RANGE_LOWER..=self::PAD_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsGamepadButtonUp(index, value)) }
-    } else {
-        Err(mlua::Error::runtime("get_pad_up(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsGamepadButtonUp(index, value)) }
 }
 
 /* entry
@@ -671,11 +629,7 @@ fn get_pad_up(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
 }
 */
 fn get_pad_down(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
-    if (self::PAD_RANGE_LOWER..=self::PAD_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsGamepadButtonDown(index, value)) }
-    } else {
-        Err(mlua::Error::runtime("get_pad_down(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsGamepadButtonDown(index, value)) }
 }
 
 /* entry
@@ -689,11 +643,7 @@ fn get_pad_down(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
 }
 */
 fn get_pad_press(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
-    if (self::PAD_RANGE_LOWER..=self::PAD_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsGamepadButtonPressed(index, value)) }
-    } else {
-        Err(mlua::Error::runtime("get_pad_press(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsGamepadButtonPressed(index, value)) }
 }
 
 /* entry
@@ -707,9 +657,5 @@ fn get_pad_press(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
 }
 */
 fn get_pad_release(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
-    if (self::PAD_RANGE_LOWER..=self::PAD_RANGE_UPPER).contains(&value) {
-        unsafe { Ok(ffi::IsGamepadButtonReleased(index, value)) }
-    } else {
-        Err(mlua::Error::runtime("get_pad_release(): Unknown value."))
-    }
+    unsafe { Ok(ffi::IsGamepadButtonReleased(index, value)) }
 }

@@ -36,6 +36,7 @@ pub mod general;
 pub mod draw;
 
 /* miscellaneous */
+pub mod file;
 pub mod input;
 pub mod window;
 
@@ -46,6 +47,7 @@ pub mod music;
 pub mod shader;
 pub mod sound;
 pub mod texture;
+pub mod zip;
 
 /* rapier API */
 pub mod rapier;

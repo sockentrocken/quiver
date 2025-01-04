@@ -35,6 +35,8 @@ use serde::{Deserialize, Serialize};
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let general = lua.create_table()?;
 
+    general.set("serialize",   lua.create_function(self::serialize)?)?;
+    general.set("deserialize", lua.create_function(self::deserialize)?)?;
     general.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
     general.set("get_time",       lua.create_function(self::get_time)?)?;
     general.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
@@ -51,6 +53,43 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 }
 
 //================================================================
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.serialize",
+    "info": "Serialize a given Lua value as a JSON string.",
+    "member": [
+        { "name": "value", "info": "Lua value to serialize.", "kind": "any" }
+    ],
+    "result": [
+        { "name": "value", "info": "The value, in string form.", "kind": "string" }
+    ]
+}
+*/
+fn serialize(lua: &Lua, value: LuaValue) -> mlua::Result<String> {
+    let value: serde_json::Value = lua.from_value(value)?;
+    serde_json::to_string_pretty(&value).map_err(|e| mlua::Error::runtime(e.to_string()))
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.deserialize",
+    "info": "Deserialize a given JSON string as a Lua value.",
+    "member": [
+        { "name": "value", "info": "String to deserialize.", "kind": "string" }
+    ],
+    "result": [
+        { "name": "value", "info": "The value, in Lua value form.", "kind": "any" }
+    ]
+}
+*/
+fn deserialize(lua: &Lua, value: String) -> mlua::Result<LuaValue> {
+    let value: serde_json::Value =
+        serde_json::from_str(&value).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    lua.to_value(&value)
+}
 
 /* entry
 { "version": "1.0.0", "name": "quiver.general.load", "info": "Load the engine.", "skip_definition": "true" }
@@ -70,15 +109,9 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 }
 */
 fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
-    if (crate::system::input::BOARD_RANGE_LOWER..=crate::system::input::BOARD_RANGE_UPPER)
-        .contains(&value)
-    {
-        unsafe {
-            ffi::SetExitKey(value);
-            Ok(())
-        }
-    } else {
-        Err(mlua::Error::runtime("set_exit_key(): Unknown key value."))
+    unsafe {
+        ffi::SetExitKey(value);
+        Ok(())
     }
 }
 

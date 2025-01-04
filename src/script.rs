@@ -28,30 +28,8 @@ use crate::system::*;
 //================================================================
 
 use mlua::prelude::*;
-use serde::{Deserialize, Serialize};
 
 //================================================================
-
-#[derive(Deserialize, Serialize, Clone)]
-pub struct ModuleWindow {
-    pub sync: bool,
-    pub msaa: bool,
-    pub high_scale: bool,
-    pub name: String,
-    pub shape: (i32, i32),
-}
-
-impl Default for ModuleWindow {
-    fn default() -> Self {
-        Self {
-            sync: true,
-            msaa: true,
-            high_scale: false,
-            name: "Quiver".to_string(),
-            shape: (1024, 768),
-        }
-    }
-}
 
 #[derive(Clone)]
 pub struct Script {
@@ -85,6 +63,9 @@ impl Script {
                 unsafe { Lua::unsafe_new_with(LuaStdLib::ALL, LuaOptions::new()) }
             }
         };
+
+        // set script data.
+        lua.set_app_data(ScriptData::new(info.clone()));
 
         // set the standard Quiver library.
         Self::system(&lua, info)?;
@@ -190,6 +171,8 @@ impl Script {
         music::set_global(lua, &quiver)?;
         font::set_global(lua, &quiver)?;
         shader::set_global(lua, &quiver)?;
+        file::set_global(lua, &quiver)?;
+        zip::set_global(lua, &quiver)?;
 
         // set the quiver table as a global value.
         global.set("quiver", quiver)?;
@@ -213,5 +196,23 @@ impl Script {
         std::fs::write(format!("{path}/{}", Self::NAME_META), Self::FILE_META)
             .map_err(|e| Status::panic(&e.to_string()))
             .unwrap();
+    }
+}
+
+//================================================================
+
+pub struct ScriptData {
+    pub info: Info,
+}
+
+impl ScriptData {
+    pub fn new(info: Info) -> Self {
+        Self { info }
+    }
+
+    pub fn get_path(lua: &Lua, path: &str) -> String {
+        let script_data = lua.app_data_ref::<ScriptData>().unwrap();
+
+        format!("{}/{path}", script_data.info.path)
     }
 }

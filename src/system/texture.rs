@@ -22,6 +22,10 @@
 * SOFTWARE.
 */
 
+use crate::script::*;
+
+//================================================================
+
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::CString;
@@ -231,8 +235,9 @@ impl Texture {
         ]
     }
     */
-    fn new(_: &Lua, path: String) -> mlua::Result<Self> {
-        let name = CString::new(path.clone()).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    fn new(lua: &Lua, path: String) -> mlua::Result<Self> {
+        let name = CString::new(ScriptData::get_path(lua, &path))
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
         unsafe {
             let data = ffi::LoadTexture(name.as_ptr());

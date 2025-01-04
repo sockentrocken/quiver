@@ -295,14 +295,21 @@ mod draw_2d {
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw_2d = lua.create_table()?;
 
-        draw_2d.set("begin",          lua.create_function(self::begin)?)?;
-        draw_2d.set("pixel",          lua.create_function(self::pixel)?)?;
-        draw_2d.set("line",           lua.create_function(self::line)?)?;
-        draw_2d.set("text",           lua.create_function(self::text)?)?;
-        draw_2d.set("circle",         lua.create_function(self::circle)?)?;
-        draw_2d.set("circle_sector",  lua.create_function(self::circle_sector)?)?;
-        draw_2d.set("box_2",          lua.create_function(self::box_2)?)?;
-        draw_2d.set("box_2_gradient", lua.create_function(self::box_2_gradient)?)?;
+        draw_2d.set("begin",                 lua.create_function(self::begin)?)?;
+        draw_2d.set("draw_pixel",            lua.create_function(self::draw_pixel)?)?;
+        draw_2d.set("draw_line",             lua.create_function(self::draw_line)?)?;
+        draw_2d.set("draw_text",             lua.create_function(self::draw_text)?)?;
+        draw_2d.set("draw_circle",           lua.create_function(self::draw_circle)?)?;
+        draw_2d.set("draw_circle_sector",    lua.create_function(self::draw_circle_sector)?)?;
+        draw_2d.set("draw_box_2",            lua.create_function(self::draw_box_2)?)?;
+        draw_2d.set("draw_box_2_gradient_x", lua.create_function(self::draw_box_2_gradient_x)?)?;
+        draw_2d.set("draw_box_2_gradient_y", lua.create_function(self::draw_box_2_gradient_y)?)?;
+        draw_2d.set("draw_box_2_gradient",   lua.create_function(self::draw_box_2_gradient)?)?;
+        draw_2d.set("draw_box_2_line",       lua.create_function(self::draw_box_2_line)?)?;
+        draw_2d.set("draw_box_2_round",      lua.create_function(self::draw_box_2_round)?)?;
+        draw_2d.set("draw_box_2_line_round", lua.create_function(self::draw_box_2_line_round)?)?;
+        draw_2d.set("draw_triangle",         lua.create_function(self::draw_triangle)?)?;
+        draw_2d.set("draw_triangle_line",    lua.create_function(self::draw_triangle_line)?)?;
 
         table.set("draw_2d", draw_2d)?;
 
@@ -336,7 +343,7 @@ mod draw_2d {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw_2d.pixel",
+        "name": "quiver.draw_2d.draw_pixel",
         "info": "Draw pixel.",
         "member": [
             { "name": "point", "info": "The point of the pixel.", "kind": "vector_2" },
@@ -344,7 +351,7 @@ mod draw_2d {
         ]
     }
     */
-    fn pixel(lua: &Lua, (point, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
+    fn draw_pixel(lua: &Lua, (point, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
         let point: Vector2 = lua.from_value(point)?;
         let color: Color = lua.from_value(color)?;
 
@@ -357,7 +364,7 @@ mod draw_2d {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw_2d.line",
+        "name": "quiver.draw_2d.draw_line",
         "info": "Draw line.",
         "member": [
             { "name": "point_a", "info": "The point A of the line.",   "kind": "vector_2" },
@@ -367,7 +374,7 @@ mod draw_2d {
         ]
     }
     */
-    fn line(
+    fn draw_line(
         lua: &Lua,
         (point_a, point_b, thick, color): (LuaValue, LuaValue, f32, LuaValue),
     ) -> mlua::Result<()> {
@@ -384,7 +391,7 @@ mod draw_2d {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw_2d.text",
+        "name": "quiver.draw_2d.draw_text",
         "info": "Draw text.",
         "member": [
             { "name": "label", "info": "The label of the text.", "kind": "string"   },
@@ -394,7 +401,7 @@ mod draw_2d {
         ]
     }
     */
-    fn text(
+    fn draw_text(
         lua: &Lua,
         (text, point, scale, color): (String, LuaValue, i32, LuaValue),
     ) -> mlua::Result<()> {
@@ -417,7 +424,7 @@ mod draw_2d {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw_2d.circle",
+        "name": "quiver.draw_2d.draw_circle",
         "info": "Draw a circle.",
         "member": [
             { "name": "point",  "info": "", "kind": "vector_2" },
@@ -426,7 +433,10 @@ mod draw_2d {
         ]
     }
     */
-    fn circle(lua: &Lua, (point, radius, color): (LuaValue, f32, LuaValue)) -> mlua::Result<()> {
+    fn draw_circle(
+        lua: &Lua,
+        (point, radius, color): (LuaValue, f32, LuaValue),
+    ) -> mlua::Result<()> {
         let point: Vector2 = lua.from_value(point)?;
         let color: Color = lua.from_value(color)?;
 
@@ -439,7 +449,7 @@ mod draw_2d {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw_2d.circle_sector",
+        "name": "quiver.draw_2d.draw_circle_sector",
         "info": "Draw the sector of a circle.",
         "member": [
             { "name": "point",         "info": "", "kind": "vector_2" },
@@ -451,7 +461,7 @@ mod draw_2d {
         ]
     }
     */
-    fn circle_sector(
+    fn draw_circle_sector(
         lua: &Lua,
         (point, radius, begin_angle, close_angle, segment_count, color): (
             LuaValue,
@@ -481,7 +491,7 @@ mod draw_2d {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw_2d.box_2",
+        "name": "quiver.draw_2d.draw_box_2",
         "info": "Draw 2D box.",
         "member": [
             { "name": "shape", "info": "The shape of the box.", "kind": "box_2"    },
@@ -491,7 +501,7 @@ mod draw_2d {
         ]
     }
     */
-    fn box_2(
+    fn draw_box_2(
         lua: &Lua,
         (shape, point, angle, color): (LuaValue, LuaValue, f32, LuaValue),
     ) -> mlua::Result<()> {
@@ -508,8 +518,74 @@ mod draw_2d {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw_2d.box_2_gradient",
-        "info": "Draw 2D box.",
+        "name": "quiver.draw_2d.draw_box_2_gradient_x",
+        "info": "Draw 2D box with a gradient (X-direction).",
+        "member": [
+            { "name": "shape",   "info": "The shape of the box.",   "kind": "box_2" },
+            { "name": "color_a", "info": "The color A of the box.", "kind": "color" },
+            { "name": "color_b", "info": "The color B of the box.", "kind": "color" }
+        ]
+    }
+    */
+    fn draw_box_2_gradient_x(
+        lua: &Lua,
+        (shape, color_a, color_b): (LuaValue, LuaValue, LuaValue),
+    ) -> mlua::Result<()> {
+        let shape: Rectangle = lua.from_value(shape)?;
+        let color_a: Color = lua.from_value(color_a)?;
+        let color_b: Color = lua.from_value(color_b)?;
+
+        unsafe {
+            ffi::DrawRectangleGradientH(
+                shape.x as i32,
+                shape.y as i32,
+                shape.width as i32,
+                shape.height as i32,
+                color_a.into(),
+                color_b.into(),
+            );
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_box_2_gradient_y",
+        "info": "Draw 2D box with a gradient (Y-direction).",
+        "member": [
+            { "name": "shape",   "info": "The shape of the box.",   "kind": "box_2" },
+            { "name": "color_a", "info": "The color A of the box.", "kind": "color" },
+            { "name": "color_b", "info": "The color B of the box.", "kind": "color" }
+        ]
+    }
+    */
+    fn draw_box_2_gradient_y(
+        lua: &Lua,
+        (shape, color_a, color_b): (LuaValue, LuaValue, LuaValue),
+    ) -> mlua::Result<()> {
+        let shape: Rectangle = lua.from_value(shape)?;
+        let color_a: Color = lua.from_value(color_a)?;
+        let color_b: Color = lua.from_value(color_b)?;
+
+        unsafe {
+            ffi::DrawRectangleGradientV(
+                shape.x as i32,
+                shape.y as i32,
+                shape.width as i32,
+                shape.height as i32,
+                color_a.into(),
+                color_b.into(),
+            );
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_box_2_gradient",
+        "info": "Draw 2D box with a 4-point gradient.",
         "member": [
             { "name": "shape",   "info": "The shape of the box.",   "kind": "box_2" },
             { "name": "color_a", "info": "The color A (T.L.) of the box.", "kind": "color" },
@@ -519,7 +595,7 @@ mod draw_2d {
         ]
     }
     */
-    fn box_2_gradient(
+    fn draw_box_2_gradient(
         lua: &Lua,
         (shape, color_a, color_b, color_c, color_d): (
             LuaValue,
@@ -543,6 +619,140 @@ mod draw_2d {
                 color_c.into(),
                 color_d.into(),
             );
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_box_2_line",
+        "info": "Draw 2D box (out-line).",
+        "member": [
+            { "name": "shape", "info": "The shape of the box.",     "kind": "box_2"  },
+            { "name": "thick", "info": "The thickness of the box.", "kind": "number" },
+            { "name": "color", "info": "The color of the box.",     "kind": "color"  }
+        ]
+    }
+    */
+    fn draw_box_2_line(
+        lua: &Lua,
+        (shape, thick, color): (LuaValue, f32, LuaValue),
+    ) -> mlua::Result<()> {
+        let shape: Rectangle = lua.from_value(shape)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawRectangleLinesEx(shape.into(), thick, color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_box_2_round",
+        "info": "Draw 2D box (round).",
+        "member": [
+            { "name": "shape", "info": "The shape of the box.",         "kind": "box_2"  },
+            { "name": "round", "info": "The roundness of the box.",     "kind": "number" },
+            { "name": "count", "info": "The segment count of the box.", "kind": "number" },
+            { "name": "color", "info": "The color of the box.",         "kind": "color"  }
+        ]
+    }
+    */
+    fn draw_box_2_round(
+        lua: &Lua,
+        (shape, round, count, color): (LuaValue, f32, i32, LuaValue),
+    ) -> mlua::Result<()> {
+        let shape: Rectangle = lua.from_value(shape)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawRectangleRounded(shape.into(), round, count, color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_box_2_line_round",
+        "info": "Draw 2D box (out-line, round).",
+        "member": [
+            { "name": "shape", "info": "The shape of the box.",         "kind": "box_2"  },
+            { "name": "round", "info": "The roundness of the box.",     "kind": "number" },
+            { "name": "count", "info": "The segment count of the box.", "kind": "number" },
+            { "name": "thick", "info": "The thickness of the box.",     "kind": "number" },
+            { "name": "color", "info": "The color of the box.",         "kind": "color"  }
+        ]
+    }
+    */
+    fn draw_box_2_line_round(
+        lua: &Lua,
+        (shape, round, count, thick, color): (LuaValue, f32, i32, f32, LuaValue),
+    ) -> mlua::Result<()> {
+        let shape: Rectangle = lua.from_value(shape)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawRectangleRoundedLinesEx(shape.into(), round, count, thick, color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_triangle",
+        "info": "Draw 2D triangle.",
+        "member": [
+            { "name": "point_a", "info": "The point A of the triangle.", "kind": "vector_2" },
+            { "name": "point_b", "info": "The point B of the triangle.", "kind": "vector_2" },
+            { "name": "point_c", "info": "The point C of the triangle.", "kind": "vector_2" },
+            { "name": "color",   "info": "The color of the triangle.",   "kind": "color"    }
+        ]
+    }
+    */
+    fn draw_triangle(
+        lua: &Lua,
+        (point_a, point_b, point_c, color): (LuaValue, LuaValue, LuaValue, LuaValue),
+    ) -> mlua::Result<()> {
+        let point_a: Vector2 = lua.from_value(point_a)?;
+        let point_b: Vector2 = lua.from_value(point_b)?;
+        let point_c: Vector2 = lua.from_value(point_c)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawTriangle(point_a.into(), point_b.into(), point_c.into(), color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.draw_triangle_line",
+        "info": "Draw 2D triangle (out-line).",
+        "member": [
+            { "name": "point_a", "info": "The point A of the triangle.", "kind": "vector_2" },
+            { "name": "point_b", "info": "The point B of the triangle.", "kind": "vector_2" },
+            { "name": "point_c", "info": "The point C of the triangle.", "kind": "vector_2" },
+            { "name": "color",   "info": "The color of the triangle.",   "kind": "color"    }
+        ]
+    }
+    */
+    fn draw_triangle_line(
+        lua: &Lua,
+        (point_a, point_b, point_c, color): (LuaValue, LuaValue, LuaValue, LuaValue),
+    ) -> mlua::Result<()> {
+        let point_a: Vector2 = lua.from_value(point_a)?;
+        let point_b: Vector2 = lua.from_value(point_b)?;
+        let point_c: Vector2 = lua.from_value(point_c)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawTriangleLines(point_a.into(), point_b.into(), point_c.into(), color.into());
             Ok(())
         }
     }

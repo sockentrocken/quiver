@@ -198,7 +198,7 @@ pub enum InfoResult {
     Missing,
 }
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Default, Clone, Deserialize, Serialize)]
 pub struct Info {
     pub safe: bool,
     pub path: String,
