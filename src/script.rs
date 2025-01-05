@@ -213,6 +213,12 @@ impl ScriptData {
     pub fn get_path(lua: &Lua, path: &str) -> String {
         let script_data = lua.app_data_ref::<ScriptData>().unwrap();
 
-        format!("{}/{path}", script_data.info.path)
+        if script_data.info.safe {
+            // any path in safe mode must be done within the info file's given path.
+            format!("{}/{path}", script_data.info.path)
+        } else {
+            // un-safe mode does not have this restriction.
+            path.to_string()
+        }
     }
 }

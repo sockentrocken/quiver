@@ -22,6 +22,10 @@
 * SOFTWARE.
 */
 
+use crate::script::*;
+
+//================================================================
+
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -35,14 +39,15 @@ use serde::{Deserialize, Serialize};
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let general = lua.create_table()?;
 
-    general.set("serialize",   lua.create_function(self::serialize)?)?;
-    general.set("deserialize", lua.create_function(self::deserialize)?)?;
+    general.set("serialize",      lua.create_function(self::serialize)?)?;
+    general.set("deserialize",    lua.create_function(self::deserialize)?)?;
     general.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
     general.set("get_time",       lua.create_function(self::get_time)?)?;
     general.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
     general.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
     general.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
-    general.set("get_memory", lua.create_function(self::get_memory)?)?;
+    general.set("get_memory",     lua.create_function(self::get_memory)?)?;
+    general.set("get_info",       lua.create_function(self::get_info)?)?;
     //general.set("get_clipboard_text",  lua.create_function(self::get_clipboard_text)?)?;
     //general.set("set_clipboard_text",  lua.create_function(self::set_clipboard_text)?)?;
     //general.set("get_clipboard_image", lua.create_function(self::get_clipboard_image)?)?;
@@ -181,6 +186,23 @@ fn get_memory(lua: &Lua, _: ()) -> mlua::Result<usize> {
     Ok(lua.used_memory())
 }
 
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.get_info",
+    "info": "Get the current info manifest data.",
+    "result": [
+        { "name": "safe", "info": "Safe mode.", "kind": "boolean" },
+        { "name": "path", "info": "Main path.", "kind": "string"  }
+    ]
+}
+*/
+fn get_info(lua: &Lua, _: ()) -> mlua::Result<(bool, String)> {
+    let script_data = lua.app_data_ref::<ScriptData>().unwrap();
+
+    Ok((script_data.info.safe, script_data.info.path.clone()))
+}
+
 //================================================================
 
 #[derive(Deserialize, Serialize)]
@@ -208,6 +230,7 @@ pub struct Camera3D {
     pub focus: Vector3,
     pub angle: Vector3,
     pub zoom: f32,
+    pub kind: i32,
 }
 
 impl Into<ffi::Camera3D> for Camera3D {
@@ -217,7 +240,7 @@ impl Into<ffi::Camera3D> for Camera3D {
             target: self.focus.into(),
             up: self.angle.into(),
             fovy: self.zoom,
-            projection: 0,
+            projection: self.kind,
         }
     }
 }

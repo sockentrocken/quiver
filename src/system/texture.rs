@@ -256,6 +256,7 @@ impl Texture {
 impl Drop for Texture {
     fn drop(&mut self) {
         unsafe {
+            println!("dropping...");
             ffi::UnloadTexture(self.0);
         }
     }

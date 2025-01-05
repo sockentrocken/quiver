@@ -139,7 +139,10 @@ fn set_clipboard_text(_: &Lua, text: String) -> mlua::Result<()> {
 fn get_clipboard_text(_: &Lua, _: ()) -> mlua::Result<String> {
     unsafe {
         let name = ffi::GetClipboardText();
-        Ok(CStr::from_ptr(name).to_str().unwrap().to_string())
+        Ok(CStr::from_ptr(name)
+            .to_str()
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?
+            .to_string())
     }
 }
 
@@ -187,7 +190,10 @@ fn get_board_uni_code_queue(_: &Lua, _: ()) -> mlua::Result<i32> {
 fn get_board_name(_: &Lua, value: i32) -> mlua::Result<String> {
     unsafe {
         let name = ffi::GetKeyName(value);
-        Ok(CStr::from_ptr(name).to_str().unwrap().to_string())
+        Ok(CStr::from_ptr(name)
+            .to_str()
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?
+            .to_string())
     }
 }
 
@@ -551,7 +557,10 @@ fn get_pad_state(_: &Lua, index: i32) -> mlua::Result<bool> {
 fn get_pad_name(_: &Lua, index: i32) -> mlua::Result<String> {
     unsafe {
         let name = ffi::GetGamepadName(index);
-        Ok(CStr::from_ptr(name).to_str().unwrap().to_string())
+        Ok(CStr::from_ptr(name)
+            .to_str()
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?
+            .to_string())
     }
 }
 
