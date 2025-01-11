@@ -1,25 +1,18 @@
 /*
-* MIT License
+* BSD Zero Clause License
 *
-* Copyright (c) 2024 sockentrocken
+* Copyright (c) 2025 sockentrocken
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
+* Permission to use, copy, modify, and/or distribute this software for any
+* purpose with or without fee is hereby granted.
 *
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
+* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+* REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+* AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+* INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+* LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+* OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+* PERFORMANCE OF THIS SOFTWARE.
 */
 
 use mlua::prelude::*;
@@ -88,16 +81,27 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     */
     let pad = lua.create_table()?;
 
+    // IsGamepadAvailable
     pad.set("get_state",      lua.create_function(self::get_pad_state)?)?;
+    // GetGamepadName
     pad.set("get_name",       lua.create_function(self::get_pad_name)?)?;
-    pad.set("get_queue",      lua.create_function(self::get_pad_queue)?)?;
-    pad.set("get_axis_count", lua.create_function(self::get_pad_axis_count)?)?;
-    pad.set("get_axis_state", lua.create_function(self::get_pad_axis_state)?)?;
-    pad.set("get_up",         lua.create_function(self::get_pad_up)?)?;
-    pad.set("get_down",       lua.create_function(self::get_pad_down)?)?;
+    // IsGamepadButtonPressed
     pad.set("get_press",      lua.create_function(self::get_pad_press)?)?;
+    // IsGamepadButtonDown
+    pad.set("get_down",       lua.create_function(self::get_pad_down)?)?;
+    // IsGamepadButtonReleased
     pad.set("get_release",    lua.create_function(self::get_pad_release)?)?;
-
+    // IsGamepadButtonUp
+    pad.set("get_up",         lua.create_function(self::get_pad_up)?)?;
+    // GetGamepadButtonPressed
+    pad.set("get_queue",      lua.create_function(self::get_pad_queue)?)?;
+    // GetGamepadAxisCount
+    pad.set("get_axis_count", lua.create_function(self::get_pad_axis_count)?)?;
+    // GetGamepadAxisMovement
+    pad.set("get_axis_state", lua.create_function(self::get_pad_axis_state)?)?;
+    // SetGamepadrumble
+    pad.set("set_rumble", lua.create_function(self::set_pad_rumble)?)?;
+    
     input.set("pad", pad)?;
 
     //================================================================
@@ -567,6 +571,62 @@ fn get_pad_name(_: &Lua, index: i32) -> mlua::Result<String> {
 /* entry
 {
     "version": "1.0.0",
+    "name": "quiver.input.pad.get_press",
+    "info": "Get the state of an input (press).",
+    "member": [
+        { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
+    ]
+}
+*/
+fn get_pad_press(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsGamepadButtonPressed(index, value)) }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.input.pad.get_down",
+    "info": "Get the state of an input (down).",
+    "member": [
+        { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
+    ]
+}
+*/
+fn get_pad_down(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsGamepadButtonDown(index, value)) }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.input.pad.get_release",
+    "info": "Get the state of an input (release).",
+    "member": [
+        { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
+    ]
+}
+*/
+fn get_pad_release(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsGamepadButtonReleased(index, value)) }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.input.pad.get_up",
+    "info": "Get the state of an input (up).",
+    "member": [
+        { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
+    ]
+}
+*/
+fn get_pad_up(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsGamepadButtonUp(index, value)) }
+}
+
+/* entry
+{
+    "version": "1.0.0",
     "name": "quiver.input.pad.get_queue",
     "info": "Get the last pad button press.",
     "result": [
@@ -616,55 +676,22 @@ fn get_pad_axis_state(_: &Lua, (index, axis): (i32, i32)) -> mlua::Result<f32> {
 /* entry
 {
     "version": "1.0.0",
-    "name": "quiver.input.pad.get_up",
-    "info": "Get the state of an input (up).",
+    "name": "quiver.input.pad.set_rumble",
+    "info": "Set the rumble of a pad.",
     "member": [
-        { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
+        { "name": "index",    "info": "The index of the pad to rumble.",       "kind": "number" },
+        { "name": "motor_a",  "info": "The intensity of the L. rumble motor.", "kind": "number" },
+        { "name": "motor_b",  "info": "The intensity of the R. rumble motor.", "kind": "number" },
+        { "name": "duration", "info": "The duration of the rumble.",           "kind": "number" }
     ]
 }
 */
-fn get_pad_up(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
-    unsafe { Ok(ffi::IsGamepadButtonUp(index, value)) }
-}
-
-/* entry
-{
-    "version": "1.0.0",
-    "name": "quiver.input.pad.get_down",
-    "info": "Get the state of an input (down).",
-    "member": [
-        { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
-    ]
-}
-*/
-fn get_pad_down(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
-    unsafe { Ok(ffi::IsGamepadButtonDown(index, value)) }
-}
-
-/* entry
-{
-    "version": "1.0.0",
-    "name": "quiver.input.pad.get_press",
-    "info": "Get the state of an input (press).",
-    "member": [
-        { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
-    ]
-}
-*/
-fn get_pad_press(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
-    unsafe { Ok(ffi::IsGamepadButtonPressed(index, value)) }
-}
-
-/* entry
-{
-    "version": "1.0.0",
-    "name": "quiver.input.pad.get_release",
-    "info": "Get the state of an input (release).",
-    "member": [
-        { "name": "pad", "info": "The pad button to check for.", "kind": "input_pad" }
-    ]
-}
-*/
-fn get_pad_release(_: &Lua, (index, value): (i32, i32)) -> mlua::Result<bool> {
-    unsafe { Ok(ffi::IsGamepadButtonReleased(index, value)) }
+fn set_pad_rumble(
+    _: &Lua,
+    (index, motor_a, motor_b, duration): (i32, f32, f32, f32),
+) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetGamepadVibration(index, motor_a, motor_b, duration);
+        Ok(())
+    }
 }

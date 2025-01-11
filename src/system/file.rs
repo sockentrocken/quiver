@@ -1,25 +1,18 @@
 /*
-* MIT License
+* BSD Zero Clause License
 *
-* Copyright (c) 2024 sockentrocken
+* Copyright (c) 2025 sockentrocken
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
+* Permission to use, copy, modify, and/or distribute this software for any
+* purpose with or without fee is hereby granted.
 *
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
+* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+* REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+* AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+* INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+* LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+* OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+* PERFORMANCE OF THIS SOFTWARE.
 */
 
 use crate::script::*;
@@ -70,7 +63,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 }
 */
 fn get(lua: &Lua, path: String) -> mlua::Result<String> {
-    std::fs::read_to_string(ScriptData::get_path(lua, &path))
+    std::fs::read_to_string(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))
 }
 
@@ -86,7 +79,7 @@ fn get(lua: &Lua, path: String) -> mlua::Result<String> {
 }
 */
 fn set(lua: &Lua, (path, data): (String, String)) -> mlua::Result<()> {
-    std::fs::write(ScriptData::get_path(lua, &path), data)
+    std::fs::write(ScriptData::get_path(lua, &path)?, data)
         .map_err(|e| mlua::Error::runtime(e.to_string()))
 }
 
@@ -104,7 +97,7 @@ fn set(lua: &Lua, (path, data): (String, String)) -> mlua::Result<()> {
 }
 */
 fn get_file_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
-    let path = CString::new(ScriptData::get_path(lua, &path))
+    let path = CString::new(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
     unsafe { Ok(ffi::FileExists(path.as_ptr())) }
@@ -124,7 +117,7 @@ fn get_file_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
 }
 */
 fn get_path_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
-    let path = CString::new(ScriptData::get_path(lua, &path))
+    let path = CString::new(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
     unsafe { Ok(ffi::DirectoryExists(path.as_ptr())) }
@@ -145,7 +138,7 @@ fn get_path_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
 }
 */
 fn get_file_extension_check(lua: &Lua, (path, extension): (String, String)) -> mlua::Result<bool> {
-    let path = CString::new(ScriptData::get_path(lua, &path))
+    let path = CString::new(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
     let extension = CString::new(extension).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
@@ -166,7 +159,7 @@ fn get_file_extension_check(lua: &Lua, (path, extension): (String, String)) -> m
 }
 */
 fn get_file_size(lua: &Lua, path: String) -> mlua::Result<i32> {
-    let path = CString::new(ScriptData::get_path(lua, &path))
+    let path = CString::new(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
     unsafe { Ok(ffi::GetFileLength(path.as_ptr())) }
@@ -186,7 +179,7 @@ fn get_file_size(lua: &Lua, path: String) -> mlua::Result<i32> {
 }
 */
 fn get_file_extension(lua: &Lua, path: String) -> mlua::Result<String> {
-    let path = CString::new(ScriptData::get_path(lua, &path))
+    let path = CString::new(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
     unsafe {
@@ -213,7 +206,7 @@ fn get_file_extension(lua: &Lua, path: String) -> mlua::Result<String> {
 }
 */
 fn get_file_name(lua: &Lua, (path, extension): (String, bool)) -> mlua::Result<String> {
-    let path = CString::new(ScriptData::get_path(lua, &path))
+    let path = CString::new(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
     unsafe {
@@ -292,7 +285,7 @@ fn scan_path(
     lua: &Lua,
     (path, filter, recursive): (String, Option<String>, bool),
 ) -> mlua::Result<LuaValue> {
-    let path = CString::new(ScriptData::get_path(lua, &path))
+    let path = CString::new(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
     let mut data: Vec<String> = Vec::new();
 

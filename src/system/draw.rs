@@ -1,25 +1,18 @@
 /*
-* MIT License
+* BSD Zero Clause License
 *
-* Copyright (c) 2024 sockentrocken
+* Copyright (c) 2025 sockentrocken
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
+* Permission to use, copy, modify, and/or distribute this software for any
+* purpose with or without fee is hereby granted.
 *
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
+* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+* REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+* AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+* INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+* LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+* OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+* PERFORMANCE OF THIS SOFTWARE.
 */
 
 use crate::system::*;
@@ -34,8 +27,8 @@ use std::ffi::CString;
 
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     draw_general::set_global(lua, table)?;
-    draw_2d::set_global(lua, table)?;
     draw_3d::set_global(lua, table)?;
+    draw_2d::set_global(lua, table)?;
 
     Ok(())
 }
@@ -50,14 +43,10 @@ mod draw_general {
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw = lua.create_table()?;
 
-        draw.set("begin",                  lua.create_function(self::begin)?)?;
-        draw.set("begin_blend",            lua.create_function(self::begin_blend)?)?;
-        draw.set("begin_scissor",          lua.create_function(self::begin_scissor)?)?;
-        draw.set("get_screen_to_world_3d", lua.create_function(self::get_screen_to_world_3d)?)?;
-        draw.set("get_world_to_screen_3d", lua.create_function(self::get_world_to_screen_3d)?)?;
-        draw.set("get_screen_to_world_2d", lua.create_function(self::get_screen_to_world_2d)?)?;
-        draw.set("get_world_to_screen_2d", lua.create_function(self::get_world_to_screen_2d)?)?;
-        draw.set("clear",                  lua.create_function(self::clear)?)?;
+        draw.set("begin",         lua.create_function(self::begin)?)?;
+        draw.set("begin_blend",   lua.create_function(self::begin_blend)?)?;
+        draw.set("begin_scissor", lua.create_function(self::begin_scissor)?)?;
+        draw.set("clear",         lua.create_function(self::clear)?)?;
 
         table.set("draw", draw)?;
 
@@ -139,8 +128,71 @@ mod draw_general {
 
     /* entry
     {
+        "version": "1.0.0", "name": "quiver.draw.clear",
+        "info": "Clear the screen with a color.",
+        "member": [
+            { "name": "color", "info": "The color to use for clearing.", "kind": "color" }
+        ]
+    }
+    */
+    fn clear(lua: &Lua, color: LuaValue) -> mlua::Result<()> {
+        let value: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::ClearBackground(value.into());
+            Ok(())
+        }
+    }
+}
+
+mod draw_3d {
+    use super::*;
+
+    /* class
+    { "version": "1.0.0", "name": "quiver.draw_3d", "info": "The 3D drawing API." }
+    */
+    #[rustfmt::skip]
+    pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+        let draw_3d = lua.create_table()?;
+
+        draw_3d.set("begin",               lua.create_function(self::begin)?)?;
+        draw_3d.set("update_camera",       lua.create_function(self::update_camera)?)?;
+        //draw_3d.set("update_camera_pro",   lua.create_function(self::update_camera_pro)?)?;
+        draw_3d.set("get_screen_to_world", lua.create_function(self::get_screen_to_world)?)?;
+        draw_3d.set("get_world_to_screen", lua.create_function(self::get_world_to_screen)?)?;
+        draw_3d.set("draw_grid",           lua.create_function(self::draw_grid)?)?;
+        draw_3d.set("draw_cube",           lua.create_function(self::draw_cube)?)?;
+        draw_3d.set("draw_ball",           lua.create_function(self::draw_ball)?)?;
+        draw_3d.set("draw_box_3",          lua.create_function(self::draw_box_3)?)?;
+        draw_3d.set("draw_ray",            lua.create_function(self::draw_ray)?)?;
+        draw_3d.set("draw_line",           lua.create_function(self::draw_line)?)?;
+
+        table.set("draw_3d", draw_3d)?;
+
+        Ok(())
+    }
+
+    /* entry
+    {
         "version": "1.0.0",
-        "name": "quiver.draw.get_screen_to_world_3d",
+        "name": "quiver.draw_3d.update_camera",
+        "info": "Update the 3D camera.",
+        "member": [
+            { "name": "camera", "info": "The camera to update.", "kind": "camera_3d" },
+            { "name": "kind", "info": "", "kind": "number" }
+        ]
+    }
+    */
+    fn update_camera(lua: &Lua, (camera, kind): (LuaValue, i32)) -> mlua::Result<()> {
+        let mut camera: general::Camera3D = lua.from_value(camera)?;
+
+        Ok(())
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_3d.get_screen_to_world",
         "info": "Get a ray for a 2D screen-space point.",
         "member": [
             { "name": "camera", "info": "The current camera.",        "kind": "camera_3d" },
@@ -152,7 +204,7 @@ mod draw_general {
         ]
     }
     */
-    fn get_screen_to_world_3d(
+    fn get_screen_to_world(
         lua: &Lua,
         (camera, point, shape): (LuaValue, LuaValue, LuaValue),
     ) -> mlua::Result<LuaValue> {
@@ -175,7 +227,7 @@ mod draw_general {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw.get_world_to_screen_3d",
+        "name": "quiver.draw_3d.get_world_to_screen",
         "info": "Get a 2D screen-space point for a 3D world-space point.",
         "member": [
             { "name": "camera", "info": "The current camera.",        "kind": "camera_3d" },
@@ -188,7 +240,7 @@ mod draw_general {
         ]
     }
     */
-    fn get_world_to_screen_3d(
+    fn get_world_to_screen(
         lua: &Lua,
         (camera, point, shape): (LuaValue, LuaValue, LuaValue),
     ) -> mlua::Result<(f32, f32)> {
@@ -211,75 +263,151 @@ mod draw_general {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw.get_screen_to_world_2d",
-        "info": "Get a world-space point for a 2D screen-space point.",
+        "name": "quiver.draw_3d.begin",
+        "info": "Initialize the 3D draw mode.",
         "member": [
-            { "name": "camera", "info": "The current camera.",     "kind": "camera_2d" },
-            { "name": "point",  "info": "The screen-space point.", "kind": "vector_2"  }
-        ],
-        "result": [
-            { "name": "point_x", "info": "The 2D world-space point (X).", "kind": "number" },
-            { "name": "point_y", "info": "The 2D world-space point (Y).", "kind": "number" }
+            { "name": "call",   "info": "The draw code.", "kind": "function"  },
+            { "name": "camera", "info": "The 2D camera.", "kind": "camera_3d" }
         ]
     }
     */
-    fn get_screen_to_world_2d(
-        lua: &Lua,
-        (camera, point): (LuaValue, LuaValue),
-    ) -> mlua::Result<(f32, f32)> {
-        let camera: general::Camera2D = lua.from_value(camera)?;
-        let point: Vector2 = lua.from_value(point)?;
+    fn begin(lua: &Lua, (call, camera): (mlua::Function, LuaValue)) -> mlua::Result<()> {
+        let value: general::Camera3D = lua.from_value(camera)?;
 
         unsafe {
-            let point = ffi::GetScreenToWorld2D(point.into(), camera.into());
+            ffi::BeginMode3D(value.into());
 
-            Ok((point.x, point.y))
+            call.call::<()>(())?;
+
+            ffi::EndMode3D();
+            Ok(())
         }
     }
 
     /* entry
     {
-        "version": "1.0.0",
-        "name": "quiver.draw.get_world_to_screen_2d",
-        "info": "Get a screen-space point for a 2D world-space point.",
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_grid",
+        "info": "Draw a grid.",
         "member": [
-            { "name": "camera", "info": "The current camera.",    "kind": "camera_2d" },
-            { "name": "point",  "info": "The world-space point.", "kind": "vector_2"  }
-        ],
-        "result": [
-            { "name": "point_x", "info": "The 2D screen-space point (X).", "kind": "number" },
-            { "name": "point_y", "info": "The 2D screen-space point (Y).", "kind": "number" }
+            { "name": "slice", "info": "The slice count of the grid.", "kind": "number" },
+            { "name": "space", "info": "The space shift of the grid.", "kind": "number" }
         ]
     }
     */
-    fn get_world_to_screen_2d(
-        lua: &Lua,
-        (camera, point): (LuaValue, LuaValue),
-    ) -> mlua::Result<(f32, f32)> {
-        let camera: general::Camera2D = lua.from_value(camera)?;
-        let point: Vector2 = lua.from_value(point)?;
-
+    fn draw_grid(_: &Lua, (slice, space): (i32, f32)) -> mlua::Result<()> {
         unsafe {
-            let point = ffi::GetWorldToScreen2D(point.into(), camera.into());
-
-            Ok((point.x, point.y))
+            ffi::DrawGrid(slice, space);
+            Ok(())
         }
     }
 
     /* entry
     {
-        "version": "1.0.0", "name": "quiver.draw.clear",
-        "info": "Clear the screen with a color.",
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_cube",
+        "info": "Draw a cube.",
         "member": [
-            { "name": "color", "info": "The color to use for clearing.", "kind": "color" }
+            { "name": "point", "info": "The point of the cube.", "kind": "vector_3" },
+            { "name": "shape", "info": "The shape of the cube.", "kind": "vector_3" },
+            { "name": "color", "info": "The color of the cube.", "kind": "color"    }
         ]
     }
     */
-    fn clear(lua: &Lua, color: LuaValue) -> mlua::Result<()> {
-        let value: Color = lua.from_value(color)?;
+    fn draw_cube(
+        lua: &Lua,
+        (point, shape, color): (LuaValue, LuaValue, LuaValue),
+    ) -> mlua::Result<()> {
+        let point: Vector3 = lua.from_value(point)?;
+        let shape: Vector3 = lua.from_value(shape)?;
+        let color: Color = lua.from_value(color)?;
 
         unsafe {
-            ffi::ClearBackground(value.into());
+            ffi::DrawCubeV(point.into(), shape.into(), color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_cube",
+        "info": "Draw a ball.",
+        "member": [
+            { "name": "point", "info": "The point of the ball.", "kind": "vector_3" },
+            { "name": "shape", "info": "The shape of the ball.", "kind": "number"   },
+            { "name": "color", "info": "The color of the ball.", "kind": "color"    }
+        ]
+    }
+    */
+    fn draw_ball(lua: &Lua, (point, shape, color): (LuaValue, f32, LuaValue)) -> mlua::Result<()> {
+        let point: Vector3 = lua.from_value(point)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawSphere(point.into(), shape, color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_box_3",
+        "info": "Draw a 3D box.",
+        "member": [
+            { "name": "shape", "info": "The shape of the ball.", "kind": "box_3" },
+            { "name": "color", "info": "The color of the ball.", "kind": "color" }
+        ]
+    }
+    */
+    fn draw_box_3(lua: &Lua, (box_3, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
+        let box_3: BoundingBox = lua.from_value(box_3)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawBoundingBox(box_3.into(), color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_ray",
+        "info": "Draw a ray.",
+        "member": [
+            { "name": "ray",   "info": "The ray.",              "kind": "ray"   },
+            { "name": "color", "info": "The color of the ray.", "kind": "color" }
+        ]
+    }
+    */
+    fn draw_ray(lua: &Lua, (ray, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
+        let ray: Ray = lua.from_value(ray)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawRay(ray.into(), color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_line",
+        "info": "Draw a line.",
+        "member": [
+            { "name": "point_a", "info": "The point A of the line.",   "kind": "vector_3" },
+            { "name": "point_b", "info": "The point B of the line.",   "kind": "vector_3" },
+            { "name": "color",   "info": "The color of the line.",     "kind": "color"    }
+        ]
+    }
+    */
+    fn draw_line(
+        lua: &Lua,
+        (point_a, point_b, color): (LuaValue, LuaValue, LuaValue),
+    ) -> mlua::Result<()> {
+        let point_a: Vector3 = lua.from_value(point_a)?;
+        let point_b: Vector3 = lua.from_value(point_b)?;
+        let color: Color = lua.from_value(color)?;
+
+        unsafe {
+            ffi::DrawLine3D(point_a.into(), point_b.into(), color.into());
             Ok(())
         }
     }
@@ -296,6 +424,8 @@ mod draw_2d {
         let draw_2d = lua.create_table()?;
 
         draw_2d.set("begin",                 lua.create_function(self::begin)?)?;
+        draw_2d.set("get_screen_to_world",   lua.create_function(self::get_screen_to_world)?)?;
+        draw_2d.set("get_world_to_screen",   lua.create_function(self::get_world_to_screen)?)?;
         draw_2d.set("draw_pixel",            lua.create_function(self::draw_pixel)?)?;
         draw_2d.set("draw_line",             lua.create_function(self::draw_line)?)?;
         draw_2d.set("draw_text",             lua.create_function(self::draw_text)?)?;
@@ -314,6 +444,64 @@ mod draw_2d {
         table.set("draw_2d", draw_2d)?;
 
         Ok(())
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.get_screen_to_world",
+        "info": "Get a world-space point for a 2D screen-space point.",
+        "member": [
+            { "name": "camera", "info": "The current camera.",     "kind": "camera_2d" },
+            { "name": "point",  "info": "The screen-space point.", "kind": "vector_2"  }
+        ],
+        "result": [
+            { "name": "point_x", "info": "The 2D world-space point (X).", "kind": "number" },
+            { "name": "point_y", "info": "The 2D world-space point (Y).", "kind": "number" }
+        ]
+    }
+    */
+    fn get_screen_to_world(
+        lua: &Lua,
+        (camera, point): (LuaValue, LuaValue),
+    ) -> mlua::Result<(f32, f32)> {
+        let camera: general::Camera2D = lua.from_value(camera)?;
+        let point: Vector2 = lua.from_value(point)?;
+
+        unsafe {
+            let point = ffi::GetScreenToWorld2D(point.into(), camera.into());
+
+            Ok((point.x, point.y))
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_2d.get_world_to_screen",
+        "info": "Get a screen-space point for a 2D world-space point.",
+        "member": [
+            { "name": "camera", "info": "The current camera.",    "kind": "camera_2d" },
+            { "name": "point",  "info": "The world-space point.", "kind": "vector_2"  }
+        ],
+        "result": [
+            { "name": "point_x", "info": "The 2D screen-space point (X).", "kind": "number" },
+            { "name": "point_y", "info": "The 2D screen-space point (Y).", "kind": "number" }
+        ]
+    }
+    */
+    fn get_world_to_screen(
+        lua: &Lua,
+        (camera, point): (LuaValue, LuaValue),
+    ) -> mlua::Result<(f32, f32)> {
+        let camera: general::Camera2D = lua.from_value(camera)?;
+        let point: Vector2 = lua.from_value(point)?;
+
+        unsafe {
+            let point = ffi::GetWorldToScreen2D(point.into(), camera.into());
+
+            Ok((point.x, point.y))
+        }
     }
 
     /* entry
@@ -365,7 +553,7 @@ mod draw_2d {
     {
         "version": "1.0.0",
         "name": "quiver.draw_2d.draw_line",
-        "info": "Draw line.",
+        "info": "Draw a line.",
         "member": [
             { "name": "point_a", "info": "The point A of the line.",   "kind": "vector_2" },
             { "name": "point_b", "info": "The point B of the line.",   "kind": "vector_2" },
@@ -753,156 +941,6 @@ mod draw_2d {
 
         unsafe {
             ffi::DrawTriangleLines(point_a.into(), point_b.into(), point_c.into(), color.into());
-            Ok(())
-        }
-    }
-}
-
-mod draw_3d {
-    use super::*;
-
-    /* class
-    { "version": "1.0.0", "name": "quiver.draw_3d", "info": "The 3D drawing API." }
-    */
-    #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
-        let draw_3d = lua.create_table()?;
-
-        draw_3d.set("begin", lua.create_function(self::begin)?)?;
-        draw_3d.set("draw_grid", lua.create_function(self::draw_grid)?)?;
-        draw_3d.set("draw_cube", lua.create_function(self::draw_cube)?)?;
-        draw_3d.set("draw_ball", lua.create_function(self::draw_ball)?)?;
-        draw_3d.set("draw_box_3", lua.create_function(self::draw_box_3)?)?;
-        draw_3d.set("draw_ray", lua.create_function(self::draw_ray)?)?;
-
-        table.set("draw_3d", draw_3d)?;
-
-        Ok(())
-    }
-
-    /* entry
-    {
-        "version": "1.0.0",
-        "name": "quiver.draw_3d.begin",
-        "info": "Initialize the 3D draw mode.",
-        "member": [
-            { "name": "call",   "info": "The draw code.", "kind": "function"  },
-            { "name": "camera", "info": "The 2D camera.", "kind": "camera_3d" }
-        ]
-    }
-    */
-    fn begin(lua: &Lua, (call, camera): (mlua::Function, LuaValue)) -> mlua::Result<()> {
-        let value: general::Camera3D = lua.from_value(camera)?;
-
-        unsafe {
-            ffi::BeginMode3D(value.into());
-
-            call.call::<()>(())?;
-
-            ffi::EndMode3D();
-            Ok(())
-        }
-    }
-
-    /* entry
-    {
-        "version": "1.0.0", "name": "quiver.draw_3d.draw_grid",
-        "info": "Draw a grid.",
-        "member": [
-            { "name": "slice", "info": "The slice count of the grid.", "kind": "number" },
-            { "name": "space", "info": "The space shift of the grid.", "kind": "number" }
-        ]
-    }
-    */
-    fn draw_grid(_: &Lua, (slice, space): (i32, f32)) -> mlua::Result<()> {
-        unsafe {
-            ffi::DrawGrid(slice, space);
-            Ok(())
-        }
-    }
-
-    /* entry
-    {
-        "version": "1.0.0", "name": "quiver.draw_3d.draw_cube",
-        "info": "Draw a cube.",
-        "member": [
-            { "name": "point", "info": "The point of the cube.", "kind": "vector_3" },
-            { "name": "shape", "info": "The shape of the cube.", "kind": "vector_3" },
-            { "name": "color", "info": "The color of the cube.", "kind": "color"    }
-        ]
-    }
-    */
-    fn draw_cube(
-        lua: &Lua,
-        (point, shape, color): (LuaValue, LuaValue, LuaValue),
-    ) -> mlua::Result<()> {
-        let point: Vector3 = lua.from_value(point)?;
-        let shape: Vector3 = lua.from_value(shape)?;
-        let color: Color = lua.from_value(color)?;
-
-        unsafe {
-            ffi::DrawCubeV(point.into(), shape.into(), color.into());
-            Ok(())
-        }
-    }
-
-    /* entry
-    {
-        "version": "1.0.0", "name": "quiver.draw_3d.draw_cube",
-        "info": "Draw a ball.",
-        "member": [
-            { "name": "point", "info": "The point of the ball.", "kind": "vector_3" },
-            { "name": "shape", "info": "The shape of the ball.", "kind": "number"   },
-            { "name": "color", "info": "The color of the ball.", "kind": "color"    }
-        ]
-    }
-    */
-    fn draw_ball(lua: &Lua, (point, shape, color): (LuaValue, f32, LuaValue)) -> mlua::Result<()> {
-        let point: Vector3 = lua.from_value(point)?;
-        let color: Color = lua.from_value(color)?;
-
-        unsafe {
-            ffi::DrawSphere(point.into(), shape, color.into());
-            Ok(())
-        }
-    }
-
-    /* entry
-    {
-        "version": "1.0.0", "name": "quiver.draw_3d.draw_box_3",
-        "info": "Draw a 3D box.",
-        "member": [
-            { "name": "shape", "info": "The shape of the ball.", "kind": "box_3" },
-            { "name": "color", "info": "The color of the ball.", "kind": "color" }
-        ]
-    }
-    */
-    fn draw_box_3(lua: &Lua, (box_3, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
-        let box_3: BoundingBox = lua.from_value(box_3)?;
-        let color: Color = lua.from_value(color)?;
-
-        unsafe {
-            ffi::DrawBoundingBox(box_3.into(), color.into());
-            Ok(())
-        }
-    }
-
-    /* entry
-    {
-        "version": "1.0.0", "name": "quiver.draw_3d.draw_ray",
-        "info": "Draw a ray.",
-        "member": [
-            { "name": "ray",   "info": "The ray.",              "kind": "ray"   },
-            { "name": "color", "info": "The color of the ray.", "kind": "color" }
-        ]
-    }
-    */
-    fn draw_ray(lua: &Lua, (ray, color): (LuaValue, LuaValue)) -> mlua::Result<()> {
-        let ray: Ray = lua.from_value(ray)?;
-        let color: Color = lua.from_value(color)?;
-
-        unsafe {
-            ffi::DrawRay(ray.into(), color.into());
             Ok(())
         }
     }
