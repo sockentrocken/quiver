@@ -706,6 +706,15 @@ function model:bind(index,which,texture) end
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L153)
 function model:draw(point,scale,color) end
 
+---Draw the model (wire-frame).
+---@param point vector_3 # 
+---@param scale number # 
+---@param color color # 
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L176)
+function model:draw_wire(point,scale,color) end
+
 ---Draw the model with a transformation.
 ---@param point vector_3 # 
 ---@param angle vector_4 # 
@@ -713,7 +722,7 @@ function model:draw(point,scale,color) end
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L177)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L200)
 function model:draw_transform(point,angle,scale,color) end
 
 ---Get the vertex data of a specific mesh in the model.
@@ -721,7 +730,7 @@ function model:draw_transform(point,angle,scale,color) end
 ---@return table table # Vector3 table.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L208)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L231)
 function model:mesh_vertex(index) end
 
 ---Get the index data of a specific mesh in the model.
@@ -729,13 +738,13 @@ function model:mesh_vertex(index) end
 ---@return table table # Number table.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L226)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L249)
 function model:mesh_index(index) end
 
 ---An unique handle for a model animation in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L242)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L265)
 ---@class model_animation
 model_animation = {}
 
@@ -744,7 +753,7 @@ model_animation = {}
 ---@return model_animation model_animation # ModelAnimation resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L258)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L281)
 function quiver.model_animation.new(path) end
 
 ---Update model with new model animation data.
@@ -753,7 +762,7 @@ function quiver.model_animation.new(path) end
 ---@param frame number # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L302)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L325)
 function model_animation:update(model,index,frame) end
 
 ---The drawing API.
@@ -800,13 +809,15 @@ function quiver.draw.clear(color) end
 ---@class quiver.draw_3d
 quiver.draw_3d = {}
 
----Update the 3D camera.
+---Update the 3D camera (pro).
 ---@param camera camera_3d # The camera to update.
----@param kind number # 
+---@param position vector_3 # 
+---@param rotation vector_3 # 
+---@param zoom number # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L186)
-function quiver.draw_3d.update_camera(camera,kind) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L188)
+function quiver.draw_3d.update_camera_pro(camera,position,rotation,zoom) end
 
 ---Get a ray for a 2D screen-space point.
 ---@param camera camera_3d # The current camera.
@@ -815,7 +826,7 @@ function quiver.draw_3d.update_camera(camera,kind) end
 ---@return ray ray # The 3D ray, beginning at the screen-space point, in 3D space.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L207)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L232)
 function quiver.draw_3d.get_screen_to_world(camera,point,shape) end
 
 ---Get a 2D screen-space point for a 3D world-space point.
@@ -826,7 +837,7 @@ function quiver.draw_3d.get_screen_to_world(camera,point,shape) end
 ---@return number point_y # The 2D screen-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L243)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L268)
 function quiver.draw_3d.get_world_to_screen(camera,point,shape) end
 
 ---Initialize the 3D draw mode.
@@ -834,7 +845,7 @@ function quiver.draw_3d.get_world_to_screen(camera,point,shape) end
 ---@param camera camera_3d # The 2D camera.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L274)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L299)
 function quiver.draw_3d.begin(call,camera) end
 
 ---Draw a grid.
@@ -842,7 +853,7 @@ function quiver.draw_3d.begin(call,camera) end
 ---@param space number # The space shift of the grid.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L297)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L322)
 function quiver.draw_3d.draw_grid(slice,space) end
 
 ---Draw a cube.
@@ -851,7 +862,7 @@ function quiver.draw_3d.draw_grid(slice,space) end
 ---@param color color # The color of the cube.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L315)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L340)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a ball.
@@ -860,7 +871,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L340)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L365)
 function quiver.draw_3d.draw_cube(point,shape,color) end
 
 ---Draw a 3D box.
@@ -868,7 +879,7 @@ function quiver.draw_3d.draw_cube(point,shape,color) end
 ---@param color color # The color of the ball.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L360)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L385)
 function quiver.draw_3d.draw_box_3(shape,color) end
 
 ---Draw a ray.
@@ -876,7 +887,7 @@ function quiver.draw_3d.draw_box_3(shape,color) end
 ---@param color color # The color of the ray.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L380)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L405)
 function quiver.draw_3d.draw_ray(ray,color) end
 
 ---Draw a line.
@@ -885,13 +896,13 @@ function quiver.draw_3d.draw_ray(ray,color) end
 ---@param color color # The color of the line.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L401)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L426)
 function quiver.draw_3d.draw_line(point_a,point_b,color) end
 
 ---The 2D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L422)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L447)
 ---@class quiver.draw_2d
 quiver.draw_2d = {}
 
@@ -902,7 +913,7 @@ quiver.draw_2d = {}
 ---@return number point_y # The 2D world-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L464)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L489)
 function quiver.draw_2d.get_screen_to_world(camera,point) end
 
 ---Get a screen-space point for a 2D world-space point.
@@ -912,7 +923,7 @@ function quiver.draw_2d.get_screen_to_world(camera,point) end
 ---@return number point_y # The 2D screen-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L493)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L518)
 function quiver.draw_2d.get_world_to_screen(camera,point) end
 
 ---Initialize the 2D draw mode.
@@ -920,7 +931,7 @@ function quiver.draw_2d.get_world_to_screen(camera,point) end
 ---@param camera camera_2d # The 2D camera.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L518)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L543)
 function quiver.draw_2d.begin(call,camera) end
 
 ---Draw pixel.
@@ -928,7 +939,7 @@ function quiver.draw_2d.begin(call,camera) end
 ---@param color color # The color of the pixel.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L542)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L567)
 function quiver.draw_2d.draw_pixel(point,color) end
 
 ---Draw a line.
@@ -938,7 +949,7 @@ function quiver.draw_2d.draw_pixel(point,color) end
 ---@param color color # The color of the line.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L565)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L590)
 function quiver.draw_2d.draw_line(point_a,point_b,thick,color) end
 
 ---Draw text.
@@ -948,7 +959,7 @@ function quiver.draw_2d.draw_line(point_a,point_b,thick,color) end
 ---@param color color # The color of the text.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L592)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L617)
 function quiver.draw_2d.draw_text(label,point,scale,color) end
 
 ---Draw a circle.
@@ -957,7 +968,7 @@ function quiver.draw_2d.draw_text(label,point,scale,color) end
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L624)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L649)
 function quiver.draw_2d.draw_circle(point,radius,color) end
 
 ---Draw the sector of a circle.
@@ -969,7 +980,7 @@ function quiver.draw_2d.draw_circle(point,radius,color) end
 ---@param color color # 
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L652)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L677)
 function quiver.draw_2d.draw_circle_sector(point,radius,begin_angle,close_angle,segment_count,color) end
 
 ---Draw 2D box.
@@ -979,7 +990,7 @@ function quiver.draw_2d.draw_circle_sector(point,radius,begin_angle,close_angle,
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L692)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L717)
 function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
 
 ---Draw 2D box with a gradient (X-direction).
@@ -988,7 +999,7 @@ function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
 ---@param color_b color # The color B of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L718)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L743)
 function quiver.draw_2d.draw_box_2_gradient_x(shape,color_a,color_b) end
 
 ---Draw 2D box with a gradient (Y-direction).
@@ -997,7 +1008,7 @@ function quiver.draw_2d.draw_box_2_gradient_x(shape,color_a,color_b) end
 ---@param color_b color # The color B of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L751)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L776)
 function quiver.draw_2d.draw_box_2_gradient_y(shape,color_a,color_b) end
 
 ---Draw 2D box with a 4-point gradient.
@@ -1008,7 +1019,7 @@ function quiver.draw_2d.draw_box_2_gradient_y(shape,color_a,color_b) end
 ---@param color_d color # The color D (B.R.) of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L786)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L811)
 function quiver.draw_2d.draw_box_2_gradient(shape,color_a,color_b,color_c,color_d) end
 
 ---Draw 2D box (out-line).
@@ -1017,7 +1028,7 @@ function quiver.draw_2d.draw_box_2_gradient(shape,color_a,color_b,color_c,color_
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L826)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L851)
 function quiver.draw_2d.draw_box_2_line(shape,thick,color) end
 
 ---Draw 2D box (round).
@@ -1027,7 +1038,7 @@ function quiver.draw_2d.draw_box_2_line(shape,thick,color) end
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L852)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L877)
 function quiver.draw_2d.draw_box_2_round(shape,round,count,color) end
 
 ---Draw 2D box (out-line, round).
@@ -1038,7 +1049,7 @@ function quiver.draw_2d.draw_box_2_round(shape,round,count,color) end
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L879)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L904)
 function quiver.draw_2d.draw_box_2_line_round(shape,round,count,thick,color) end
 
 ---Draw 2D triangle.
@@ -1048,7 +1059,7 @@ function quiver.draw_2d.draw_box_2_line_round(shape,round,count,thick,color) end
 ---@param color color # The color of the triangle.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L905)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L930)
 function quiver.draw_2d.draw_triangle(point_a,point_b,point_c,color) end
 
 ---Draw 2D triangle (out-line).
@@ -1058,7 +1069,7 @@ function quiver.draw_2d.draw_triangle(point_a,point_b,point_c,color) end
 ---@param color color # The color of the triangle.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L933)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L958)
 function quiver.draw_2d.draw_triangle_line(point_a,point_b,point_c,color) end
 
 ---The file API.

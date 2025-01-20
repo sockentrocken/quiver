@@ -164,6 +164,29 @@ impl mlua::UserData for Model {
         /* entry
         {
             "version": "1.0.0",
+            "name": "model:draw_wire",
+            "info": "Draw the model (wire-frame).",
+            "member": [
+                { "name": "point", "info": "", "kind": "vector_3" },
+                { "name": "scale", "info": "", "kind": "number"   },
+                { "name": "color", "info": "", "kind": "color"    }
+            ]
+        }
+        */
+        method.add_method(
+            "draw_wire",
+            |lua, this, (point, scale, color): (LuaValue, f32, LuaValue)| unsafe {
+                let point: Vector3 = lua.from_value(point)?;
+                let color: Color = lua.from_value(color)?;
+
+                ffi::DrawModelWires(*this.0, point.into(), scale, color.into());
+                Ok(())
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "model:draw_transform",
             "info": "Draw the model with a transformation.",
             "member": [

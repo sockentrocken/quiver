@@ -156,8 +156,8 @@ mod draw_3d {
         let draw_3d = lua.create_table()?;
 
         draw_3d.set("begin",               lua.create_function(self::begin)?)?;
-        draw_3d.set("update_camera",       lua.create_function(self::update_camera)?)?;
-        //draw_3d.set("update_camera_pro",   lua.create_function(self::update_camera_pro)?)?;
+        //draw_3d.set("update_camera",       lua.create_function(self::update_camera)?)?;
+        draw_3d.set("update_camera_pro",   lua.create_function(self::update_camera_pro)?)?;
         draw_3d.set("get_screen_to_world", lua.create_function(self::get_screen_to_world)?)?;
         draw_3d.set("get_world_to_screen", lua.create_function(self::get_world_to_screen)?)?;
         draw_3d.set("draw_grid",           lua.create_function(self::draw_grid)?)?;
@@ -175,18 +175,43 @@ mod draw_3d {
     /* entry
     {
         "version": "1.0.0",
-        "name": "quiver.draw_3d.update_camera",
-        "info": "Update the 3D camera.",
+        "name": "quiver.draw_3d.update_camera_pro",
+        "info": "Update the 3D camera (pro).",
         "member": [
-            { "name": "camera", "info": "The camera to update.", "kind": "camera_3d" },
-            { "name": "kind", "info": "", "kind": "number" }
+            { "name": "camera",   "info": "The camera to update.", "kind": "camera_3d" },
+            { "name": "position", "info": "",                      "kind": "vector_3"  },
+            { "name": "rotation", "info": "",                      "kind": "vector_3"  },
+            { "name": "zoom",     "info": "",                      "kind": "number"    }
         ]
     }
     */
-    fn update_camera(lua: &Lua, (camera, kind): (LuaValue, i32)) -> mlua::Result<()> {
-        let mut camera: general::Camera3D = lua.from_value(camera)?;
+    fn update_camera_pro(
+        lua: &Lua,
+        (camera, position, rotation, zoom): (LuaValue, LuaValue, LuaValue, f32),
+    ) -> mlua::Result<(f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, i32)> {
+        let camera: general::Camera3D = lua.from_value(camera)?;
+        let position: Vector3 = lua.from_value(position)?;
+        let rotation: Vector3 = lua.from_value(rotation)?;
 
-        Ok(())
+        unsafe {
+            let mut camera: ffi::Camera3D = camera.into();
+
+            ffi::UpdateCameraPro(&mut camera, position.into(), rotation.into(), zoom);
+
+            Ok((
+                camera.position.x,
+                camera.position.y,
+                camera.position.z,
+                camera.target.x,
+                camera.target.y,
+                camera.target.z,
+                camera.up.x,
+                camera.up.y,
+                camera.up.z,
+                camera.fovy,
+                camera.projection,
+            ))
+        }
     }
 
     /* entry
