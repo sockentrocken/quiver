@@ -22,6 +22,7 @@ use crate::script::*;
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::ffi::CString;
 
 //================================================================
 
@@ -32,15 +33,17 @@ use serde::{Deserialize, Serialize};
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let general = lua.create_table()?;
 
-    general.set("serialize",      lua.create_function(self::serialize)?)?;
-    general.set("deserialize",    lua.create_function(self::deserialize)?)?;
-    general.set("set_exit_key",   lua.create_function(self::set_exit_key)?)?;
-    general.set("get_time",       lua.create_function(self::get_time)?)?;
-    general.set("get_frame_time", lua.create_function(self::get_frame_time)?)?;
-    general.set("get_frame_rate", lua.create_function(self::get_frame_rate)?)?;
-    general.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
-    general.set("get_memory",     lua.create_function(self::get_memory)?)?;
-    general.set("get_info",       lua.create_function(self::get_info)?)?;
+    general.set("open_link", lua.create_function(self::open_link)?)?;
+    general.set("serialize",         lua.create_function(self::serialize)?)?;
+    general.set("deserialize",       lua.create_function(self::deserialize)?)?;
+    general.set("set_exit_key",      lua.create_function(self::set_exit_key)?)?;
+    general.set("get_time",          lua.create_function(self::get_time)?)?;
+    general.set("get_frame_time",    lua.create_function(self::get_frame_time)?)?;
+    general.set("get_frame_rate",    lua.create_function(self::get_frame_rate)?)?;
+    general.set("set_frame_rate",    lua.create_function(self::set_frame_rate)?)?;
+    general.set("get_memory",        lua.create_function(self::get_memory)?)?;
+    general.set("get_info",          lua.create_function(self::get_info)?)?;
+    general.set("collision_box_box", lua.create_function(self::collision_box_box)?)?;
     //general.set("get_clipboard_text",  lua.create_function(self::get_clipboard_text)?)?;
     //general.set("set_clipboard_text",  lua.create_function(self::set_clipboard_text)?)?;
     //general.set("get_clipboard_image", lua.create_function(self::get_clipboard_image)?)?;
@@ -51,6 +54,41 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 }
 
 //================================================================
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.open_link",
+    "info": ""
+}
+*/
+fn open_link(_: &Lua, link: String) -> mlua::Result<()> {
+    unsafe {
+        ffi::OpenURL(link.as_ptr() as *const i8);
+        Ok(())
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.collision_box_box",
+    "info": "",
+    "member": [
+        { "name": "box_a", "info": "", "kind": "box_3" },
+        { "name": "box_b", "info": "", "kind": "box_3" }
+    ],
+    "result": [
+        { "name": "result", "info": "", "kind": "boolean" }
+    ]
+}
+*/
+fn collision_box_box(lua: &Lua, (box_a, box_b): (LuaValue, LuaValue)) -> mlua::Result<bool> {
+    let box_a: BoundingBox = lua.from_value(box_a)?;
+    let box_b: BoundingBox = lua.from_value(box_b)?;
+
+    unsafe { Ok(ffi::CheckCollisionBoxes(box_a.into(), box_b.into())) }
+}
 
 /* entry
 {

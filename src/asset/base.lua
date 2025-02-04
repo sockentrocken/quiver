@@ -694,10 +694,6 @@ function vector_3:new(x, y, z)
     return i
 end
 
-function vector_3:foo()
-    print("123")
-end
-
 function vector_3:default()
     return vector_3:new(0.0, 0.0, 0.0)
 end

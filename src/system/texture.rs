@@ -16,6 +16,7 @@
 */
 
 use crate::script::*;
+use crate::system::*;
 
 //================================================================
 
@@ -85,6 +86,58 @@ fn texture_pro_draw(
             rec_a.into(),
             rec_b.into(),
             point.into(),
+            angle,
+            color.into(),
+        );
+        Ok(())
+    }
+}
+
+fn texture_draw_billboard(
+    lua: &Lua,
+    (texture, camera, point, scale, color): (&ffi::Texture, LuaValue, LuaValue, f32, LuaValue),
+) -> mlua::Result<()> {
+    let camera: general::Camera3D = lua.from_value(camera)?;
+    let point: Vector3 = lua.from_value(point)?;
+    let color: Color = lua.from_value(color)?;
+
+    unsafe {
+        ffi::DrawBillboard(camera.into(), *texture, point.into(), scale, color.into());
+        Ok(())
+    }
+}
+
+fn texture_draw_billboard_pro(
+    lua: &Lua,
+    (texture, camera, source, point, up, scale, origin, angle, color): (
+        &ffi::Texture,
+        LuaValue,
+        LuaValue,
+        LuaValue,
+        LuaValue,
+        LuaValue,
+        LuaValue,
+        f32,
+        LuaValue,
+    ),
+) -> mlua::Result<()> {
+    let camera: general::Camera3D = lua.from_value(camera)?;
+    let source: Rectangle = lua.from_value(source)?;
+    let point: Vector3 = lua.from_value(point)?;
+    let up: Vector3 = lua.from_value(up)?;
+    let scale: Vector2 = lua.from_value(scale)?;
+    let origin: Vector2 = lua.from_value(origin)?;
+    let color: Color = lua.from_value(color)?;
+
+    unsafe {
+        ffi::DrawBillboardPro(
+            camera.into(),
+            *texture,
+            source.into(),
+            point.into(),
+            up.into(),
+            scale.into(),
+            origin.into(),
             angle,
             color.into(),
         );
@@ -211,6 +264,71 @@ impl mlua::UserData for Texture {
                     ))
                 },
             );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "texture:draw_billboard",
+            "info": "Draw a billboard texture.",
+            "member": [
+                { "name": "camera", "info": "", "kind": "camera_3d" },
+                { "name": "point",  "info": "", "kind": "vector_3"  },
+                { "name": "scale",  "info": "", "kind": "number"    },
+                { "name": "color",  "info": "", "kind": "color"     }
+            ]
+        }
+        */
+        method.add_method(
+            "draw_billboard",
+            |lua: &Lua,
+             this,
+             (camera, point, scale, color): (LuaValue, LuaValue, f32, LuaValue)| {
+                Ok(texture_draw_billboard(
+                    lua,
+                    (&this.0, camera, point, scale, color),
+                ))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "texture:draw_billboard_pro",
+            "info": "Draw a billboard texture (pro).",
+            "member": [
+                { "name": "camera", "info": "", "kind": "camera_3d" },
+                { "name": "source", "info": "", "kind": "box_3"     },
+                { "name": "point",  "info": "", "kind": "vector_3"  },
+                { "name": "up",     "info": "", "kind": "vector_3"  },
+                { "name": "scale",  "info": "", "kind": "vector_2"  },
+                { "name": "origin", "info": "", "kind": "vector_2"  },
+                { "name": "angle",  "info": "", "kind": "number"    },
+                { "name": "color",  "info": "", "kind": "color"     }
+            ]
+        }
+        */
+        method.add_method(
+            "draw_billboard_pro",
+            |lua: &Lua,
+             this,
+             (camera, source, point, up, scale, origin, angle, color): (
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                f32,
+                LuaValue,
+            )| {
+                Ok(texture_draw_billboard_pro(
+                    lua,
+                    (
+                        &this.0, camera, source, point, up, scale, origin, angle, color,
+                    ),
+                ))
+            },
+        );
     }
 }
 

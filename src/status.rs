@@ -120,7 +120,10 @@ impl Status {
                     ffi::EndTextureMode();
                     ffi::EndShaderMode();
                     ffi::EndBlendMode();
+                    ffi::EndScissorMode();
                     ffi::EndDrawing();
+                    ffi::SetMouseOffset(0, 0);
+                    ffi::SetMouseScale(1.0, 1.0);
                 }
 
                 Some(Status::Failure(

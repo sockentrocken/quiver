@@ -178,7 +178,7 @@ impl mlua::UserData for Shader {
         /* entry
         {
             "version": "1.0.0",
-            "name": "shader:set_shader_number",
+            "name": "shader:set_shader_integer",
             "info": "",
             "member": [
                 { "name": "location", "info": "", "kind": "number" },
@@ -187,8 +187,27 @@ impl mlua::UserData for Shader {
         }
         */
         method.add_method_mut(
-            "set_shader_number",
+            "set_shader_integer",
             |_, this, (location, value): (i32, i32)| {
+                this.0.set_shader_value(location, value);
+                Ok(())
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "shader:set_shader_decimal",
+            "info": "",
+            "member": [
+                { "name": "location", "info": "", "kind": "number" },
+                { "name": "value",    "info": "", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "set_shader_decimal",
+            |_, this, (location, value): (i32, f32)| {
                 this.0.set_shader_value(location, value);
                 Ok(())
             },

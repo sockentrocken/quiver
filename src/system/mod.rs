@@ -35,6 +35,7 @@ pub mod window;
 
 /* user-data */
 pub mod font;
+pub mod image;
 pub mod model;
 pub mod music;
 pub mod shader;

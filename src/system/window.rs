@@ -57,7 +57,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     // RestoreWindow
     window.set("set_restore", lua.create_function(self::set_restore)?)?;
     // SetWindowIcon/SetWindowIcons
-    // window.set("set_icon", lua.create_function(self::set_icon)?)?;
+    window.set("set_icon", lua.create_function(self::set_icon)?)?;
     // SetWindowTitle
     window.set("set_name", lua.create_function(self::set_name)?)?;
     // SetWindowPosition
@@ -288,6 +288,25 @@ fn set_restore(_: &Lua, _: ()) -> mlua::Result<()> {
         ffi::RestoreWindow();
         Ok(())
     }
+}
+
+/* entry
+{ "version": "1.0.0", "name": "quiver.window.set_icon", "info": "Set the window icon." }
+*/
+fn set_icon(_: &Lua, icon: LuaAnyUserData) -> mlua::Result<()> {
+    if icon.is::<crate::system::image::Image>() {
+        let icon = icon.borrow::<crate::system::image::Image>().unwrap();
+        let icon = &*icon;
+
+        unsafe {
+            ffi::SetWindowIcon(icon.0);
+            return Ok(());
+        }
+    }
+
+    Err(mlua::Error::runtime(
+        "set_icon(): Icon is not a valid image.",
+    ))
 }
 
 /* entry

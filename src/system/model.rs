@@ -127,16 +127,19 @@ impl mlua::UserData for Model {
             },
         );
 
-        method.add_method_mut("bind_shader", |_, this, shader: LuaAnyUserData| {
-            if shader.is::<crate::system::shader::Shader>() {
-                let shader = shader.borrow::<crate::system::shader::Shader>().unwrap();
-                let shader = &*shader;
+        method.add_method_mut(
+            "bind_shader",
+            |_, this, (index, shader): (usize, LuaAnyUserData)| {
+                if shader.is::<crate::system::shader::Shader>() {
+                    let shader = shader.borrow::<crate::system::shader::Shader>().unwrap();
+                    let shader = &*shader;
 
-                this.0.materials_mut()[0].shader = *shader.0;
-            }
+                    this.0.materials_mut()[index].shader = *shader.0;
+                }
 
-            Ok(())
-        });
+                Ok(())
+            },
+        );
 
         /* entry
         {
@@ -201,11 +204,16 @@ impl mlua::UserData for Model {
             "draw_transform",
             |lua, this, (point, angle, scale, color): (LuaValue, LuaValue, LuaValue, LuaValue)| unsafe {
                 let point: Vector3 = lua.from_value(point)?;
-                let angle: Vector4 = lua.from_value(angle)?;
+                let angle: Vector3 = lua.from_value(angle)?;
                 let scale: Vector3 = lua.from_value(scale)?;
                 let color: Color = lua.from_value(color)?;
+                let angle = Vector3::new(
+                    angle.x * DEG2RAD as f32,
+                    angle.y * DEG2RAD as f32,
+                    angle.z * DEG2RAD as f32,
+                );
 
-                this.0.transform = (angle.to_matrix() * Matrix::scale(scale.x, scale.y, scale.z)).into();
+                this.0.transform = (Matrix::rotate_xyz(angle) * Matrix::scale(scale.x, scale.y, scale.z)).into();
 
                 ffi::DrawModel(*this.0, point.into(), 1.0, color.into());
 
@@ -214,6 +222,33 @@ impl mlua::UserData for Model {
                 Ok(())
             },
         );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:get_box_3",
+            "info": "",
+            "result": [
+                { "name": "min_x", "info": "Minimum vector. (X)", "kind": "number" },
+                { "name": "min_y", "info": "Minimum vector. (Y)", "kind": "number" },
+                { "name": "min_z", "info": "Minimum vector. (Z)", "kind": "number" },
+                { "name": "max_x", "info": "Maximum vector. (X)", "kind": "number" },
+                { "name": "max_y", "info": "Maximum vector. (Y)", "kind": "number" },
+                { "name": "max_z", "info": "Maximum vector. (Z)", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method("get_box_3", |_, this, _: ()| unsafe {
+            let value = ffi::GetModelBoundingBox(*this.0);
+            Ok((
+                value.min.x,
+                value.min.y,
+                value.min.z,
+                value.max.x,
+                value.max.y,
+                value.max.z,
+            ))
+        });
 
         /* entry
         {
@@ -247,8 +282,37 @@ impl mlua::UserData for Model {
         }
         */
         method.add_method("mesh_index", |lua, this, index: usize| {
+            // bug with raylib-rs.
+            //let mesh = &this.0.meshes()[index];
+            //lua.to_value(mesh.indicies())
+
             let mesh = &this.0.meshes()[index];
-            lua.to_value(mesh.indicies())
+            unsafe {
+                let work = std::slice::from_raw_parts(
+                    mesh.as_ref().indices as *const u16,
+                    (mesh.as_ref().triangleCount * 3) as usize,
+                );
+
+                lua.to_value(&work)
+            }
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:mesh_triangle_count",
+            "info": "Get the triangle count of a specific mesh in the model.",
+            "member": [
+                { "name": "index", "info": "Index of mesh.", "kind": "number" }
+            ],
+            "result": [
+                { "name": "count", "info": "Triangle count.", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method("mesh_triangle_count", |_, this, index: usize| {
+            let mesh = &this.0.meshes()[index];
+            Ok(mesh.triangleCount)
         });
     }
 }

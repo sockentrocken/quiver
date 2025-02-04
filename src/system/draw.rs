@@ -155,21 +155,62 @@ mod draw_3d {
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw_3d = lua.create_table()?;
 
-        draw_3d.set("begin",               lua.create_function(self::begin)?)?;
-        //draw_3d.set("update_camera",       lua.create_function(self::update_camera)?)?;
-        draw_3d.set("update_camera_pro",   lua.create_function(self::update_camera_pro)?)?;
-        draw_3d.set("get_screen_to_world", lua.create_function(self::get_screen_to_world)?)?;
-        draw_3d.set("get_world_to_screen", lua.create_function(self::get_world_to_screen)?)?;
-        draw_3d.set("draw_grid",           lua.create_function(self::draw_grid)?)?;
-        draw_3d.set("draw_cube",           lua.create_function(self::draw_cube)?)?;
-        draw_3d.set("draw_ball",           lua.create_function(self::draw_ball)?)?;
-        draw_3d.set("draw_box_3",          lua.create_function(self::draw_box_3)?)?;
-        draw_3d.set("draw_ray",            lua.create_function(self::draw_ray)?)?;
-        draw_3d.set("draw_line",           lua.create_function(self::draw_line)?)?;
+        draw_3d.set("begin",                 lua.create_function(self::begin)?)?;
+        draw_3d.set("update_camera_pro",     lua.create_function(self::update_camera_pro)?)?;
+        draw_3d.set("get_matrix_projection", lua.create_function(self::get_matrix_projection)?)?;
+        draw_3d.set("get_matrix_model_view", lua.create_function(self::get_matrix_model_view)?)?;
+        draw_3d.set("get_screen_to_world",   lua.create_function(self::get_screen_to_world)?)?;
+        draw_3d.set("get_world_to_screen",   lua.create_function(self::get_world_to_screen)?)?;
+        draw_3d.set("draw_grid",             lua.create_function(self::draw_grid)?)?;
+        draw_3d.set("draw_cube",             lua.create_function(self::draw_cube)?)?;
+        draw_3d.set("draw_ball",             lua.create_function(self::draw_ball)?)?;
+        draw_3d.set("draw_box_3",            lua.create_function(self::draw_box_3)?)?;
+        draw_3d.set("draw_ray",              lua.create_function(self::draw_ray)?)?;
+        draw_3d.set("draw_line",             lua.create_function(self::draw_line)?)?;
 
         table.set("draw_3d", draw_3d)?;
 
         Ok(())
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_3d.get_matrix_projection",
+        "info": ""
+    }
+    */
+    #[rustfmt::skip]
+    fn get_matrix_projection(_: &Lua, _ : ()) -> mlua::Result<(f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32)> {
+        unsafe {
+            let value = ffi::rlGetMatrixProjection();
+            Ok((
+                value.m0,  value.m1,  value.m2,  value.m3,
+                value.m4,  value.m5,  value.m6,  value.m7,
+                value.m8,  value.m9,  value.m10, value.m11,
+                value.m12, value.m13, value.m14, value.m15 
+            ))
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw_3d.get_matrix_model_view",
+        "info": ""
+    }
+    */
+    #[rustfmt::skip]
+    fn get_matrix_model_view(_: &Lua, _ : ()) -> mlua::Result<(f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32)> {
+        unsafe {
+            let value = ffi::rlGetMatrixModelview();
+            Ok((
+                value.m0,  value.m1,  value.m2,  value.m3,
+                value.m4,  value.m5,  value.m6,  value.m7,
+                value.m8,  value.m9,  value.m10, value.m11,
+                value.m12, value.m13, value.m14, value.m15 
+            ))
+        }
     }
 
     /* entry
@@ -225,14 +266,19 @@ mod draw_3d {
             { "name": "shape",  "info": "The size of the view-port.", "kind": "vector_2"  }
         ],
         "result": [
-            { "name": "ray", "info": "The 3D ray, beginning at the screen-space point, in 3D space.", "kind": "ray" }
+            { "name": "position_x",  "info": "The 3D ray position. (X).",  "kind": "number" },
+            { "name": "position_y",  "info": "The 3D ray position. (Y).",  "kind": "number" },
+            { "name": "position_z",  "info": "The 3D ray position. (Z).",  "kind": "number" },
+            { "name": "direction_x", "info": "The 3D ray direction. (X).", "kind": "number" },
+            { "name": "direction_y", "info": "The 3D ray direction. (Y).", "kind": "number" },
+            { "name": "direction_z", "info": "The 3D ray direction. (Z).", "kind": "number" }
         ]
     }
     */
     fn get_screen_to_world(
         lua: &Lua,
         (camera, point, shape): (LuaValue, LuaValue, LuaValue),
-    ) -> mlua::Result<LuaValue> {
+    ) -> mlua::Result<(f32, f32, f32, f32, f32, f32)> {
         let camera: general::Camera3D = lua.from_value(camera)?;
         let point: Vector2 = lua.from_value(point)?;
         let shape: Vector2 = lua.from_value(shape)?;
@@ -245,7 +291,14 @@ mod draw_3d {
                 shape.y as i32,
             );
 
-            lua.to_value(&Ray::from(ray))
+            Ok((
+                ray.position.x,
+                ray.position.y,
+                ray.position.z,
+                ray.direction.x,
+                ray.direction.y,
+                ray.direction.z,
+            ))
         }
     }
 

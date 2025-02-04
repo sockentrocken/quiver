@@ -16,7 +16,7 @@
 */
 
 use mlua::prelude::*;
-use rapier3d::{control::KinematicCharacterController, prelude::*};
+use rapier3d::{control::KinematicCharacterController, parry, prelude::*};
 use raylib::prelude::*;
 
 //================================================================
@@ -96,19 +96,204 @@ impl mlua::UserData for Rapier {
         /* entry
         {
             "version": "1.0.0",
+            "name": "rapier:cast_ray",
+            "info": "Cast a ray.",
+            "member": [
+                { "name": "ray",           "info": "Ray to cast.", "kind": "ray"     },
+                { "name": "length",        "info": "Ray length.",  "kind": "number"  },
+                { "name": "solid",         "info": "",             "kind": "boolean" },
+                { "name": "exclude_rigid", "info": "",             "kind": "table"   }
+            ],
+            "result": [
+                { "name": "rigid_body", "info": "Rigid body handle.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "cast_ray",
+            |lua,
+             this,
+             (ray, length, solid, exclude_rigid, exclude_collider): (
+                LuaValue,
+                f32,
+                bool,
+                Option<LuaValue>,
+                Option<LuaValue>,
+            )| {
+                let ray: raylib::math::Ray = lua.from_value(ray)?;
+                let ray = rapier3d::geometry::Ray::new(
+                    point![ray.position.x, ray.position.y, ray.position.z],
+                    vector![ray.direction.x, ray.direction.y, ray.direction.z],
+                );
+
+                let mut filter = QueryFilter::default();
+
+                if let Some(rigid) = exclude_rigid {
+                    filter = filter.exclude_rigid_body(lua.from_value(rigid)?);
+                }
+
+                if let Some(collider) = exclude_collider {
+                    filter = filter.exclude_collider(lua.from_value(collider)?);
+                }
+
+                if let Some((handle, time)) = this.query_pipeline.cast_ray(
+                    &this.rigid_body_set,
+                    &this.collider_set,
+                    &ray,
+                    length,
+                    solid,
+                    filter,
+                ) {
+                    return Ok((lua.to_value(&handle)?, time));
+                }
+
+                Ok((mlua::Nil, 0.0))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:cast_ray_normal",
+            "info": "Cast a ray, and also get the normal information..",
+            "member": [
+                { "name": "ray",           "info": "Ray to cast.", "kind": "ray"     },
+                { "name": "length",        "info": "Ray length.",  "kind": "number"  },
+                { "name": "solid",         "info": "",             "kind": "boolean" },
+                { "name": "exclude_rigid", "info": "",             "kind": "table"   }
+            ],
+            "result": [
+                { "name": "rigid_body", "info": "Rigid body handle.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "cast_ray_normal",
+            |lua,
+             this,
+             (ray, length, solid, exclude_rigid, exclude_collider): (
+                LuaValue,
+                f32,
+                bool,
+                Option<LuaValue>,
+                Option<LuaValue>,
+            )| {
+                let ray: raylib::math::Ray = lua.from_value(ray)?;
+                let ray = rapier3d::geometry::Ray::new(
+                    point![ray.position.x, ray.position.y, ray.position.z],
+                    vector![ray.direction.x, ray.direction.y, ray.direction.z],
+                );
+
+                let mut filter = QueryFilter::default();
+
+                if let Some(rigid) = exclude_rigid {
+                    filter = filter.exclude_rigid_body(lua.from_value(rigid)?);
+                }
+
+                if let Some(collider) = exclude_collider {
+                    filter = filter.exclude_collider(lua.from_value(collider)?);
+                }
+
+                if let Some((handle, normal)) = this.query_pipeline.cast_ray_and_get_normal(
+                    &this.rigid_body_set,
+                    &this.collider_set,
+                    &ray,
+                    length,
+                    solid,
+                    filter,
+                ) {
+                    return Ok((
+                        lua.to_value(&handle)?,
+                        normal.normal.x,
+                        normal.normal.y,
+                        normal.normal.z,
+                    ));
+                }
+
+                Ok((mlua::Nil, 0.0, 0.0, 0.0))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:test_intersect_cuboid_cuboid",
+            "info": ""
+        }
+        */
+        method.add_method_mut(
+            "test_intersect_cuboid_cuboid",
+            |lua,
+             _,
+             (point_a, angle_a, shape_a, point_b, angle_b, shape_b): (
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                LuaValue,
+            )| {
+                let point: Vector3 = lua.from_value(point_a)?;
+                let angle: Vector3 = lua.from_value(angle_a)?;
+                let shape: Vector3 = lua.from_value(shape_a)?;
+                let point_a = Isometry::new(
+                    vector![point.x, point.y, point.z],
+                    vector![angle.x, angle.y, angle.z],
+                );
+                let shape_a = Cuboid::new(vector![shape.x, shape.y, shape.z]);
+
+                let point: Vector3 = lua.from_value(point_b)?;
+                let angle: Vector3 = lua.from_value(angle_b)?;
+                let shape: Vector3 = lua.from_value(shape_b)?;
+                let point_b = Isometry::new(
+                    vector![point.x, point.y, point.z],
+                    vector![angle.x, angle.y, angle.z],
+                );
+                let shape_b = Cuboid::new(vector![shape.x, shape.y, shape.z]);
+
+                Ok(
+                    parry::query::intersection_test(&point_a, &shape_a, &point_b, &shape_b)
+                        .unwrap(),
+                )
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "rapier:test_intersect_cuboid",
             "info": ""
         }
         */
         method.add_method_mut(
             "test_intersect_cuboid",
-            |lua, this, (point, shape): (LuaValue, LuaValue)| {
+            |lua,
+             this,
+             (point, angle, shape, exclude_rigid, exclude_collider): (
+                LuaValue,
+                LuaValue,
+                LuaValue,
+                Option<LuaValue>,
+                Option<LuaValue>,
+            )| {
                 let point: Vector3 = lua.from_value(point)?;
+                let angle: Vector3 = lua.from_value(angle)?;
                 let shape: Vector3 = lua.from_value(shape)?;
-                let point =
-                    Isometry::new(vector![point.x, point.y, point.z], vector![0.0, 0.0, 0.0]);
+                let point = Isometry::new(
+                    vector![point.x, point.y, point.z],
+                    vector![angle.x, angle.y, angle.z],
+                );
                 let shape = Cuboid::new(vector![shape.x, shape.y, shape.z]);
-                let filter = QueryFilter::default();
+
+                let mut filter = QueryFilter::default();
+
+                if let Some(rigid) = exclude_rigid {
+                    filter = filter.exclude_rigid_body(lua.from_value(rigid)?);
+                }
+
+                if let Some(collider) = exclude_collider {
+                    filter = filter.exclude_collider(lua.from_value(collider)?);
+                }
 
                 let mut hit: Option<ColliderHandle> = None;
 
@@ -131,6 +316,87 @@ impl mlua::UserData for Rapier {
                 }
             },
         );
+
+        //================================================================
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:get_collider_shape_cuboid",
+            "info": "Get the shape of a collider (cuboid).",
+            "member": [
+                { "name": "collider", "info": "Collider handle.", "kind": "table" }
+            ],
+            "result": [
+                { "name": "half_shape_x", "info": "Half-shape of the cuboid. (X).", "kind": "number" },
+                { "name": "half_shape_y", "info": "Half-shape of the cuboid. (Y).", "kind": "number" },
+                { "name": "half_shape_z", "info": "Half-shape of the cuboid. (Z).", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "get_collider_shape_cuboid",
+            |lua, this, collider: LuaValue| {
+                let collider: ColliderHandle = lua.from_value(collider)?;
+
+                if let Some(collider) = this.collider_set.get(collider) {
+                    if let Some(shape) = collider.shape().as_cuboid() {
+                        return Ok((
+                            shape.half_extents.x,
+                            shape.half_extents.y,
+                            shape.half_extents.z,
+                        ));
+                    } else {
+                        return Err(mlua::Error::runtime(
+                            "rapier:get_collider_shape_cuboid(): Collider is not a cuboid.",
+                        ));
+                    }
+                }
+
+                Err(mlua::Error::runtime(
+                    "rapier:get_collider_shape_cuboid(): Invalid collider handle.",
+                ))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_collider_shape_cuboid",
+            "info": "Set the shape of a collider (cuboid).",
+            "member": [
+                { "name": "collider",   "info": "Collider handle.",      "kind": "table"    },
+                { "name": "half_shape", "info": "Half-shape of cuboid.", "kind": "vector_3" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "set_collider_shape_cuboid",
+            |lua, this, (collider, half_shape): (LuaValue, LuaValue)| {
+                let collider: ColliderHandle = lua.from_value(collider)?;
+                let half_shape: Vector3 = lua.from_value(half_shape)?;
+
+                if let Some(collider) = this.collider_set.get_mut(collider) {
+                    if let Some(shape) = collider.shape_mut().as_cuboid_mut() {
+                        shape.half_extents.x = half_shape.x;
+                        shape.half_extents.y = half_shape.y;
+                        shape.half_extents.z = half_shape.z;
+
+                        return Ok(());
+                    } else {
+                        return Err(mlua::Error::runtime(
+                            "rapier:set_collider_shape_cuboid(): Collider is not a cuboid.",
+                        ));
+                    }
+                }
+
+                Err(mlua::Error::runtime(
+                    "rapier:set_collider_shape_cuboid(): Invalid collider handle.",
+                ))
+            },
+        );
+
+        //================================================================
 
         /* entry
         {
@@ -197,6 +463,37 @@ impl mlua::UserData for Rapier {
         /* entry
         {
             "version": "1.0.0",
+            "name": "rapier:set_collider_rotation",
+            "info": "Set the rotation of a collider.",
+            "member": [
+                { "name": "collider", "info": "Collider handle.",   "kind": "table"    },
+                { "name": "rotation", "info": "Collider rotation.", "kind": "vector_3" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "set_collider_rotation",
+            |lua, this, (collider, rotation): (LuaValue, LuaValue)| {
+                let collider: ColliderHandle = lua.from_value(collider)?;
+                let rotation: Vector3 = lua.from_value(rotation)?;
+
+                if let Some(collider) = this.collider_set.get_mut(collider) {
+                    collider
+                        .set_rotation(Rotation::new(vector![rotation.x, rotation.y, rotation.z]));
+                    return Ok(());
+                }
+
+                Err(mlua::Error::runtime(
+                    "rapier:set_collider_rotation(): Invalid collider handle.",
+                ))
+            },
+        );
+
+        //================================================================
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "rapier:collider_remove",
             "info": "Remove a collider.",
             "member": [
@@ -215,6 +512,35 @@ impl mlua::UserData for Rapier {
                     &mut this.island_manager,
                     &mut this.rigid_body_set,
                     wake_parent,
+                );
+
+                Ok(())
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:rigid_body_remove",
+            "info": "Remove a rigid body.",
+            "member": [
+                { "name": "rigid_body",      "info": "Rigid body handle.",                                                   "kind": "table"   },
+                { "name": "remove_collider", "info": "Whether or not to remove every collider this rigid body is bound to.", "kind": "boolean" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "rigid_body_remove",
+            |lua, this, (rigid_body, remove_collider): (LuaValue, bool)| {
+                let rigid_body: RigidBodyHandle = lua.from_value(rigid_body)?;
+
+                this.rigid_body_set.remove(
+                    rigid_body,
+                    &mut this.island_manager,
+                    &mut this.collider_set,
+                    &mut this.impulse_joint_set,
+                    &mut this.multibody_joint_set,
+                    remove_collider,
                 );
 
                 Ok(())
@@ -286,58 +612,6 @@ impl mlua::UserData for Rapier {
                     collider_r.translation().z,
                     movement.grounded,
                     movement.is_sliding_down_slope
-                ))
-            },
-        );
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "rapier:cast_ray",
-            "info": "Cast a ray.",
-            "member": [
-                { "name": "ray",           "info": "Ray to cast.", "kind": "ray"     },
-                { "name": "length",        "info": "Ray length.",  "kind": "number"  },
-                { "name": "solid",         "info": "",             "kind": "boolean" },
-                { "name": "exclude_rigid", "info": "",             "kind": "table"   }
-            ],
-            "result": [
-                { "name": "rigid_body", "info": "Rigid body handle.", "kind": "table" }
-            ]
-        }
-        */
-        method.add_method_mut(
-            "cast_ray",
-            |lua, this, (ray, length, solid, exclude_rigid): (LuaValue, f32, bool, Option<LuaValue>)| {
-                let ray: raylib::math::Ray = lua.from_value(ray)?;
-                let ray = rapier3d::geometry::Ray::new(
-                    point![ray.position.x, ray.position.y, ray.position.z],
-                    vector![ray.direction.x, ray.direction.y, ray.direction.z],
-                );
-
-                let mut filter = QueryFilter::default();
-
-                if let Some(rigid) = exclude_rigid {
-                    filter = filter.exclude_rigid_body(lua.from_value(rigid)?);
-                }
-
-                if let Some((handle, time)) = this.query_pipeline.cast_ray(
-                    &this.rigid_body_set,
-                    &this.collider_set,
-                    &ray,
-                    length,
-                    solid,
-                    filter,
-                ) {
-                    return Ok((
-                        lua.to_value(&handle)?,
-                        time
-                    ))
-                }
-
-                Ok((
-                   mlua::Nil,
-                   0.0
                 ))
             },
         );
@@ -451,6 +725,55 @@ impl mlua::UserData for Rapier {
         /* entry
         {
             "version": "1.0.0",
+            "name": "rapier:collider_builder_tri_mesh",
+            "info": "Create a collider builder (tri-mesh).",
+            "member": [
+                { "name": "point_table", "info": "The point array table.", "kind": "table" },
+                { "name": "index_table", "info": "The index array table.", "kind": "table" }
+            ],
+            "result": [
+                { "name": "collider_builer", "info": "Collider builder.", "kind": "table" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "collider_builder_tri_mesh",
+            |lua, this, (point_table, index_table, rigid_body): (LuaValue, LuaValue, Option<LuaValue>)| {
+                let mut p_table: Vec<Point<f32>> = Vec::new();
+                let mut i_table: Vec<[u32; 3]> = Vec::new();
+                let point_table: Vec<Vector3> = lua.from_value(point_table)?;
+                let index_table: Vec<u32> = lua.from_value(index_table)?;
+
+                for x in point_table {
+                    p_table.push(point![x.x, x.y, x.z]);
+                }
+
+                let mut iterator = index_table.iter();
+
+                while let Some(a) = iterator.next() {
+                    if let Some(b) = iterator.next() {
+                        if let Some(c) = iterator.next() {
+                            i_table.push([*a, *b, *c]);
+                        }
+                    }
+                }
+
+                // TO-DO this should really be a convex_mesh call, but for some reason, it doesn't work, no matter what input is sent?
+                this.insert_collider(
+                    lua,
+                    ColliderBuilder::trimesh_with_flags(
+                        p_table,
+                        i_table,
+                        TriMeshFlags::all(),
+                    ),
+                    rigid_body,
+                )
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "rapier:collider_builder_convex_hull",
             "info": "Create a collider builder (convex hull).",
             "member": [
@@ -476,28 +799,6 @@ impl mlua::UserData for Rapier {
                 } else {
                     Ok(mlua::Nil)
                 }
-            },
-        );
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "rapier:collider_translation",
-            "info": "Apply translation to a collider.",
-            "member": [
-                { "name": "collider",    "info": "Collider.",    "kind": "table"    },
-                { "name": "translation", "info": "Translation.", "kind": "vector_3" }
-            ]
-        }
-        */
-        method.add_method_mut(
-            "collider_translation",
-            |lua, this, (collider, translation): (LuaValue, LuaValue)| {
-                let collider_h: ColliderHandle = lua.from_value(collider)?;
-                let translation: Vector3 = lua.from_value(translation)?;
-                let collider_r = this.collider_set.get_mut(collider_h).unwrap();
-                collider_r.set_translation(vector![translation.x, translation.y, translation.z]);
-                Ok(())
             },
         );
 

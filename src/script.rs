@@ -160,6 +160,7 @@ impl Script {
         input::set_global(lua, &quiver)?;
         model::set_global(lua, &quiver)?;
         texture::set_global(lua, &quiver)?;
+        image::set_global(lua, &quiver)?;
         sound::set_global(lua, &quiver)?;
         music::set_global(lua, &quiver)?;
         font::set_global(lua, &quiver)?;
