@@ -160,6 +160,7 @@ pub struct Texture(pub RLTexture);
 
 impl mlua::UserData for Texture {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
+        field.add_field_method_get("ID", |_: &Lua, this| Ok(this.0.id));
         field.add_field_method_get("shape_x", |_: &Lua, this| Ok(this.0.width));
         field.add_field_method_get("shape_y", |_: &Lua, this| Ok(this.0.height));
     }
@@ -387,6 +388,7 @@ pub struct RenderTexture(pub RLRenderTexture);
 
 impl mlua::UserData for RenderTexture {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
+        field.add_field_method_get("ID", |_: &Lua, this| Ok(this.0.texture.id));
         field.add_field_method_get("shape_x", |_: &Lua, this| Ok(this.0.texture.width));
         field.add_field_method_get("shape_y", |_: &Lua, this| Ok(this.0.texture.height));
     }

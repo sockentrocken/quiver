@@ -207,12 +207,14 @@ impl ScriptData {
     pub fn get_path(lua: &Lua, path: &str) -> mlua::Result<String> {
         let script_data = lua.app_data_ref::<ScriptData>().unwrap();
 
-        if script_data.info.safe {
-            // any path in safe mode must be done within the info file's given path.
-            Ok(format!("{}/{path}", script_data.info.path))
-        } else {
-            // un-safe mode does not have this restriction.
-            Ok(path.to_string())
-        }
+        //        if script_data.info.safe {
+        // any path in safe mode must be done within the info file's given path.
+
+        Ok(format!("{}/{path}", script_data.info.path))
+
+        //        } else {
+        //            // un-safe mode does not have this restriction.
+        //            Ok(path.to_string())
+        //        }
     }
 }

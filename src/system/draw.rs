@@ -43,10 +43,10 @@ mod draw_general {
     pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
         let draw = lua.create_table()?;
 
-        draw.set("begin",         lua.create_function(self::begin)?)?;
-        draw.set("begin_blend",   lua.create_function(self::begin_blend)?)?;
-        draw.set("begin_scissor", lua.create_function(self::begin_scissor)?)?;
-        draw.set("clear",         lua.create_function(self::clear)?)?;
+        draw.set("begin",          lua.create_function(self::begin)?)?;
+        draw.set("begin_blend",    lua.create_function(self::begin_blend)?)?;
+        draw.set("begin_scissor",  lua.create_function(self::begin_scissor)?)?;
+        draw.set("clear",          lua.create_function(self::clear)?)?;
 
         table.set("draw", draw)?;
 
@@ -167,6 +167,12 @@ mod draw_3d {
         draw_3d.set("draw_box_3",            lua.create_function(self::draw_box_3)?)?;
         draw_3d.set("draw_ray",              lua.create_function(self::draw_ray)?)?;
         draw_3d.set("draw_line",             lua.create_function(self::draw_line)?)?;
+        draw_3d.set("set_backface_cull",     lua.create_function(self::set_backface_cull)?)?;
+        draw_3d.set("begin_quad",            lua.create_function(self::begin_quad)?)?;
+        draw_3d.set("draw_quad_color",       lua.create_function(self::draw_quad_color)?)?;
+        draw_3d.set("draw_quad_normal",      lua.create_function(self::draw_quad_normal)?)?;
+        draw_3d.set("draw_quad_coordinate",  lua.create_function(self::draw_quad_coordinate)?)?;
+        draw_3d.set("draw_quad_vertex",      lua.create_function(self::draw_quad_vertex)?)?;
 
         table.set("draw_3d", draw_3d)?;
 
@@ -486,6 +492,116 @@ mod draw_3d {
 
         unsafe {
             ffi::DrawLine3D(point_a.into(), point_b.into(), color.into());
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0", "name": "quiver.draw_3d.set_backface_cull",
+        "info": "Set the current state of backface culling.",
+        "member": [
+            { "name": "state", "info": "The new state.", "kind": "boolean" }
+        ]
+    }
+    */
+    fn set_backface_cull(_: &Lua, state: bool) -> mlua::Result<()> {
+        unsafe {
+            if state {
+                ffi::rlEnableBackfaceCulling();
+            } else {
+                ffi::rlDisableBackfaceCulling();
+            }
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.begin_quad",
+        "info": "",
+        "member": [
+            { "name": "call", "info": "The draw code.", "kind": "function" }
+        ]
+    }
+    */
+    fn begin_quad(_: &Lua, (call, texture): (mlua::Function, Option<u32>)) -> mlua::Result<()> {
+        unsafe {
+            if let Some(texture) = texture {
+                ffi::rlSetTexture(texture);
+            }
+
+            ffi::rlBegin(ffi::RL_QUADS as i32);
+
+            call.call::<()>(())?;
+
+            ffi::rlEnd();
+
+            if texture.is_some() {
+                ffi::rlSetTexture(0);
+            }
+
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.draw_quad_color",
+        "info": ""
+    }
+    */
+    fn draw_quad_color(lua: &Lua, color: LuaValue) -> mlua::Result<()> {
+        unsafe {
+            let color: Color = lua.from_value(color)?;
+            ffi::rlColor4ub(color.r, color.g, color.b, color.a);
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.draw_quad_normal",
+        "info": ""
+    }
+    */
+    fn draw_quad_normal(lua: &Lua, normal: LuaValue) -> mlua::Result<()> {
+        unsafe {
+            let normal: Vector3 = lua.from_value(normal)?;
+            ffi::rlNormal3f(normal.x, normal.y, normal.z);
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.draw_quad_coordinate",
+        "info": ""
+    }
+    */
+    fn draw_quad_coordinate(lua: &Lua, coordinate: LuaValue) -> mlua::Result<()> {
+        unsafe {
+            let coordinate: Vector2 = lua.from_value(coordinate)?;
+            ffi::rlTexCoord2f(coordinate.x, coordinate.y);
+            Ok(())
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.draw.draw_quad_vertex",
+        "info": ""
+    }
+    */
+    fn draw_quad_vertex(lua: &Lua, vertex: LuaValue) -> mlua::Result<()> {
+        unsafe {
+            let vertex: Vector3 = lua.from_value(vertex)?;
+            ffi::rlVertex3f(vertex.x, vertex.y, vertex.z);
             Ok(())
         }
     }

@@ -32,6 +32,8 @@ use std::ffi::{CStr, CString};
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let file = lua.create_table()?;
 
+    file.set("to_binary",                 lua.create_function(self::to_binary)?)?;
+    file.set("from_binary",               lua.create_function(self::from_binary)?)?;
     file.set("get",                       lua.create_function(self::get)?)?;
     file.set("set",                       lua.create_function(self::set)?)?;
     file.set("get_file_exist",            lua.create_function(self::get_file_exist)?)?;
@@ -52,6 +54,48 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 /* entry
 {
     "version": "1.0.0",
+    "name": "quiver.file.to_binary",
+    "info": "TO-DO"
+}
+*/
+fn to_binary(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<LuaValue> {
+    match kind {
+        0 => {
+            let data: i32 = lua.from_value(data)?;
+            lua.to_value(&data.to_ne_bytes())
+        }
+        1 => {
+            let data: f32 = lua.from_value(data)?;
+            lua.to_value(&data.to_ne_bytes())
+        }
+        _ => Ok(mlua::Nil),
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.file.from_binary",
+    "info": "TO-DO"
+}
+*/
+fn from_binary(lua: &Lua, (data, kind): (Vec<u8>, i32)) -> mlua::Result<LuaValue> {
+    match kind {
+        0 => {
+            let data = i32::from_ne_bytes([data[0], data[1], data[2], data[3]]);
+            lua.to_value(&data)
+        }
+        1 => {
+            let data = f32::from_ne_bytes([data[0], data[1], data[2], data[3]]);
+            lua.to_value(&data)
+        }
+        _ => Ok(mlua::Nil),
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
     "name": "quiver.file.get",
     "info": "Get the data of a file, in string format.",
     "member": [
@@ -62,9 +106,18 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     ]
 }
 */
-fn get(lua: &Lua, path: String) -> mlua::Result<String> {
-    std::fs::read_to_string(ScriptData::get_path(lua, &path)?)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))
+fn get(lua: &Lua, (path, binary): (String, bool)) -> mlua::Result<LuaValue> {
+    if binary {
+        let data = std::fs::read(ScriptData::get_path(lua, &path)?)
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+        lua.to_value(&data)
+    } else {
+        let data = std::fs::read_to_string(ScriptData::get_path(lua, &path)?)
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+        lua.to_value(&data)
+    }
 }
 
 /* entry
@@ -78,9 +131,18 @@ fn get(lua: &Lua, path: String) -> mlua::Result<String> {
     ]
 }
 */
-fn set(lua: &Lua, (path, data): (String, String)) -> mlua::Result<()> {
-    std::fs::write(ScriptData::get_path(lua, &path)?, data)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))
+fn set(lua: &Lua, (path, data, binary): (String, LuaValue, bool)) -> mlua::Result<()> {
+    if binary {
+        let data: Vec<u8> = lua.from_value(data)?;
+
+        std::fs::write(ScriptData::get_path(lua, &path)?, data)
+            .map_err(|e| mlua::Error::runtime(e.to_string()))
+    } else {
+        let data: String = lua.from_value(data)?;
+
+        std::fs::write(ScriptData::get_path(lua, &path)?, data)
+            .map_err(|e| mlua::Error::runtime(e.to_string()))
+    }
 }
 
 /* entry

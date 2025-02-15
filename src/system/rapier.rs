@@ -15,9 +15,17 @@
 * PERFORMANCE OF THIS SOFTWARE.
 */
 
+use rapier3d::control::CharacterLength;
+use std::sync::{Arc, Mutex};
+
 use mlua::prelude::*;
-use rapier3d::{control::KinematicCharacterController, parry, prelude::*};
+use rapier3d::{
+    control::{CharacterAutostep, KinematicCharacterController},
+    parry,
+    prelude::*,
+};
 use raylib::prelude::*;
+use serde::Serialize;
 
 //================================================================
 
@@ -51,6 +59,7 @@ struct Rapier {
     multibody_joint_set: MultibodyJointSet,
     ccd_solver: CCDSolver,
     query_pipeline: QueryPipeline,
+    event_handler: QuiverHandler,
     debug_render: DebugRenderPipeline,
 }
 
@@ -75,6 +84,10 @@ impl Rapier {
         collider: ColliderBuilder,
         rigid_body: Option<LuaValue>,
     ) -> mlua::Result<LuaValue> {
+        let collider = collider
+            .active_events(ActiveEvents::COLLISION_EVENTS)
+            .active_collision_types(ActiveCollisionTypes::all());
+
         if let Some(rigid_body) = rigid_body {
             let rigid_body: RigidBodyHandle = lua.from_value(rigid_body)?;
 
@@ -295,6 +308,8 @@ impl mlua::UserData for Rapier {
                     filter = filter.exclude_collider(lua.from_value(collider)?);
                 }
 
+                filter = filter.exclude_sensors();
+
                 let mut hit: Option<ColliderHandle> = None;
 
                 this.query_pipeline.intersections_with_shape(
@@ -401,61 +416,87 @@ impl mlua::UserData for Rapier {
         /* entry
         {
             "version": "1.0.0",
-            "name": "rapier:get_collider_translation",
-            "info": "Get the translation of a collider.",
+            "name": "rapier:get_collider_parent",
+            "info": "Get the parent of a collider.",
             "member": [
                 { "name": "collider", "info": "Collider handle.", "kind": "table" }
             ],
             "result": [
-                { "name": "translation_x", "info": "Collider translation (X).", "kind": "number" },
-                { "name": "translation_y", "info": "Collider translation (Y).", "kind": "number" },
-                { "name": "translation_z", "info": "Collider translation (Z).", "kind": "number" }
+                { "name": "rigid_body",   "info": "Rigid body handle.", "kind": "table" }
             ]
         }
         */
-        method.add_method_mut(
-            "get_collider_translation",
-            |lua, this, collider: LuaValue| {
-                let collider: ColliderHandle = lua.from_value(collider)?;
+        method.add_method_mut("get_collider_parent", |lua, this, collider: LuaValue| {
+            let collider: ColliderHandle = lua.from_value(collider)?;
 
-                if let Some(collider) = this.collider_set.get(collider) {
-                    return Ok((
-                        collider.translation().x,
-                        collider.translation().y,
-                        collider.translation().z,
-                    ));
+            if let Some(collider) = this.collider_set.get(collider) {
+                if let Some(parent) = collider.parent() {
+                    return lua.to_value(&parent);
+                } else {
+                    return Ok(mlua::Nil);
                 }
+            }
 
-                Err(mlua::Error::runtime(
-                    "rapier:get_collider_translation(): Invalid collider handle.",
-                ))
-            },
-        );
+            Err(mlua::Error::runtime(
+                "rapier:get_collider_parent(): Invalid collider handle.",
+            ))
+        });
 
         /* entry
         {
             "version": "1.0.0",
-            "name": "rapier:set_collider_translation",
-            "info": "Set the translation of a collider.",
+            "name": "rapier:get_collider_position",
+            "info": "Get the position of a collider.",
             "member": [
-                { "name": "collider",    "info": "Collider handle.",      "kind": "table"    },
-                { "name": "translation", "info": "Collider translation.", "kind": "vector_3" }
+                { "name": "collider", "info": "Collider handle.", "kind": "table" }
+            ],
+            "result": [
+                { "name": "position_x", "info": "Collider position (X).", "kind": "number" },
+                { "name": "position_y", "info": "Collider position (Y).", "kind": "number" },
+                { "name": "position_z", "info": "Collider position (Z).", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method_mut("get_collider_position", |lua, this, collider: LuaValue| {
+            let collider: ColliderHandle = lua.from_value(collider)?;
+
+            if let Some(collider) = this.collider_set.get(collider) {
+                return Ok((
+                    collider.translation().x,
+                    collider.translation().y,
+                    collider.translation().z,
+                ));
+            }
+
+            Err(mlua::Error::runtime(
+                "rapier:get_collider_position(): Invalid collider handle.",
+            ))
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_collider_position",
+            "info": "Set the position of a collider.",
+            "member": [
+                { "name": "collider", "info": "Collider handle.",   "kind": "table"    },
+                { "name": "position", "info": "Collider position.", "kind": "vector_3" }
             ]
         }
         */
         method.add_method_mut(
             "set_collider_translation",
-            |lua, this, (collider, translation): (LuaValue, LuaValue)| {
+            |lua, this, (collider, position): (LuaValue, LuaValue)| {
                 let collider: ColliderHandle = lua.from_value(collider)?;
-                let translation: Vector3 = lua.from_value(translation)?;
+                let position: Vector3 = lua.from_value(position)?;
 
                 if let Some(collider) = this.collider_set.get_mut(collider) {
-                    collider.set_translation(vector![translation.x, translation.y, translation.z,]);
+                    collider.set_translation(vector![position.x, position.y, position.z,]);
                     return Ok(());
                 }
 
                 Err(mlua::Error::runtime(
-                    "rapier:set_collider_translation(): Invalid collider handle.",
+                    "rapier:set_collider_position(): Invalid collider handle.",
                 ))
             },
         );
@@ -485,6 +526,33 @@ impl mlua::UserData for Rapier {
 
                 Err(mlua::Error::runtime(
                     "rapier:set_collider_rotation(): Invalid collider handle.",
+                ))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_collider_sensor",
+            "info": "Set the sensor state of a collider.",
+            "member": [
+                { "name": "collider", "info": "Collider handle.",       "kind": "table"   },
+                { "name": "sensor",   "info": "Collider sensor state.", "kind": "boolean" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "set_collider_sensor",
+            |lua, this, (collider, sensor): (LuaValue, bool)| {
+                let collider: ColliderHandle = lua.from_value(collider)?;
+
+                if let Some(collider) = this.collider_set.get_mut(collider) {
+                    collider.set_sensor(sensor);
+                    return Ok(());
+                }
+
+                Err(mlua::Error::runtime(
+                    "rapier:set_collider_sensor(): Invalid collider handle.",
                 ))
             },
         );
@@ -564,6 +632,110 @@ impl mlua::UserData for Rapier {
         /* entry
         {
             "version": "1.0.0",
+            "name": "rapier:set_character_controller_up_vector",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut(
+            "set_character_controller_up_vector",
+            |lua, _, (character, up): (LuaValue, LuaValue)| {
+                let mut character: KinematicCharacterController = lua.from_value(character)?;
+                let up: Vector3 = lua.from_value(up)?;
+                character.up = UnitVector::new_normalize(vector![up.x, up.y, up.z]);
+                lua.to_value(&character)
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_character_controller_slope",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut(
+            "set_character_controller_slope",
+            |lua, _, (character, slope_min, slope_max): (LuaValue, f32, f32)| {
+                let mut character: KinematicCharacterController = lua.from_value(character)?;
+                character.min_slope_slide_angle = slope_min;
+                character.max_slope_climb_angle = slope_max;
+                lua.to_value(&character)
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_character_auto_step",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut(
+            "set_character_auto_step",
+            |lua,
+             _,
+             (character, kind_a, kind_b, value_a, value_b, dynamic): (
+                LuaValue,
+                i32,
+                i32,
+                f32,
+                f32,
+                bool,
+            )| {
+                let mut character: KinematicCharacterController = lua.from_value(character)?;
+                if kind_a == 0 || kind_b == 0 {
+                    character.autostep = None;
+                } else {
+                    let auto = {
+                        Some(CharacterAutostep {
+                            max_height: {
+                                match kind_a {
+                                    1 => CharacterLength::Absolute(value_a),
+                                    _ => CharacterLength::Relative(value_a),
+                                }
+                            },
+                            min_width: {
+                                match kind_b {
+                                    1 => CharacterLength::Absolute(value_b),
+                                    _ => CharacterLength::Relative(value_b),
+                                }
+                            },
+                            include_dynamic_bodies: dynamic,
+                        })
+                    };
+
+                    character.autostep = auto;
+                }
+                lua.to_value(&character)
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_character_snap_ground",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut(
+            "set_character_snap_ground",
+            |lua, _, (character, kind, value): (LuaValue, i32, f32)| {
+                let mut character: KinematicCharacterController = lua.from_value(character)?;
+                let snap = match kind {
+                    1 => Some(CharacterLength::Absolute(value)),
+                    2 => Some(CharacterLength::Relative(value)),
+                    _ => None,
+                };
+
+                character.snap_to_ground = snap;
+
+                lua.to_value(&character)
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "rapier:character_controller_move",
             "info": "Move a character controller.",
             "member": [
@@ -599,7 +771,8 @@ impl mlua::UserData for Rapier {
                     vector![translation.x * step, translation.y * step, translation.z * step],
                     QueryFilter::default()
                         // Make sure the character we are trying to move isn’t considered an obstacle.
-                        .exclude_collider(collider_h),
+                        .exclude_collider(collider_h)
+                        .exclude_sensors(),
                     |_| {}, // We don’t care about events in this example.
                 );
 
@@ -631,14 +804,129 @@ impl mlua::UserData for Rapier {
         */
         method.add_method_mut("rigid_body", |lua, this, kind: i32| {
             let rigid = match kind {
-                1 => RigidBodyBuilder::dynamic(),
-                2 => RigidBodyBuilder::kinematic_velocity_based(),
-                3 => RigidBodyBuilder::kinematic_position_based(),
                 _ => RigidBodyBuilder::fixed(),
+                1 => RigidBodyBuilder::dynamic(),
+                2 => RigidBodyBuilder::kinematic_position_based(),
+                3 => RigidBodyBuilder::kinematic_velocity_based(),
             };
 
             lua.to_value(&this.rigid_body_set.insert(rigid))
         });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:get_rigid_body_user_data",
+            "info": "Get the user data of a rigid_body.",
+            "member": [
+                { "name": "rigid_body", "info": "Rigid body handle.",  "kind": "userdata" }
+            ],
+            "result": [
+                { "name": "user_data",  "info": "Rigid body user data.", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "get_rigid_body_user_data",
+            |lua, this, rigid_body: LuaValue| {
+                let rigid_body: RigidBodyHandle = lua.from_value(rigid_body)?;
+
+                if let Some(rigid_body) = this.rigid_body_set.get(rigid_body) {
+                    return Ok(rigid_body.user_data);
+                }
+
+                Err(mlua::Error::runtime(
+                    "rapier:get_rigid_body_user_data(): Invalid rigid body handle.",
+                ))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_rigid_body_user_data",
+            "info": "Set the user data of a rigid_body.",
+            "member": [
+                { "name": "rigid_body", "info": "Rigid body handle.",    "kind": "userdata" },
+                { "name": "user_data",  "info": "Rigid body user data.", "kind": "number"   }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "set_rigid_body_user_data",
+            |lua, this, (rigid_body, user_data): (LuaValue, u128)| {
+                let rigid_body: RigidBodyHandle = lua.from_value(rigid_body)?;
+
+                if let Some(rigid_body) = this.rigid_body_set.get_mut(rigid_body) {
+                    rigid_body.user_data = user_data;
+                    return Ok(());
+                }
+
+                Err(mlua::Error::runtime(
+                    "rapier:set_rigid_body_user_data(): Invalid rigid body handle.",
+                ))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_rigid_body_position",
+            "info": "Set the position of a rigid_body.",
+            "member": [
+                { "name": "rigid_body", "info": "rigid_body handle.",   "kind": "userdata" },
+                { "name": "position",   "info": "rigid_body position.", "kind": "vector_3" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "set_rigid_body_position",
+            |lua, this, (rigid_body, position, wake_up): (LuaValue, LuaValue, bool)| {
+                let rigid_body: RigidBodyHandle = lua.from_value(rigid_body)?;
+                let position: Vector3 = lua.from_value(position)?;
+
+                if let Some(rigid_body) = this.rigid_body_set.get_mut(rigid_body) {
+                    rigid_body
+                        .set_translation(vector![position.x, position.y, position.z,], wake_up);
+                    return Ok(());
+                }
+
+                Err(mlua::Error::runtime(
+                    "rapier:set_rigid_body_position(): Invalid rigid_body handle.",
+                ))
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "rapier:set_rigid_body_rotation",
+            "info": "Set the rotation of a rigid_body.",
+            "member": [
+                { "name": "rigid_body", "info": "rigid_body handle.",   "kind": "table"    },
+                { "name": "rotation", "info": "rigid_body rotation.", "kind": "vector_3" }
+            ]
+        }
+        */
+        method.add_method_mut(
+            "set_rigid_body_rotation",
+            |lua, this, (rigid_body, rotation, wake_up): (LuaValue, LuaValue, bool)| {
+                let rigid_body: RigidBodyHandle = lua.from_value(rigid_body)?;
+                let rotation: Vector3 = lua.from_value(rotation)?;
+
+                if let Some(rigid_body) = this.rigid_body_set.get_mut(rigid_body) {
+                    rigid_body.set_rotation(
+                        Rotation::new(vector![rotation.x, rotation.y, rotation.z]),
+                        wake_up,
+                    );
+                    return Ok(());
+                }
+
+                Err(mlua::Error::runtime(
+                    "rapier:set_rigid_body_rotation(): Invalid rigid_body handle.",
+                ))
+            },
+        );
 
         //================================================================
 
@@ -689,7 +977,7 @@ impl mlua::UserData for Rapier {
                 }
 
                 Err(mlua::Error::runtime(
-                    "rapier:set_collider_translation(): Invalid collider handle.",
+                    "rapier:set_collider_user_data(): Invalid collider handle.",
                 ))
             },
         );
@@ -809,7 +1097,12 @@ impl mlua::UserData for Rapier {
             "info": "Step the Rapier simulation."
         }
         */
-        method.add_method_mut("step", |_, this, _: ()| {
+        method.add_method_mut("step", |lua, this, _: ()| {
+            {
+                let mut list = this.event_handler.event_list.lock().unwrap();
+                list.clear();
+            }
+
             this.simulation_pipeline.step(
                 &vector![0.0, -9.81, 0.0],
                 &this.integration_parameter,
@@ -823,10 +1116,16 @@ impl mlua::UserData for Rapier {
                 &mut this.ccd_solver,
                 Some(&mut this.query_pipeline),
                 &(),
-                &(),
+                &this.event_handler,
             );
 
-            Ok(())
+            let list = this.event_handler.event_list.lock().unwrap();
+
+            if !list.is_empty() {
+                lua.to_value(&*list)
+            } else {
+                Ok(mlua::Nil)
+            }
         });
 
         /* entry
@@ -848,6 +1147,79 @@ impl mlua::UserData for Rapier {
 
             Ok(())
         });
+    }
+}
+
+#[derive(Default)]
+struct QuiverHandler {
+    event_list: Arc<Mutex<Vec<QuiverEvent>>>,
+}
+
+#[derive(Serialize)]
+struct QuiverEvent {
+    handle_a: ColliderHandle,
+    handle_b: ColliderHandle,
+    flag: CollisionEventFlags,
+    start: bool,
+}
+
+impl Default for QuiverEvent {
+    fn default() -> Self {
+        Self {
+            handle_a: ColliderHandle::default(),
+            handle_b: ColliderHandle::default(),
+            flag: CollisionEventFlags::empty(),
+            start: false,
+        }
+    }
+}
+
+impl QuiverHandler {
+    pub fn new() -> Self {
+        Self {
+            event_list: Arc::new(Mutex::new(Vec::new())),
+        }
+    }
+}
+
+impl EventHandler for QuiverHandler {
+    fn handle_collision_event(
+        &self,
+        bodies: &RigidBodySet,
+        colliders: &ColliderSet,
+        event: CollisionEvent,
+        contact_pair: Option<&ContactPair>,
+    ) {
+        let mut lock = self.event_list.lock().unwrap();
+        match event {
+            CollisionEvent::Started(collider_handle, collider_handle1, collision_event_flags) => {
+                lock.push(QuiverEvent {
+                    handle_a: collider_handle,
+                    handle_b: collider_handle1,
+                    flag: collision_event_flags,
+                    start: true,
+                });
+            }
+            CollisionEvent::Stopped(collider_handle, collider_handle1, collision_event_flags) => {
+                lock.push(QuiverEvent {
+                    handle_a: collider_handle,
+                    handle_b: collider_handle1,
+                    flag: collision_event_flags,
+                    start: false,
+                });
+            }
+        }
+    }
+
+    fn handle_contact_force_event(
+        &self,
+        dt: f32,
+        bodies: &RigidBodySet,
+        colliders: &ColliderSet,
+        contact_pair: &ContactPair,
+        total_force_magnitude: f32,
+    ) {
+        println!("bar");
     }
 }
 

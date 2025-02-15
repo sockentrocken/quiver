@@ -16,12 +16,14 @@
 */
 
 use crate::script::*;
+use std::collections::HashMap;
 
 //================================================================
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::CString;
+use serde::Deserialize;
+use std::ffi::{CStr, CString};
 
 //================================================================
 
@@ -47,6 +49,9 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 
 type RLModel = raylib::models::Model;
 
+#[derive(Deserialize)]
+struct TransformBatch(usize, f32, f32, f32);
+
 /* class
 {
     "version": "1.0.0",
@@ -59,7 +64,12 @@ type RLModel = raylib::models::Model;
     ]
 }
 */
-pub struct Model(pub RLModel);
+pub struct Model(
+    pub RLModel,
+    pub HashMap<usize, ffi::Matrix>,
+    pub usize,
+    pub Vec<TransformBatch>,
+);
 
 impl Model {
     /* entry
@@ -83,7 +93,12 @@ impl Model {
             let data = ffi::LoadModel(name.as_ptr());
 
             if ffi::IsModelValid(data) {
-                Ok(Self(RLModel::from_raw(data)))
+                Ok(Self(
+                    RLModel::from_raw(data),
+                    HashMap::new(),
+                    0,
+                    Vec::with_capacity(2048),
+                ))
             } else {
                 Err(mlua::Error::RuntimeError(format!(
                     "Model::new(): Could not load file \"{path}\"."
@@ -101,6 +116,91 @@ impl mlua::UserData for Model {
     }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:insert_transform_list",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("insert_transform_list", |lua, this, point: LuaValue| {
+            let point: Vector3 = lua.from_value(point)?;
+            this.1
+                .insert(this.2, Matrix::translate(point.x, point.y, point.z).into());
+            this.2 += 1;
+            Ok(this.2 - 1)
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:remove_transform_list",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("remove_transform_list", |_, this, index: usize| {
+            this.1.remove(&index);
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:clear_transform_list",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("clear_transform_list", |_, this, _: ()| {
+            this.1.clear();
+            this.2 = 0;
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:set_transform_list",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut(
+            "set_transform_list",
+            |lua, this, (index, point): (usize, LuaValue)| {
+                let point: Vector3 = lua.from_value(point)?;
+                if let Some(instance) = this.1.get_mut(&index) {
+                    *instance = Matrix::translate(point.x, point.y, point.z).into();
+                } else {
+                    return Err(mlua::Error::runtime(
+                        "set_transform_list(): Invalid instance index.",
+                    ));
+                }
+                Ok(())
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:set_transform_list_batch",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("set_transform_list_batch", |lua, this, batch: LuaValue| {
+            this.3 = lua.from_value(batch)?;
+
+            for b in &this.3 {
+                if let Some(instance) = this.1.get_mut(&b.0) {
+                    *instance = Matrix::translate(b.1, b.2, b.3).into();
+                } else {
+                    return Err(mlua::Error::runtime(
+                        "set_transform_list_batch(): Invalid instance index.",
+                    ));
+                }
+            }
+
+            Ok(())
+        });
+
         /* entry
         {
             "version": "1.0.0",
@@ -140,6 +240,55 @@ impl mlua::UserData for Model {
                 Ok(())
             },
         );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:draw_mesh",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method(
+            "draw_mesh",
+            |lua, this, (index, point, angle, scale): (usize, LuaValue, LuaValue, LuaValue)| unsafe {
+                let mesh = &this.0.meshes()[index];
+                let point: Vector3 = lua.from_value(point)?;
+                let angle: Vector3 = lua.from_value(angle)?;
+                let scale: Vector3 = lua.from_value(scale)?;
+                let angle = Vector3::new(
+                    angle.x * DEG2RAD as f32,
+                    angle.y * DEG2RAD as f32,
+                    angle.z * DEG2RAD as f32,
+                );
+
+                let transform =
+                    (Matrix::translate(point.x, point.y, point.z) * Matrix::rotate_xyz(angle) * Matrix::scale(scale.x, scale.y, scale.z)).into();
+
+                ffi::DrawMesh(**mesh, *this.0.materials()[0], transform);
+                Ok(())
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model:draw_mesh_instance",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method("draw_mesh_instance", |_, this, index: usize| unsafe {
+            let mesh = &this.0.meshes()[index];
+            let transform = &this.1;
+            let transform: Vec<ffi::Matrix> = transform.values().cloned().collect();
+
+            ffi::DrawMeshInstanced(
+                **mesh,
+                *this.0.materials()[0],
+                transform.as_ptr(),
+                transform.len().try_into().unwrap(),
+            );
+            Ok(())
+        });
 
         /* entry
         {
@@ -194,7 +343,7 @@ impl mlua::UserData for Model {
             "info": "Draw the model with a transformation.",
             "member": [
                 { "name": "point", "info": "", "kind": "vector_3" },
-                { "name": "angle", "info": "", "kind": "vector_4" },
+                { "name": "angle", "info": "", "kind": "vector_3" },
                 { "name": "scale", "info": "", "kind": "vector_3" },
                 { "name": "color", "info": "", "kind": "color"    }
             ]
@@ -204,18 +353,13 @@ impl mlua::UserData for Model {
             "draw_transform",
             |lua, this, (point, angle, scale, color): (LuaValue, LuaValue, LuaValue, LuaValue)| unsafe {
                 let point: Vector3 = lua.from_value(point)?;
-                let angle: Vector3 = lua.from_value(angle)?;
+                let angle: Vector4 = lua.from_value(angle)?;
                 let scale: Vector3 = lua.from_value(scale)?;
                 let color: Color = lua.from_value(color)?;
-                let angle = Vector3::new(
-                    angle.x * DEG2RAD as f32,
-                    angle.y * DEG2RAD as f32,
-                    angle.z * DEG2RAD as f32,
-                );
 
-                this.0.transform = (Matrix::rotate_xyz(angle) * Matrix::scale(scale.x, scale.y, scale.z)).into();
+                this.0.transform = ((Matrix::scale(scale.x, scale.y, scale.z) * angle.to_matrix()) * Matrix::translate(point.x, point.y, point.z)).into();
 
-                ffi::DrawModel(*this.0, point.into(), 1.0, color.into());
+                ffi::DrawModel(*this.0, Vector3::zero().into(), 1.0, color.into());
 
                 this.0.transform = Matrix::identity().into();
 
@@ -326,7 +470,7 @@ type RLModelAnimation = raylib::models::ModelAnimation;
     "info": "An unique handle for a model animation in memory."
 }
 */
-pub struct ModelAnimation(pub Vec<RLModelAnimation>);
+pub struct ModelAnimation(pub RLModelAnimation);
 
 impl ModelAnimation {
     /* entry
@@ -342,14 +486,14 @@ impl ModelAnimation {
         ]
     }
     */
-    fn new(lua: &Lua, path: String) -> mlua::Result<Self> {
+    fn new(lua: &Lua, path: String) -> mlua::Result<Vec<Self>> {
         let name = CString::new(ScriptData::get_path(lua, &path)?)
             .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
         unsafe {
             let mut count = 0;
             let data = ffi::LoadModelAnimations(name.as_ptr(), &mut count);
-            let mut list: Vec<RLModelAnimation> = Vec::new();
+            let mut list: Vec<Self> = Vec::new();
 
             if count == 0 {
                 return Err(mlua::Error::RuntimeError(format!(
@@ -360,20 +504,65 @@ impl ModelAnimation {
             for x in 0..count {
                 let animation = data.wrapping_add(x.try_into().unwrap());
 
-                println!("Pushing animation {x}");
-
-                list.push(RLModelAnimation::from_raw(*animation));
+                list.push(Self(RLModelAnimation::from_raw(*animation)));
             }
 
-            Ok(Self(list))
+            Ok(list)
         }
     }
 }
 
 impl mlua::UserData for ModelAnimation {
-    fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
+    fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
+        field.add_field_method_get("bone_count", |_, this| Ok(this.0.boneCount));
+        field.add_field_method_get("frame_count", |_, this| Ok(this.0.frameCount));
+        field.add_field_method_get("name", |_, this| unsafe {
+            let name = this.0.name.as_ptr();
+            Ok(CStr::from_ptr(name)
+                .to_str()
+                .map_err(|e| mlua::Error::runtime(e.to_string()))?
+                .to_string())
+        });
+    }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model_animation:get_bone_info",
+            "info": ""
+        }
+        */
+        method.add_method("get_bone_info", |_, this, index: usize| {
+            let bone = &this.0.bones()[index];
+            unsafe {
+                let name = CStr::from_ptr(bone.name.as_ptr())
+                    .to_str()
+                    .map_err(|e| mlua::Error::runtime(e.to_string()))?
+                    .to_string();
+                Ok((name, bone.parent))
+            }
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "model_animation:get_bone_info",
+            "info": ""
+        }
+        */
+        method.add_method(
+            "get_bone_transform",
+            |_, this, (frame, index): (usize, usize)| {
+                let transform = this.0.frame_poses()[frame][index];
+                Ok((
+                    transform.translation.x,
+                    transform.translation.y,
+                    transform.translation.z,
+                ))
+            },
+        );
+
         /* entry
         {
             "version": "1.0.0",
@@ -381,21 +570,18 @@ impl mlua::UserData for ModelAnimation {
             "info": "Update model with new model animation data.",
             "member": [
                 { "name": "model", "info": "", "kind": "model"  },
-                { "name": "index", "info": "", "kind": "number" },
                 { "name": "frame", "info": "", "kind": "number" }
             ]
         }
         */
         method.add_method(
             "update",
-            |_, this, (model, index, frame): (LuaAnyUserData, usize, usize)| {
-                let animation = this.0.get(index).unwrap();
-
+            |_, this, (model, frame): (LuaAnyUserData, usize)| {
                 if model.is::<Model>() {
                     let model = model.borrow::<Model>().unwrap();
 
                     unsafe {
-                        ffi::UpdateModelAnimation(*model.0, **animation, frame.try_into().unwrap());
+                        ffi::UpdateModelAnimation(*model.0, *this.0, frame.try_into().unwrap());
                     }
                 } else {
                     panic!("not model");

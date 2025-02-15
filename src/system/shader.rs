@@ -142,6 +142,23 @@ impl mlua::UserData for Shader {
         /* entry
         {
             "version": "1.0.0",
+            "name": "shader:get_location_attribute_name",
+            "info": "",
+            "member": [
+                { "name": "name", "info": "", "kind": "string" }
+            ],
+            "result": [
+                { "name": "location", "info": "", "kind": "number" }
+            ]
+        }
+        */
+        method.add_method("get_location_attribute_name", |_, this, name: String| {
+            Ok(this.0.get_shader_location_attribute(&name))
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "shader:get_location",
             "info": "",
             "member": [

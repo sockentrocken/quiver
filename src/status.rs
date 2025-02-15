@@ -202,8 +202,34 @@ pub struct Info {
 
 impl Info {
     pub const FILE_INFO: &'static str = "info_quiver.json";
+    pub const MAIN_PATH: &'static str = "main";
+    pub const MAIN_FILE: &'static str = "main.lua";
 
     pub fn new() -> Result<Self, InfoResult> {
+        // get the path to the main folder.
+        let main_path = std::path::Path::new(Self::MAIN_PATH);
+
+        if main_path.is_dir() {
+            return Ok(Self {
+                safe: true,
+                path: Self::MAIN_PATH.to_string(),
+            });
+        }
+
+        //================================================================
+
+        // get the path to the main file.
+        let main_file = std::path::Path::new(Self::MAIN_FILE);
+
+        if main_file.is_file() {
+            return Ok(Self {
+                safe: true,
+                path: ".".to_string(),
+            });
+        }
+
+        //================================================================
+
         // get the path to the info file.
         let data = std::path::Path::new(Self::FILE_INFO);
 
