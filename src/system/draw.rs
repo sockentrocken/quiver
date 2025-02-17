@@ -412,7 +412,7 @@ mod draw_3d {
 
     /* entry
     {
-        "version": "1.0.0", "name": "quiver.draw_3d.draw_cube",
+        "version": "1.0.0", "name": "quiver.draw_3d.draw_ball",
         "info": "Draw a ball.",
         "member": [
             { "name": "point", "info": "The point of the ball.", "kind": "vector_3" },

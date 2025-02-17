@@ -28,7 +28,8 @@ use crate::status::*;
 
 // the main entry-point.
 #[rustfmt::skip]
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // create the RL context.
     let (mut handle, thread, _audio) = Status::window();
     // create the Quiver state.
@@ -44,7 +45,7 @@ fn main() {
             }
             // success status: standard state.
             Status::Success(ref mut script) => {
-                if let Some(state) = Status::success(&mut handle, &thread, script) {
+                if let Some(state) = Status::success(&mut handle, &thread, script).await {
                     status = state;
                 }
             }
@@ -58,4 +59,7 @@ fn main() {
             Status::Closure => break,
         }
     }
+
+    Ok(())
+
 }

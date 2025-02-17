@@ -91,12 +91,12 @@ impl Status {
     }
 
     // success state.
-    pub fn success(
+    pub async fn success(
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         script: &Script,
     ) -> Option<Status> {
-        match script.main() {
+        match script.main().await {
             Ok(result) => {
                 if result {
                     // need to do this, otherwise MAY cause an infinite hang.
@@ -239,8 +239,12 @@ impl Info {
             let file = std::fs::read_to_string(data)
                 .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))?;
             // return.
-            serde_json::from_str(&file)
-                .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))
+            let mut info: Self = serde_json::from_str(&file)
+                .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))?;
+
+            info.path = info.path.to_string();
+
+            Ok(info)
         } else {
             // file does not exist, return missing.
             Err(InfoResult::Missing)

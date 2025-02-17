@@ -5,14 +5,17 @@ edition = "2021"
 
 [dependencies]
 raylib     = { git = "https://github.com/raylib-rs/raylib-rs.git", features = ["with_serde"] }
-mlua   	   = { version = "0.10.1", features = ["luajit52", "vendored", "serialize", "async"] }
-serde  	   = { version = "1.0", features = ["derive"] }
+mlua   	   = { version = "0.10.1", features = ["luajit52", "vendored", "serialize", "async", "anyhow"] }
+serde  	   = { version = "1.0",    features = ["derive"] }
 serde_json = { version = "1.0" }
+serde_ini  = { version = "0.2.0" }
 rfd		   = { version = "0.15.1" }
 rapier3d   = { version = "0.22.0", features = ["simd-stable", "serde-serialize", "debug-render"] }
 rapier2d   = { version = "0.22.0", features = ["simd-stable", "serde-serialize", "debug-render"] }
 zip 	   = { version = "2.2.2" }
 notify 	   = { version = "8.0.0", features = ["serde"] }
+tokio      = { version = "1",     features = ["full"]  }
+reqwest    = { version = "0.12" }
 
 [build-dependencies]
 serde  	    = { version = "1.0", features = ["derive"] }

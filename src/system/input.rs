@@ -15,6 +15,8 @@
 * PERFORMANCE OF THIS SOFTWARE.
 */
 
+//================================================================
+
 use mlua::prelude::*;
 use raylib::prelude::*;
 use std::ffi::{CStr, CString};
@@ -28,8 +30,10 @@ use std::ffi::{CStr, CString};
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let input = lua.create_table()?;
 
-    input.set("set_clipboard_text", lua.create_function(self::set_clipboard_text)?)?;
-    input.set("get_clipboard_text", lua.create_function(self::get_clipboard_text)?)?;
+    // SetClipboardText
+    input.set("set_clipboard_text",  lua.create_function(self::set_clipboard_text)?)?;
+    // GetClipboardText
+    input.set("get_clipboard_text",  lua.create_function(self::get_clipboard_text)?)?;
 
     //================================================================
 

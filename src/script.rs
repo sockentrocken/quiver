@@ -21,6 +21,8 @@ use crate::system::*;
 //================================================================
 
 use mlua::prelude::*;
+use std::ffi::{CStr, CString};
+use std::path;
 
 //================================================================
 
@@ -87,8 +89,11 @@ impl Script {
     }
 
     // main Lua entry-point.
-    pub fn main(&self) -> Result<bool, String> {
-        self.main.call::<bool>(()).map_err(|e| e.to_string())
+    pub async fn main(&self) -> Result<bool, String> {
+        self.main
+            .call_async::<bool>(())
+            .await
+            .map_err(|e| e.to_string())
     }
 
     // fail Lua entry-point.
@@ -167,6 +172,7 @@ impl Script {
         shader::set_global(lua, &quiver)?;
         file::set_global(lua, &quiver)?;
         zip::set_global(lua, &quiver)?;
+        request::set_global(lua, &quiver)?;
 
         // set the quiver table as a global value.
         global.set("quiver", quiver)?;
@@ -191,6 +197,19 @@ impl Script {
             .map_err(|e| Status::panic(&e.to_string()))
             .unwrap();
     }
+
+    pub fn rust_to_c_string(text: &str) -> mlua::Result<CString> {
+        CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))
+    }
+
+    pub fn c_to_rust_string(text: *const i8) -> mlua::Result<String> {
+        unsafe {
+            Ok(CStr::from_ptr(text)
+                .to_str()
+                .map_err(|e| mlua::Error::runtime(e.to_string()))?
+                .to_string())
+        }
+    }
 }
 
 //================================================================
@@ -204,17 +223,20 @@ impl ScriptData {
         Self { info }
     }
 
+    #[rustfmt::skip]
     pub fn get_path(lua: &Lua, path: &str) -> mlua::Result<String> {
         let script_data = lua.app_data_ref::<ScriptData>().unwrap();
 
-        //        if script_data.info.safe {
-        // any path in safe mode must be done within the info file's given path.
+        if script_data.info.safe {
+            let path = format!("{}/{path}", script_data.info.path);
 
-        Ok(format!("{}/{path}", script_data.info.path))
+            // always disallow going up the directory in safe mode.
+            let path = path.replace("../", "");
+            let path = path.replace("..",  "");
 
-        //        } else {
-        //            // un-safe mode does not have this restriction.
-        //            Ok(path.to_string())
-        //        }
+            Ok(path)
+        } else {
+            Ok(format!("{}/{path}", script_data.info.path))
+        }
     }
 }

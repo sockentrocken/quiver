@@ -43,9 +43,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     general.set("set_frame_rate", lua.create_function(self::set_frame_rate)?)?;
     general.set("get_memory",     lua.create_function(self::get_memory)?)?;
     general.set("get_info",       lua.create_function(self::get_info)?)?;
-    //general.set("get_clipboard_text",  lua.create_function(self::get_clipboard_text)?)?;
-    //general.set("set_clipboard_text",  lua.create_function(self::set_clipboard_text)?)?;
-    //general.set("get_clipboard_image", lua.create_function(self::get_clipboard_image)?)?;
 
     table.set("general", general)?;
 
@@ -114,8 +111,10 @@ fn serialize(lua: &Lua, value: LuaValue) -> mlua::Result<String> {
 }
 */
 fn deserialize(lua: &Lua, value: String) -> mlua::Result<LuaValue> {
+    //let value: serde_json::Value =
+    //    serde_json::from_str(&value).map_err(|e| mlua::Error::runtime(e.to_string()))?;
     let value: serde_json::Value =
-        serde_json::from_str(&value).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+        serde_ini::from_str(&value).map_err(|e| mlua::Error::runtime(e.to_string()))?;
     lua.to_value(&value)
 }
 

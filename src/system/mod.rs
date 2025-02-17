@@ -25,6 +25,12 @@ pub mod general;
 // raylib API
 //================================================================
 
+pub mod request;
+// pub mod serialize;
+// pub mod discord;
+// pub mod steam;
+// pub mod notify;
+
 /* draw */
 pub mod draw;
 
@@ -39,6 +45,7 @@ pub mod image;
 pub mod model;
 pub mod music;
 pub mod shader;
+// pub mod video;
 pub mod sound;
 pub mod texture;
 pub mod zip;
