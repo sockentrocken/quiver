@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/asset/logo.png" width="192" height="240">
+<img src="src/asset/card.png" width="192" height="240">
 
 **A 3D/2D game development framework for Lua, written in Rust.**
 
