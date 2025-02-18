@@ -159,32 +159,32 @@ impl Window {
         // button footer.
         self.point(Vector2::new(20.0, draw_shape.y - Self::LOGO_SHAPE + 24.0));
 
-        // create a new info file for a module, which doesn't exist yet.
-        if self.button(&mut draw, "New Module") {
+        // create a new info file for a project, which doesn't exist yet.
+        if self.button(&mut draw, "New Project") {
             let path = std::env::current_dir()
                 .map_err(|e| Status::panic(&e.to_string()))
                 .unwrap();
 
-            let module = rfd::FileDialog::new().set_directory(path).pick_folder();
+            let project = rfd::FileDialog::new().set_directory(path).pick_folder();
 
-            if let Some(module) = module {
-                Script::new_module(&module.display().to_string());
+            if let Some(project) = project {
+                Script::new_project(&project.display().to_string());
 
                 drop(draw);
                 return Some(Status::new(handle, thread));
             }
         }
 
-        // create a new info file for a module.
-        if self.button(&mut draw, "Load Module") {
+        // create a new info file for a project.
+        if self.button(&mut draw, "Load Project") {
             let path = std::env::current_dir()
                 .map_err(|e| Status::panic(&e.to_string()))
                 .unwrap();
 
-            let module = rfd::FileDialog::new().set_directory(path).pick_folder();
+            let project = rfd::FileDialog::new().set_directory(path).pick_folder();
 
-            if let Some(module) = module {
-                Script::load_module(&module.display().to_string());
+            if let Some(project) = project {
+                Script::load_project(&project.display().to_string());
 
                 drop(draw);
                 return Some(Status::new(handle, thread));
@@ -241,7 +241,7 @@ impl Window {
         self.point(Vector2::new(20.0, draw_shape.y - 136.0));
 
         // reload Quiver.
-        if self.button(&mut draw, "Load Module") {
+        if self.button(&mut draw, "Load Project") {
             drop(draw);
             return Some(Status::new(handle, thread));
         }

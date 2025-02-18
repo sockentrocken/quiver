@@ -1,21 +1,21 @@
 --- Welcome to Quiver!
 --- * main.lua -> Main entry-point file.
---- * base.lua -> Quiver's standard Lua library.
 --- * meta.lua -> Quiver API documentation, for use with LuaLS.
+--- * base/ -> Quiver's standard Lua library.
 
 --[[----------------------------------------------------------------]]
 
-require "base"
+require "base/main"
 
 local time = 0.0
 
 function quiver.main()
-    --- Main entry-point. Quiver will call this on module initialization.
+    --- Main entry-point. Quiver will call this on project initialization.
     while not quiver.window.get_close() do
         time = time + quiver.general.get_frame_time()
 
         -- Press F1 to reload Quiver.
-        if quiver.input.board.get_press(INPUT_BOARD.KEY_F1) then
+        if quiver.input.board.get_press(INPUT_BOARD.F1) then
             -- Returning "true" will reload Quiver.
             return true
         end
@@ -38,7 +38,7 @@ function draw()
 
     -- Begin the 3D draw mode.
     quiver.draw_3d.begin(draw_3d, camera_3d:new(vector_3:new(x * 4.0, 4.0, z * 4.0), vector_3:zero(),
-        vector_3:new(0.0, 1.0, 0.0), 90.0))
+        vector_3:new(0.0, 1.0, 0.0), 90.0, 0.0))
 
     -- Begin the 2D draw mode.
     quiver.draw_2d.begin(draw_2d, camera_2d:new(vector_2:zero(), vector_2:zero(), 0.0, 1.0))

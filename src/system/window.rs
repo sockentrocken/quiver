@@ -140,7 +140,8 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     window.set("get_screen_shot", lua.create_function(self::get_screen_shot)?)?;
 
     /* RFD-specific */
-    window.set("dialog", lua.create_async_function(self::dialog)?)?;
+    window.set("file_dialog", lua.create_async_function(self::file_dialog)?)?;
+//    window.set("text_dialog", lua.create_async_function(self::text_dialog)?)?;
 
     table.set("window", window)?;
 
@@ -150,11 +151,11 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 /* entry
 {
     "version": "1.0.0",
-    "name": "quiver.window.dialog",
+    "name": "quiver.window.file_dialog",
     "info": "TO-DO"
 }
 */
-async fn dialog(
+async fn file_dialog(
     lua: Lua,
     (kind, filter, path, name, title): (
         i32,

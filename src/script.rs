@@ -59,6 +59,17 @@ use std::path;
 
 //================================================================
 
+struct BaseFile {
+    name: &'static str,
+    data: &'static str,
+}
+
+impl BaseFile {
+    const fn new(name: &'static str, data: &'static str) -> Self {
+        Self { name, data }
+    }
+}
+
 #[derive(Clone)]
 pub struct Script {
     #[allow(dead_code)]
@@ -69,10 +80,22 @@ pub struct Script {
 
 impl Script {
     const FILE_MAIN: &'static str = include_str!("asset/main.lua");
-    const FILE_BASE: &'static str = include_str!("asset/base.lua");
+    #[rustfmt::skip]
+    const FILE_BASE: [BaseFile; 11] = [
+        BaseFile::new("base/main.lua",        include_str!("asset/base/main.lua")),
+        BaseFile::new("base/constant.lua",    include_str!("asset/base/constant.lua")),
+        BaseFile::new("base/extension.lua",   include_str!("asset/base/extension.lua")),
+        BaseFile::new("base/allocator.lua",   include_str!("asset/base/allocator.lua")),
+        BaseFile::new("base/primitive.lua",   include_str!("asset/base/primitive.lua")),
+        BaseFile::new("base/action.lua",      include_str!("asset/base/action.lua")),
+        BaseFile::new("base/window.lua",      include_str!("asset/base/window.lua")),
+        BaseFile::new("base/logger.lua",      include_str!("asset/base/logger.lua")),
+        BaseFile::new("base/system.lua",      include_str!("asset/base/system.lua")),
+        BaseFile::new("base/scene.lua",       include_str!("asset/base/scene.lua")),
+        BaseFile::new("base/path_finder.lua", include_str!("asset/base/path_finder.lua")),
+    ];
     const FILE_META: &'static str = include_str!("asset/meta.lua");
     const NAME_MAIN: &'static str = "main.lua";
-    const NAME_BASE: &'static str = "base.lua";
     const NAME_META: &'static str = "meta.lua";
     const CALL_MAIN: &'static str = "main";
     const CALL_FAIL: &'static str = "fail";
@@ -180,7 +203,7 @@ impl Script {
     }
 
     // create a new info_quiver.json file at the given path, and dump main/base/meta.lua into the path.
-    pub fn new_module(path: &str) {
+    pub fn new_project(path: &str) {
         // dump main/base/meta.
         Self::dump(path);
 
@@ -193,7 +216,7 @@ impl Script {
     }
 
     // create a new info_quiver.json file at the given path.
-    pub fn load_module(path: &str) {
+    pub fn load_project(path: &str) {
         // dump info_quiver.json.
         Info {
             safe: true,
@@ -267,10 +290,14 @@ impl Script {
             .map_err(|e| Status::panic(&e.to_string()))
             .unwrap();
 
-        // dump base.lua.
-        std::fs::write(format!("{path}/{}", Self::NAME_BASE), Self::FILE_BASE)
-            .map_err(|e| Status::panic(&e.to_string()))
-            .unwrap();
+        std::fs::create_dir(format!("{path}/base")).unwrap();
+
+        // dump base library.
+        for base in Self::FILE_BASE {
+            std::fs::write(format!("{path}/{}", base.name), base.data)
+                .map_err(|e| Status::panic(&e.to_string()))
+                .unwrap();
+        }
 
         // dump meta.lua.
         std::fs::write(format!("{path}/{}", Self::NAME_META), Self::FILE_META)
