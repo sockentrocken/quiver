@@ -1,18 +1,51 @@
 /*
-* BSD Zero Clause License
-*
 * Copyright (c) 2025 sockentrocken
 *
-* Permission to use, copy, modify, and/or distribute this software for any
-* purpose with or without fee is hereby granted.
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
 *
-* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-* REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-* AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-* INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-* LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-* OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-* PERFORMANCE OF THIS SOFTWARE.
+* 1. Redistributions of source code must retain the above copyright notice,
+* this list of conditions and the following disclaimer.
+*
+* 2. Redistributions in binary form must reproduce the above copyright notice,
+* this list of conditions and the following disclaimer in the documentation
+* and/or other materials provided with the distribution.
+*
+* Subject to the terms and conditions of this license, each copyright holder
+* and contributor hereby grants to those receiving rights under this license
+* a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+* (except for failure to satisfy the conditions of this license) patent license
+* to make, have made, use, offer to sell, sell, import, and otherwise transfer
+* this software, where such license applies only to those patent claims, already
+* acquired or hereafter acquired, licensable by such copyright holder or
+* contributor that are necessarily infringed by:
+*
+* (a) their Contribution(s) (the licensed copyrights of copyright holders and
+* non-copyrightable additions of contributors, in source or binary form) alone;
+* or
+*
+* (b) combination of their Contribution(s) with the work of authorship to which
+* such Contribution(s) was added by such copyright holder or contributor, if,
+* at the time the Contribution is added, such addition causes such combination
+* to be necessarily infringed. The patent license shall not apply to any other
+* combinations which include the Contribution.
+*
+* Except as expressly stated above, no rights or licenses from any copyright
+* holder or contributor is granted under this license, whether expressly, by
+* implication, estoppel or otherwise.
+*
+* DISCLAIMER
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 use crate::script::*;
@@ -70,6 +103,8 @@ pub struct Model(
     pub usize,
     pub Vec<TransformBatch>,
 );
+
+unsafe impl Send for Model {}
 
 impl Model {
     /* entry
@@ -207,8 +242,8 @@ impl mlua::UserData for Model {
             "name": "model:bind",
             "info": "Bind a texture to the model.",
             "member": [
-                { "name": "index",   "info": "", "kind": "number" },
-                { "name": "which",   "info": "", "kind": "number" },
+                { "name": "index",   "info": "TO-DO", "kind": "number" },
+                { "name": "which",   "info": "TO-DO", "kind": "number" },
                 { "name": "texture", "info": "Texture to bind to model.", "kind": "texture" }
             ]
         }
@@ -296,9 +331,9 @@ impl mlua::UserData for Model {
             "name": "model:draw",
             "info": "Draw the model.",
             "member": [
-                { "name": "point", "info": "", "kind": "vector_3" },
-                { "name": "scale", "info": "", "kind": "number"   },
-                { "name": "color", "info": "", "kind": "color"    }
+                { "name": "point", "info": "TO-DO", "kind": "vector_3" },
+                { "name": "scale", "info": "TO-DO", "kind": "number"   },
+                { "name": "color", "info": "TO-DO", "kind": "color"    }
             ]
         }
         */
@@ -319,9 +354,9 @@ impl mlua::UserData for Model {
             "name": "model:draw_wire",
             "info": "Draw the model (wire-frame).",
             "member": [
-                { "name": "point", "info": "", "kind": "vector_3" },
-                { "name": "scale", "info": "", "kind": "number"   },
-                { "name": "color", "info": "", "kind": "color"    }
+                { "name": "point", "info": "TO-DO", "kind": "vector_3" },
+                { "name": "scale", "info": "TO-DO", "kind": "number"   },
+                { "name": "color", "info": "TO-DO", "kind": "color"    }
             ]
         }
         */
@@ -342,10 +377,10 @@ impl mlua::UserData for Model {
             "name": "model:draw_transform",
             "info": "Draw the model with a transformation.",
             "member": [
-                { "name": "point", "info": "", "kind": "vector_3" },
-                { "name": "angle", "info": "", "kind": "vector_3" },
-                { "name": "scale", "info": "", "kind": "vector_3" },
-                { "name": "color", "info": "", "kind": "color"    }
+                { "name": "point", "info": "TO-DO", "kind": "vector_3" },
+                { "name": "angle", "info": "TO-DO", "kind": "vector_3" },
+                { "name": "scale", "info": "TO-DO", "kind": "vector_3" },
+                { "name": "color", "info": "TO-DO", "kind": "color"    }
             ]
         }
         */
@@ -371,7 +406,7 @@ impl mlua::UserData for Model {
         {
             "version": "1.0.0",
             "name": "model:get_box_3",
-            "info": "",
+            "info": "TO-DO",
             "result": [
                 { "name": "min_x", "info": "Minimum vector. (X)", "kind": "number" },
                 { "name": "min_y", "info": "Minimum vector. (Y)", "kind": "number" },
@@ -472,6 +507,8 @@ type RLModelAnimation = raylib::models::ModelAnimation;
 */
 pub struct ModelAnimation(pub RLModelAnimation);
 
+unsafe impl Send for ModelAnimation {}
+
 impl ModelAnimation {
     /* entry
     {
@@ -530,7 +567,7 @@ impl mlua::UserData for ModelAnimation {
         {
             "version": "1.0.0",
             "name": "model_animation:get_bone_info",
-            "info": ""
+            "info": "TO-DO"
         }
         */
         method.add_method("get_bone_info", |_, this, index: usize| {
@@ -548,7 +585,7 @@ impl mlua::UserData for ModelAnimation {
         {
             "version": "1.0.0",
             "name": "model_animation:get_bone_info",
-            "info": ""
+            "info": "TO-DO"
         }
         */
         method.add_method(
@@ -569,8 +606,8 @@ impl mlua::UserData for ModelAnimation {
             "name": "model_animation:update",
             "info": "Update model with new model animation data.",
             "member": [
-                { "name": "model", "info": "", "kind": "model"  },
-                { "name": "frame", "info": "", "kind": "number" }
+                { "name": "model", "info": "TO-DO", "kind": "model"  },
+                { "name": "frame", "info": "TO-DO", "kind": "number" }
             ]
         }
         */

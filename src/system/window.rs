@@ -1,23 +1,63 @@
 /*
-* BSD Zero Clause License
-*
 * Copyright (c) 2025 sockentrocken
 *
-* Permission to use, copy, modify, and/or distribute this software for any
-* purpose with or without fee is hereby granted.
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
 *
-* THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-* REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-* AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-* INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-* LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-* OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-* PERFORMANCE OF THIS SOFTWARE.
+* 1. Redistributions of source code must retain the above copyright notice,
+* this list of conditions and the following disclaimer.
+*
+* 2. Redistributions in binary form must reproduce the above copyright notice,
+* this list of conditions and the following disclaimer in the documentation
+* and/or other materials provided with the distribution.
+*
+* Subject to the terms and conditions of this license, each copyright holder
+* and contributor hereby grants to those receiving rights under this license
+* a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+* (except for failure to satisfy the conditions of this license) patent license
+* to make, have made, use, offer to sell, sell, import, and otherwise transfer
+* this software, where such license applies only to those patent claims, already
+* acquired or hereafter acquired, licensable by such copyright holder or
+* contributor that are necessarily infringed by:
+*
+* (a) their Contribution(s) (the licensed copyrights of copyright holders and
+* non-copyrightable additions of contributors, in source or binary form) alone;
+* or
+*
+* (b) combination of their Contribution(s) with the work of authorship to which
+* such Contribution(s) was added by such copyright holder or contributor, if,
+* at the time the Contribution is added, such addition causes such combination
+* to be necessarily infringed. The patent license shall not apply to any other
+* combinations which include the Contribution.
+*
+* Except as expressly stated above, no rights or licenses from any copyright
+* holder or contributor is granted under this license, whether expressly, by
+* implication, estoppel or otherwise.
+*
+* DISCLAIMER
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
+use crate::script::*;
+
+//================================================================
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::{CStr, CString};
+use std::{
+    collections::HashMap,
+    ffi::{CStr, CString},
+};
 
 //================================================================
 
@@ -96,10 +136,102 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     window.set("get_scale", lua.create_function(self::get_scale)?)?;
     // GetMonitorName
     window.set("get_screen_name", lua.create_function(self::get_screen_name)?)?;
+    // TakeScreenshot
+    window.set("get_screen_shot", lua.create_function(self::get_screen_shot)?)?;
+
+    /* RFD-specific */
+    window.set("dialog", lua.create_async_function(self::dialog)?)?;
 
     table.set("window", window)?;
 
     Ok(())
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.window.dialog",
+    "info": "TO-DO"
+}
+*/
+async fn dialog(
+    lua: Lua,
+    (kind, filter, path, name, title): (
+        i32,
+        Option<LuaValue>,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+    ),
+) -> mlua::Result<LuaValue> {
+    let mut file = rfd::AsyncFileDialog::new();
+
+    if let Some(filter) = filter {
+        let filter: HashMap<String, Vec<String>> = lua.from_value(filter)?;
+
+        for (k, v) in filter {
+            println!("adding filter {k} : {v:?}");
+            file = file.add_filter(k, &v);
+        }
+    }
+
+    if let Some(path) = path {
+        file = file.set_directory(path);
+    }
+
+    if let Some(name) = name {
+        file = file.set_file_name(name);
+    }
+
+    if let Some(title) = title {
+        file = file.set_title(title);
+    }
+
+    match kind {
+        0..2 => {
+            let file = {
+                match kind {
+                    0 => file.pick_file().await,
+                    _ => file.pick_folder().await,
+                }
+            };
+
+            if let Some(file) = file {
+                lua.to_value(&file.path().display().to_string())
+            } else {
+                Ok(mlua::Nil)
+            }
+        }
+        2..4 => {
+            let file = {
+                match kind {
+                    2 => file.pick_files().await,
+                    _ => file.pick_folders().await,
+                }
+            };
+
+            if let Some(file) = file {
+                let mut result = Vec::new();
+
+                for entry in file {
+                    result.push(entry.path().display().to_string());
+                }
+
+                lua.to_value(&result)
+            } else {
+                Ok(mlua::Nil)
+            }
+        }
+        _ => {
+            let file = file.save_file().await;
+
+            if let Some(file) = file {
+                lua.to_value(&file.path().display().to_string())
+            } else {
+                Ok(mlua::Nil)
+            }
+        }
+    }
 }
 
 /* entry
@@ -636,5 +768,21 @@ fn get_screen_name(_: &Lua, index: i32) -> mlua::Result<String> {
             .to_str()
             .map_err(|e| mlua::Error::runtime(e.to_string()))?
             .to_string())
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.window.get_screen_shot",
+    "info": "TO-DO"
+}
+*/
+fn get_screen_shot(lua: &Lua, path: String) -> mlua::Result<()> {
+    unsafe {
+        let path = ScriptData::get_path(lua, &path)?;
+        let path = Script::rust_to_c_string(&path)?;
+        ffi::TakeScreenshot(path.as_ptr());
+        Ok(())
     }
 }
