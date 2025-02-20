@@ -100,18 +100,32 @@ impl mlua::UserData for Zip {
             "info": "TO-DO"
         }
         */
-        method.add_async_method_mut("get_file", |lua: Lua, mut this, path: String| async {
-            tokio::task::spawn_blocking(move || match this.0.by_name(&path) {
-                Ok(mut value) => {
-                    let mut data = Vec::new();
-                    value.read_to_end(&mut data)?;
-                    Ok(crate::system::data::Data::new(&lua, data))
-                }
-                Err(value) => Err(mlua::Error::runtime(value.to_string())),
-            })
-            .await
-            .unwrap()
-        });
+        method.add_async_method_mut(
+            "get_file",
+            |lua: Lua, mut this, (path, binary): (String, bool)| async move {
+                tokio::task::spawn_blocking(move || match this.0.by_name(&path) {
+                    Ok(mut value) => {
+                        if binary {
+                            let mut data = Vec::new();
+                            value.read_to_end(&mut data)?;
+
+                            let data = crate::system::data::Data::new(&lua, data)?;
+                            let data = lua.create_userdata(data)?;
+
+                            Ok(mlua::Value::UserData(data))
+                        } else {
+                            let mut data = String::new();
+                            value.read_to_string(&mut data)?;
+
+                            lua.to_value(&data)
+                        }
+                    }
+                    Err(value) => Err(mlua::Error::runtime(value.to_string())),
+                })
+                .await
+                .unwrap()
+            },
+        );
 
         /* entry
         {
@@ -144,11 +158,11 @@ impl mlua::UserData for Zip {
         /* entry
         {
             "version": "1.0.0",
-            "name": "zip:is_system_link",
+            "name": "zip:is_link",
             "info": "TO-DO"
         }
         */
-        method.add_method_mut("is_system_link", |_: &Lua, this, path: String| {
+        method.add_method_mut("is_link", |_: &Lua, this, path: String| {
             match this.0.by_name(&path) {
                 Ok(value) => Ok(value.is_symlink()),
                 Err(value) => Err(mlua::Error::runtime(value.to_string())),

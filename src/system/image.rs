@@ -126,10 +126,10 @@ impl Image {
     }
     */
     async fn new(lua: Lua, path: String) -> mlua::Result<Self> {
-        tokio::task::spawn_blocking(move || unsafe {
-            let name = ScriptData::get_path(&lua, &path)?;
-            let name = Script::rust_to_c_string(&name)?;
+        let name = ScriptData::get_path(&lua, &path)?;
+        let name = Script::rust_to_c_string(&name)?;
 
+        tokio::task::spawn_blocking(move || unsafe {
             let data = ffi::LoadImage(name.as_ptr());
 
             if ffi::IsImageValid(data) {

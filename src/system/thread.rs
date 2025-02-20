@@ -57,7 +57,6 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::thread::{self, JoinHandle};
-use std::time::Duration;
 
 use crate::script::Script;
 

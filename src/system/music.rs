@@ -78,7 +78,7 @@ type RLMusic = ffi::Music;
 /* class
 { "version": "1.0.0", "name": "music", "info": "An unique handle for music in memory." }
 */
-struct Music(RLMusic);
+struct Music(RLMusic, Option<Vec<u8>>);
 
 unsafe impl Send for Music {}
 
@@ -104,7 +104,7 @@ impl Music {
             let data = ffi::LoadMusicStream(name.as_ptr());
 
             if ffi::IsMusicValid(data) {
-                Ok(Self(data))
+                Ok(Self(data, None))
             } else {
                 Err(mlua::Error::RuntimeError(format!(
                     "Music::new(): Could not load file \"{path}\"."
@@ -123,27 +123,26 @@ impl Music {
     }
     */
     async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
-        //let data = crate::system::data::Data::get_buffer(data)?;
+        let data = crate::system::data::Data::get_buffer(data)?;
 
-        unsafe {
-            //let data = &*data.0;
-
-            let data = std::fs::read("src/asset/example_2D/data/music.wav").unwrap();
-
+        tokio::task::spawn_blocking(move || unsafe {
+            let buffer = data.0.clone();
             let data = ffi::LoadMusicStreamFromMemory(
                 Script::rust_to_c_string(&kind)?.as_ptr(),
-                data.as_ptr(),
-                data.len() as i32,
+                buffer.as_ptr(),
+                buffer.len() as i32,
             );
 
             if ffi::IsMusicValid(data) {
-                Ok(Self(data))
+                Ok(Self(data, Some(buffer)))
             } else {
                 Err(mlua::Error::RuntimeError(
                     "Music::new_from_memory(): Could not load file.".to_string(),
                 ))
             }
-        }
+        })
+        .await
+        .unwrap()
     }
 }
 

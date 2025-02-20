@@ -80,25 +80,25 @@ function system:new(search)
 
 	--[[]]
 
-	i.__type = "system"
-	i.locate = {}
+	i.__type      = "system"
+	i.locate      = {}
 	i.memory_list = {
-		texture = {},
-		model = {},
+		texture         = {},
+		model           = {},
 		model_animation = {},
-		sound = {},
-		music = {},
-		shader = {},
-		font = {}
+		sound           = {},
+		music           = {},
+		shader          = {},
+		font            = {}
 	}
 	i.memory_data = {
-		texture = {},
-		model = {},
+		texture         = {},
+		model           = {},
 		model_animation = {},
-		sound = {},
-		music = {},
-		shader = {},
-		font = {}
+		sound           = {},
+		music           = {},
+		shader          = {},
+		font            = {}
 	}
 
 	i:scan(search)
@@ -108,23 +108,23 @@ end
 
 ---Scan every directory in the asset's search table, to update the asset look-up table.
 function system:scan(search)
-	-- get the info path (i.e. path: "main_folder").
-	local _, path = quiver.general.get_info()
-
 	-- for each search path in the search table...
 	for _, search_path in ipairs(search) do
-		-- scan the path recursively.
-		local list = quiver.file.scan_path(search_path, nil, true)
-		-- make the full path (main_folder/game_folder_1).
-		local wipe = path .. "/" .. search_path
+		-- check if the given path is a folder or a file.
+		if quiver.file.get_path_exist(search_path) then
+			-- scan the path recursively.
+			local list = quiver.file.scan_path(search_path, nil, true, true)
 
-		for _, search_file in ipairs(list) do
-			-- strip "main_folder/game_folder_1/video/image.png" to "video/image.png".
-			local entry = string.sub(search_file, #wipe + 2, -1)
-			local value = string.sub(search_file, #path + 2, -1)
+			for _, search_file in ipairs(list) do
+				self.locate[search_file] = search_path .. "/" .. search_file
+			end
+		else
+			local pack = quiver.zip.new(search_path)
+			local list = pack:get_data_list()
 
-			-- set entry. (i.e. "video/image.png" = "main_folder/game_folder_1/video/image.png").
-			self.locate[entry] = value
+			for _, search_file in ipairs(list) do
+				self.locate[search_file] = pack
+			end
 		end
 	end
 end
@@ -158,7 +158,7 @@ function system:load()
 	end
 end
 
-local function file_system_set_asset(self, memory_data, memory_list, call_new, force, faux_path, ...)
+local function file_system_set_asset(self, memory_data, memory_list, call_new, call_new_memory, force, faux_path, ...)
 	-- if asset was already in memory...
 	if memory_data[faux_path] then
 		if force then
@@ -177,8 +177,20 @@ local function file_system_set_asset(self, memory_data, memory_list, call_new, f
 	-- locate the asset.
 	local asset = self.locate[faux_path]
 
-	-- create the asset.
-	asset = call_new(asset, ...)
+	-- asset is not a path to the real asset, but a package...
+	if not (type(asset) == "string") and call_new_memory then
+		print("Loading from memory...")
+
+		local data = asset:get_file(faux_path, true)
+
+		-- create the asset.
+		asset = call_new_memory(data, ...)
+	else
+		print("Loading from disk...")
+
+		-- create the asset.
+		asset = call_new(asset, ...)
+	end
 
 	-- insert into the book-keeping memory table.
 	table.insert(memory_list, faux_path)
@@ -207,7 +219,7 @@ end
 ---@param  faux_path string # The "faux" path to the asset, not taking into consideration the search path in which it was found.
 ---@return texture asset # The asset.
 function system:set_texture(faux_path, force)
-	return file_system_set_asset(self, self.memory_data.texture, self.memory_list.texture, quiver.texture.new, force,
+	return file_system_set_asset(self, self.memory_data.texture, self.memory_list.texture, quiver.texture.new, nil, force,
 		faux_path)
 end
 
@@ -222,7 +234,8 @@ end
 ---@param  faux_path string # The "faux" path to the asset, not taking into consideration the search path in which it was found.
 ---@return model asset # The asset.
 function system:set_model(faux_path, force)
-	return file_system_set_asset(self, self.memory_data.model, self.memory_list.model, quiver.model.new, force, faux_path)
+	return file_system_set_asset(self, self.memory_data.model, self.memory_list.model, quiver.model.new, nil, force,
+		faux_path)
 end
 
 ---Get a model animation asset from the file-system model animation resource table.
@@ -237,7 +250,7 @@ end
 ---@return model_animation asset # The asset.
 function system:set_model_animation(faux_path, force)
 	return file_system_set_asset(self, self.memory_data.model_animation, self.memory_list.model_animation,
-		quiver.model_animation.new, force, faux_path)
+		quiver.model_animation.new, nil, force, faux_path)
 end
 
 ---Get a sound asset from the file-system sound resource table.
@@ -251,7 +264,8 @@ end
 ---@param  faux_path string # The "faux" path to the asset, not taking into consideration the search path in which it was found.
 ---@return sound asset # The asset.
 function system:set_sound(faux_path, force, ...)
-	return file_system_set_asset(self, self.memory_data.sound, self.memory_list.sound, quiver.sound.new, force, faux_path,
+	return file_system_set_asset(self, self.memory_data.sound, self.memory_list.sound, quiver.sound.new, quiver.sound
+		.new_from_memory, force, faux_path,
 		...)
 end
 
@@ -265,8 +279,9 @@ end
 ---Set a music asset into the file-system music resource table.
 ---@param  faux_path string # The "faux" path to the asset, not taking into consideration the search path in which it was found.
 ---@return music asset # The asset.
-function system:set_music(faux_path, force)
-	return file_system_set_asset(self, self.memory_data.music, self.memory_list.music, quiver.music.new, force, faux_path)
+function system:set_music(faux_path, force, ...)
+	return file_system_set_asset(self, self.memory_data.music, self.memory_list.music, quiver.music.new, quiver.music
+		.new_from_memory, force, faux_path, ...)
 end
 
 ---Get a model asset from the file-system model resource table.
@@ -305,8 +320,25 @@ function system:set_shader(faux_name, faux_path_vs, faux_path_fs, force)
 	local asset_vs = self.locate[faux_path_vs]
 	local asset_fs = self.locate[faux_path_fs]
 
+	-- asset is not a path to the real asset, but a package...
+	if not (type(asset_vs) == "string") then
+		print("Loading .VS from memory...")
+		asset_vs = asset_vs:get_file(faux_path_vs)
+	else
+		print("Loading .VS from disk...")
+		asset_vs = quiver.file.get(asset_vs)
+	end
+
+	if not (type(asset_fs) == "string") then
+		print("Loading .FS from memory...")
+		asset_fs = asset_fs:get_file(faux_path_fs)
+	else
+		print("Loading .FS from disk...")
+		asset_fs = quiver.file.get(asset_fs)
+	end
+
 	-- create the asset.
-	asset = quiver.shader.new(asset_vs, asset_fs)
+	asset = quiver.shader.new_from_memory(asset_vs, asset_fs)
 
 	-- insert into the book-keeping memory table.
 	table.insert(self.memory_list.shader, faux_name)
@@ -328,6 +360,8 @@ end
 ---@param  faux_path string # The "faux" path to the asset, not taking into consideration the search path in which it was found.
 ---@return font asset # The asset.
 function system:set_font(faux_path, force, ...)
-	return file_system_set_asset(self, self.memory_data.font, self.memory_list.font, quiver.font.new, force, faux_path,
+	return file_system_set_asset(self, self.memory_data.font, self.memory_list.font, quiver.font.new,
+		quiver.font.new_from_memory,
+		force, faux_path,
 		...)
 end

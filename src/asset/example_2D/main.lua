@@ -7,22 +7,22 @@
 
 -- file get/set should be asynchronous, asset loading should be asynchronous.
 
-require "base/main"
+--require "base/main"
+quiver.general.load_base()
 
 local time = 0.0
 
 function quiver.main()
-    local data = quiver.zip.new("data.zip")
-
     quiver.window.set_state(WINDOW_FLAG.RESIZABLE, true)
 
-    local list = data:get_data_list()
+    local system = system:new({
+        "data_FILES",
+        "data.zip",
+    })
 
-    -- use a lua co-routine to load the music. oh yes.
-    print("music: ...")
-    music = data:get_file("music.wav")
-    music = quiver.music.new_from_memory(music, ".wav")
-    print("music: done.")
+    system:set_music("music.wav", nil, ".wav")
+    system:set_sound("sound.wav", nil, nil, ".wav")
+    system:set_shader("basic", "basic.vs", "basic.fs")
 
     done = true
 
@@ -45,12 +45,6 @@ function quiver.main()
 
         if done then
             time = time + quiver.general.get_frame_time()
-
-            if not music:get_playing() then
-                music:play()
-            end
-
-            music:update()
 
             table_pool:clear()
 

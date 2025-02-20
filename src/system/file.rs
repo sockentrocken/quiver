@@ -328,9 +328,10 @@ fn get_application_directory(_: &Lua, _: ()) -> mlua::Result<String> {
     "name": "quiver.file.scan_path",
     "info": "Scan a path.",
     "member": [
-        { "name": "path",      "info": "Path to scan.",                                                                              "kind": "string"  },
-        { "name": "filter",    "info": "OPTIONAL: Extension filter. If filter is 'DIR', will includ every directory in the result.", "kind": "string"  },
-        { "name": "recursive", "info": "Recursive toggle. If true, recursively scan the directory.",                                 "kind": "boolean" }
+        { "name": "path",      "info": "Path to scan.",                                                                               "kind": "string"  },
+        { "name": "filter",    "info": "OPTIONAL: Extension filter. If filter is 'DIR', will include every directory in the result.", "kind": "string"  },
+        { "name": "recursive", "info": "If true, recursively scan the directory.",                                                    "kind": "boolean" },
+        { "name": "absolute",  "info": "If true, return path relatively.",                                                            "kind": "boolean" }
     ],
     "result": [
         { "name": "list", "info": "File list.", "kind": "table" }
@@ -339,9 +340,9 @@ fn get_application_directory(_: &Lua, _: ()) -> mlua::Result<String> {
 */
 fn scan_path(
     lua: &Lua,
-    (path, filter, recursive): (String, Option<String>, bool),
+    (path, filter, recursive, relative): (String, Option<String>, bool, bool),
 ) -> mlua::Result<LuaValue> {
-    let path = CString::new(ScriptData::get_path(lua, &path)?)
+    let c_path = CString::new(ScriptData::get_path(lua, &path)?)
         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
     let mut data: Vec<String> = Vec::new();
 
@@ -351,21 +352,34 @@ fn scan_path(
                 let filter =
                     CString::new(filter).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
-                ffi::LoadDirectoryFilesEx(path.as_ptr(), filter.as_ptr(), recursive)
+                ffi::LoadDirectoryFilesEx(c_path.as_ptr(), filter.as_ptr(), recursive)
             } else {
-                ffi::LoadDirectoryFilesEx(path.as_ptr(), std::ptr::null(), recursive)
+                ffi::LoadDirectoryFilesEx(c_path.as_ptr(), std::ptr::null(), recursive)
             }
         };
 
         for x in 0..result.count {
-            let path = *result.paths.wrapping_add(x.try_into().unwrap());
+            let result_path = *result.paths.wrapping_add(x.try_into().unwrap());
 
-            let path = CStr::from_ptr(path)
+            let result_path = CStr::from_ptr(result_path)
                 .to_str()
                 .map_err(|e| mlua::Error::runtime(e.to_string()))?
                 .to_string();
 
-            data.push(path);
+            if relative {
+                let path: Vec<&str> = result_path.split(&path).collect();
+
+                if let Some(path) = path.get(1) {
+                    // remove the leading back-slash.
+                    let path = &path[1..path.len()];
+
+                    println!("rust: {path}");
+
+                    data.push(path.to_string());
+                }
+            } else {
+                data.push(result_path);
+            }
         }
 
         ffi::UnloadDirectoryFiles(result);

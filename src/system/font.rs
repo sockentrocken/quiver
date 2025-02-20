@@ -67,7 +67,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 
     font.set("new",                 lua.create_function(self::Font::new)?)?;
     font.set("new_from_memory",     lua.create_function(self::Font::new_from_memory)?)?;
-    font.set("new_default",         lua.create_async_function(self::Font::new_default)?)?;
+    font.set("new_default",         lua.create_function(self::Font::new_default)?)?;
     font.set("set_text_line_space", lua.create_function(set_text_line_space)?)?;
 
     table.set("font", font)?;
@@ -246,7 +246,7 @@ impl Font {
         ]
     }
     */
-    async fn new_default(_: Lua, _: ()) -> mlua::Result<Self> {
+    fn new_default(_: &Lua, _: ()) -> mlua::Result<Self> {
         unsafe {
             let data = ffi::GetFontDefault();
 

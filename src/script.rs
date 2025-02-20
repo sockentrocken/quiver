@@ -54,14 +54,14 @@ use crate::system::*;
 //================================================================
 
 use mlua::prelude::*;
+use serde::Serialize;
 use std::ffi::{CStr, CString};
-use std::path;
 
 //================================================================
 
-struct BaseFile {
-    name: &'static str,
-    data: &'static str,
+pub struct BaseFile {
+    pub name: &'static str,
+    pub data: &'static str,
 }
 
 impl BaseFile {
@@ -81,8 +81,7 @@ pub struct Script {
 impl Script {
     const FILE_MAIN: &'static str = include_str!("asset/main.lua");
     #[rustfmt::skip]
-    const FILE_BASE: [BaseFile; 11] = [
-        BaseFile::new("base/main.lua",        include_str!("asset/base/main.lua")),
+    pub const FILE_BASE: [BaseFile; 10] = [
         BaseFile::new("base/constant.lua",    include_str!("asset/base/constant.lua")),
         BaseFile::new("base/extension.lua",   include_str!("asset/base/extension.lua")),
         BaseFile::new("base/allocator.lua",   include_str!("asset/base/allocator.lua")),
@@ -94,6 +93,8 @@ impl Script {
         BaseFile::new("base/scene.lua",       include_str!("asset/base/scene.lua")),
         BaseFile::new("base/path_finder.lua", include_str!("asset/base/path_finder.lua")),
     ];
+    const FILE_BASE_MAIN: BaseFile =
+        BaseFile::new("base/main.lua", include_str!("asset/base/main.lua"));
     const FILE_META: &'static str = include_str!("asset/meta.lua");
     const NAME_MAIN: &'static str = "main.lua";
     const NAME_META: &'static str = "meta.lua";
@@ -299,6 +300,13 @@ impl Script {
                 .unwrap();
         }
 
+        std::fs::write(
+            format!("{path}/{}", Self::FILE_BASE_MAIN.name),
+            Self::FILE_BASE_MAIN.data,
+        )
+        .map_err(|e| Status::panic(&e.to_string()))
+        .unwrap();
+
         // dump meta.lua.
         std::fs::write(format!("{path}/{}", Self::NAME_META), Self::FILE_META)
             .map_err(|e| Status::panic(&e.to_string()))
@@ -321,6 +329,7 @@ impl Script {
 
 //================================================================
 
+#[derive(Serialize)]
 pub struct ScriptData {
     pub info: Info,
     pub path_escape: bool,

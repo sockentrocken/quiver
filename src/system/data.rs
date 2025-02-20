@@ -50,7 +50,6 @@
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use serde::Serialize;
 
 //================================================================
 

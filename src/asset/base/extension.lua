@@ -103,22 +103,28 @@ end
 ---Print every key/value pair in a table.
 ---@param value table # Table to print.
 function table.print(value, depth)
+	if not depth then
+		depth = 1.0
+	end
+
+	print("{")
+
 	for k, v in pairs(value) do
 		local k = type(k) == "number" and string.format("[%d]", k) or k
 		local i = ""
 
-		if depth then
-			for x = 1, depth do
-				i = i .. "  "
-			end
+		for x = 1, depth do
+			i = i .. "  "
 		end
 
-		print(i .. tostring(k) .. ": " .. tostring(v))
+		print(i .. tostring(k) .. " = " .. tostring(v))
 
 		if type(v) == "table" then
-			table.print(v, depth and depth + 1.0 or 1.0)
+			table.print(v, depth + 1.0)
 		end
 	end
+
+	print("}")
 end
 
 ---Check if an object is within a table.

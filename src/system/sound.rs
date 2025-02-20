@@ -132,7 +132,7 @@ impl Sound {
     */
     async fn new_from_memory(
         _: Lua,
-        (data, kind, alias): (LuaValue, String, Option<usize>),
+        (data, alias, kind): (LuaValue, Option<usize>, String),
     ) -> mlua::Result<Self> {
         let data = crate::system::data::Data::get_buffer(data)?;
 

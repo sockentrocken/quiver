@@ -62,7 +62,7 @@ use sysinfo::System;
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let general = lua.create_table()?;
 
-    general.set("test",   lua.create_function(self::test)?)?;
+    general.set("load_base",       lua.create_function(self::load_base)?)?;
     general.set("set_log_level",   lua.create_function(self::set_log_level)?)?;
     general.set("open_link",       lua.create_function(self::open_link)?)?;
     general.set("set_exit_key",    lua.create_function(self::set_exit_key)?)?;
@@ -73,6 +73,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     general.set("get_argument",    lua.create_function(self::get_argument)?)?;
     general.set("get_system",      lua.create_function(self::get_system)?)?;
     general.set("get_memory",      lua.create_function(self::get_memory)?)?;
+    general.set("get_info",        lua.create_function(self::get_info)?)?;
 
     table.set("general", general)?;
 
@@ -84,12 +85,16 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 /* entry
 {
     "version": "1.0.0",
-    "name": "quiver.general.test",
+    "name": "quiver.general.load_base",
     "info": "TO-DO"
 }
 */
-fn test(_: &Lua, _: ()) -> mlua::Result<bool> {
-    unsafe { Ok(ffi::IsAudioDeviceReady()) }
+fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
+    for base in crate::script::Script::FILE_BASE {
+        lua.load(base.data).exec()?;
+    }
+
+    Ok(())
 }
 
 /* entry
@@ -235,6 +240,19 @@ fn get_system(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
 */
 fn get_memory(lua: &Lua, _: ()) -> mlua::Result<usize> {
     Ok(lua.used_memory())
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.get_info",
+    "info": "TO-DO"
+}
+*/
+fn get_info(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+    let script_data = lua.app_data_ref::<crate::script::ScriptData>().unwrap();
+
+    lua.to_value(&*script_data)
 }
 
 //================================================================
