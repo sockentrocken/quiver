@@ -66,7 +66,8 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let font = lua.create_table()?;
 
     font.set("new",                 lua.create_function(self::Font::new)?)?;
-    font.set("new_default",         lua.create_function(self::Font::new_default)?)?;
+    font.set("new_from_memory",     lua.create_function(self::Font::new_from_memory)?)?;
+    font.set("new_default",         lua.create_async_function(self::Font::new_default)?)?;
     font.set("set_text_line_space", lua.create_function(set_text_line_space)?)?;
 
     table.set("font", font)?;
@@ -187,10 +188,10 @@ impl Font {
     }
     */
     fn new(lua: &Lua, (path, size): (String, i32)) -> mlua::Result<Self> {
-        let name = CString::new(ScriptData::get_path(lua, &path)?)
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
         unsafe {
+            let name = CString::new(ScriptData::get_path(&lua, &path)?)
+                .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
             let data = ffi::LoadFontEx(name.as_ptr(), size, std::ptr::null_mut(), 0);
 
             if ffi::IsFontValid(data) {
@@ -206,6 +207,38 @@ impl Font {
     /* entry
     {
         "version": "1.0.0",
+        "name": "quiver.font.new_from_memory",
+        "info": "TO-DO"
+    }
+    */
+    fn new_from_memory(_: &Lua, (data, kind, size): (LuaValue, String, i32)) -> mlua::Result<Self> {
+        let data = crate::system::data::Data::get_buffer(data)?;
+
+        unsafe {
+            let data = &data.0;
+
+            let data = ffi::LoadFontFromMemory(
+                Script::rust_to_c_string(&kind)?.as_ptr(),
+                data.as_ptr(),
+                data.len() as i32,
+                size,
+                std::ptr::null_mut(),
+                0,
+            );
+
+            if ffi::IsFontValid(data) {
+                Ok(Self(RLFont::from_raw(data)))
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "Font::new_from_memory(): Could not load file.".to_string(),
+                ))
+            }
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
         "name": "quiver.font.new_default",
         "info": "Create a new font resource (default font).",
         "result": [
@@ -213,7 +246,7 @@ impl Font {
         ]
     }
     */
-    fn new_default(_: &Lua, _: ()) -> mlua::Result<Self> {
+    async fn new_default(_: Lua, _: ()) -> mlua::Result<Self> {
         unsafe {
             let data = ffi::GetFontDefault();
 

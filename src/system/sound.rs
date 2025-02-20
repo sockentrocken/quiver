@@ -49,13 +49,12 @@
 */
 
 use crate::script::*;
-use std::sync::Mutex;
 
 //================================================================
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::{ffi::CString, sync::Arc};
+use std::ffi::CString;
 
 //================================================================
 
@@ -66,7 +65,8 @@ use std::{ffi::CString, sync::Arc};
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let sound = lua.create_table()?;
 
-    sound.set("new", lua.create_function(self::Sound::new)?)?;
+    sound.set("new",             lua.create_async_function(self::Sound::new)?)?;
+    sound.set("new_from_memory", lua.create_async_function(self::Sound::new_from_memory)?)?;
 
     table.set("sound", sound)?;
 
@@ -97,11 +97,10 @@ impl Sound {
         ]
     }
     */
-    fn new(lua: &Lua, (path, alias): (String, Option<usize>)) -> mlua::Result<Self> {
-        let name = CString::new(ScriptData::get_path(lua, &path)?)
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-        unsafe {
+    async fn new(lua: Lua, (path, alias): (String, Option<usize>)) -> mlua::Result<Self> {
+        tokio::task::spawn_blocking(move || unsafe {
+            let name = CString::new(ScriptData::get_path(&lua, &path)?)
+                .map_err(|e| mlua::Error::runtime(e.to_string()))?;
             let data = ffi::LoadSound(name.as_ptr());
             let alias = alias.unwrap_or_default();
             let mut array = Vec::with_capacity(alias);
@@ -119,7 +118,61 @@ impl Sound {
                     "Sound::new(): Could not load file \"{path}\"."
                 )))
             }
-        }
+        })
+        .await
+        .unwrap()
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.sound.new_from_memory",
+        "info": "TO-DO"
+    }
+    */
+    async fn new_from_memory(
+        _: Lua,
+        (data, kind, alias): (LuaValue, String, Option<usize>),
+    ) -> mlua::Result<Self> {
+        let data = crate::system::data::Data::get_buffer(data)?;
+
+        tokio::task::spawn_blocking(move || unsafe {
+            let data = &data.0;
+
+            let data = ffi::LoadWaveFromMemory(
+                Script::rust_to_c_string(&kind)?.as_ptr(),
+                data.as_ptr(),
+                data.len() as i32,
+            );
+
+            if ffi::IsWaveValid(data) {
+                let sound = ffi::LoadSoundFromWave(data);
+                let alias = alias.unwrap_or_default();
+                let mut array = Vec::with_capacity(alias);
+
+                ffi::UnloadWave(data);
+
+                if ffi::IsSoundValid(sound) {
+                    for _ in 0..alias {
+                        let data = ffi::LoadSoundAlias(sound);
+                        println!("Pushing alias...");
+                        array.push(data);
+                    }
+
+                    Ok(Self(sound, array))
+                } else {
+                    Err(mlua::Error::RuntimeError(
+                        "Sound::new_from_memory(): Could not load file.".to_string(),
+                    ))
+                }
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "Sound::new_from_memory(): Could not load file.".to_string(),
+                ))
+            }
+        })
+        .await
+        .unwrap()
     }
 }
 

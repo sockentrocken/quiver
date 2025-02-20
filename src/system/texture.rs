@@ -202,6 +202,17 @@ impl mlua::UserData for Texture {
         /* entry
         {
             "version": "1.0.0",
+            "name": "texture:to_image",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("to_image", |_: &Lua, this, _: ()| {
+            crate::system::image::Image::new_from_texture(this.0)
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "texture:set_mipmap",
             "info": "Set the mipmap for a texture."
         }
@@ -392,6 +403,20 @@ impl Texture {
             } else {
                 Err(mlua::Error::RuntimeError(format!(
                     "Texture::new(): Could not load file \"{path}\"."
+                )))
+            }
+        }
+    }
+
+    pub fn new_from_image(image: ffi::Image) -> mlua::Result<Self> {
+        unsafe {
+            let data = ffi::LoadTextureFromImage(image);
+
+            if ffi::IsTextureValid(data) {
+                Ok(Self(data))
+            } else {
+                Err(mlua::Error::RuntimeError(format!(
+                    "Texture::new_from_image(): Could not load file."
                 )))
             }
         }

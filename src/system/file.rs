@@ -101,8 +101,10 @@ fn get(lua: &Lua, (path, binary): (String, bool)) -> mlua::Result<LuaValue> {
     if binary {
         let data = std::fs::read(ScriptData::get_path(lua, &path)?)
             .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+        let data = crate::system::data::Data::new(lua, data)?;
+        let data = lua.create_userdata(data)?;
 
-        lua.to_value(&data)
+        Ok(mlua::Value::UserData(data))
     } else {
         let data = std::fs::read_to_string(ScriptData::get_path(lua, &path)?)
             .map_err(|e| mlua::Error::runtime(e.to_string()))?;
@@ -124,7 +126,8 @@ fn get(lua: &Lua, (path, binary): (String, bool)) -> mlua::Result<LuaValue> {
 */
 fn set(lua: &Lua, (path, data, binary): (String, LuaValue, bool)) -> mlua::Result<()> {
     if binary {
-        let data: Vec<u8> = lua.from_value(data)?;
+        let data = crate::system::data::Data::get_buffer(data)?;
+        let data = &data.0;
 
         std::fs::write(ScriptData::get_path(lua, &path)?, data)
             .map_err(|e| mlua::Error::runtime(e.to_string()))

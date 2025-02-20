@@ -49,13 +49,11 @@
 */
 
 use crate::script::*;
-use crate::system::*;
 
 //================================================================
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::CString;
 
 //================================================================
 
@@ -70,7 +68,8 @@ type RLImage = ffi::Image;
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let image = lua.create_table()?;
 
-    image.set("new", lua.create_function(self::Image::new)?)?;
+    image.set("new",             lua.create_async_function(self::Image::new)?)?;
+    image.set("new_from_memory", lua.create_async_function(self::Image::new_from_memory)?)?;
 
     table.set("image", image)?;
 
@@ -98,7 +97,18 @@ impl mlua::UserData for Image {
         field.add_field_method_get("shape_y", |_: &Lua, this| Ok(this.0.height));
     }
 
-    fn add_methods<M: mlua::UserDataMethods<Self>>(_: &mut M) {}
+    fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "image:to_texture",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("to_texture", |_: &Lua, this, _: ()| {
+            crate::system::texture::Texture::new_from_image(this.0)
+        });
+    }
 }
 
 impl Image {
@@ -115,11 +125,11 @@ impl Image {
         ]
     }
     */
-    fn new(lua: &Lua, path: String) -> mlua::Result<Self> {
-        let name = CString::new(ScriptData::get_path(lua, &path)?)
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    async fn new(lua: Lua, path: String) -> mlua::Result<Self> {
+        tokio::task::spawn_blocking(move || unsafe {
+            let name = ScriptData::get_path(&lua, &path)?;
+            let name = Script::rust_to_c_string(&name)?;
 
-        unsafe {
             let data = ffi::LoadImage(name.as_ptr());
 
             if ffi::IsImageValid(data) {
@@ -128,6 +138,50 @@ impl Image {
                 Err(mlua::Error::RuntimeError(format!(
                     "Image::new(): Could not load file \"{path}\"."
                 )))
+            }
+        })
+        .await
+        .unwrap()
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.image.new_from_memory",
+        "info": "TO-DO"
+    }
+    */
+    async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
+        let data = crate::system::data::Data::get_buffer(data)?;
+
+        tokio::task::spawn_blocking(move || unsafe {
+            let data = &*data.0;
+            let kind = Script::rust_to_c_string(&kind)?;
+
+            let data = ffi::LoadImageFromMemory(kind.as_ptr(), data.as_ptr(), data.len() as i32);
+
+            if ffi::IsImageValid(data) {
+                Ok(Self(data))
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "Image::new_from_memory(): Could not load file.".to_string(),
+                ))
+            }
+        })
+        .await
+        .unwrap()
+    }
+
+    pub fn new_from_texture(texture: ffi::Texture) -> mlua::Result<Self> {
+        unsafe {
+            let data = ffi::LoadImageFromTexture(texture);
+
+            if ffi::IsImageValid(data) {
+                Ok(Self(data))
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "Image::new_from_texture(): Could not load file.".to_string(),
+                ))
             }
         }
     }

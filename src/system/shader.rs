@@ -65,7 +65,8 @@ use std::ffi::CString;
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let shader = lua.create_table()?;
 
-    shader.set("new", lua.create_function(self::Shader::new)?)?;
+    shader.set("new",             lua.create_function(self::Shader::new)?)?;
+    shader.set("new_from_memory", lua.create_function(self::Shader::new_from_memory)?)?;
 
     table.set("shader", shader)?;
 
@@ -97,27 +98,27 @@ impl Shader {
     }
     */
     fn new(lua: &Lua, (v_path, f_path): (Option<String>, Option<String>)) -> mlua::Result<Self> {
-        let v_path = match v_path {
-            Some(name) => {
-                let pointer = CString::new(ScriptData::get_path(lua, &name)?)
-                    .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-                pointer.into_raw()
-            }
-            None => std::ptr::null(),
-        };
-
-        let f_path = match f_path {
-            Some(name) => {
-                let pointer = CString::new(ScriptData::get_path(lua, &name)?)
-                    .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-
-                pointer.into_raw()
-            }
-            None => std::ptr::null(),
-        };
-
         unsafe {
+            let v_path = match v_path {
+                Some(name) => {
+                    let pointer = CString::new(ScriptData::get_path(&lua, &name)?)
+                        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+                    pointer.into_raw()
+                }
+                None => std::ptr::null(),
+            };
+
+            let f_path = match f_path {
+                Some(name) => {
+                    let pointer = CString::new(ScriptData::get_path(&lua, &name)?)
+                        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+                    pointer.into_raw()
+                }
+                None => std::ptr::null(),
+            };
+
             let data = ffi::LoadShader(v_path, f_path);
 
             if ffi::IsShaderValid(data) {
@@ -125,6 +126,48 @@ impl Shader {
             } else {
                 Err(mlua::Error::RuntimeError(
                     "Shader::new(): Could not load file.".to_string(),
+                ))
+            }
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.shader.new_from_memory",
+        "info": "TO-DO"
+    }
+    */
+    fn new_from_memory(
+        _: &Lua,
+        (v_path, f_path): (Option<String>, Option<String>),
+    ) -> mlua::Result<Self> {
+        unsafe {
+            let v_path = match v_path {
+                Some(name) => {
+                    let pointer = Script::rust_to_c_string(&name)?;
+
+                    pointer.into_raw()
+                }
+                None => std::ptr::null(),
+            };
+
+            let f_path = match f_path {
+                Some(name) => {
+                    let pointer = Script::rust_to_c_string(&name)?;
+
+                    pointer.into_raw()
+                }
+                None => std::ptr::null(),
+            };
+
+            let data = ffi::LoadShaderFromMemory(v_path, f_path);
+
+            if ffi::IsShaderValid(data) {
+                Ok(Self(RLShader::from_raw(data)))
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "Shader::new_from_memory(): Could not load file.".to_string(),
                 ))
             }
         }

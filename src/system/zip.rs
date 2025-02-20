@@ -48,13 +48,12 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-use std::io::Read;
-
 use crate::script::*;
 
 //================================================================
 
 use mlua::prelude::*;
+use std::io::Read;
 
 //================================================================
 
@@ -84,23 +83,46 @@ impl mlua::UserData for Zip {
         /* entry
         {
             "version": "1.0.0",
-            "name": "zip:get_binary",
-            "info": "Get a file from a ZIP file as binary data.",
-            "member": [
-                { "name": "path", "info": "Path to file in ZIP file.", "kind": "string" }
-            ],
-            "result": [
-                { "name": "data", "info": "Binary data.", "kind": "table" }
-            ]
+            "name": "zip:get_data_list",
+            "info": "TO-DO"
         }
         */
-        method.add_method_mut("get_binary", |_: &Lua, this, path: String| {
-            match this.0.by_name(&path) {
+        method.add_method_mut("get_data_list", |_: &Lua, this, _: ()| {
+            let name: Vec<String> = this.0.file_names().map(|x| x.to_string()).collect();
+
+            Ok(name)
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "zip:get_file",
+            "info": "TO-DO"
+        }
+        */
+        method.add_async_method_mut("get_file", |lua: Lua, mut this, path: String| async {
+            tokio::task::spawn_blocking(move || match this.0.by_name(&path) {
                 Ok(mut value) => {
-                    let mut buffer = Vec::new();
-                    value.read_to_end(&mut buffer)?;
-                    Ok(buffer)
+                    let mut data = Vec::new();
+                    value.read_to_end(&mut data)?;
+                    Ok(crate::system::data::Data::new(&lua, data))
                 }
+                Err(value) => Err(mlua::Error::runtime(value.to_string())),
+            })
+            .await
+            .unwrap()
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "zip:is_file",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("is_file", |_: &Lua, this, path: String| {
+            match this.0.by_name(&path) {
+                Ok(value) => Ok(value.is_file()),
                 Err(value) => Err(mlua::Error::runtime(value.to_string())),
             }
         });
@@ -108,23 +130,27 @@ impl mlua::UserData for Zip {
         /* entry
         {
             "version": "1.0.0",
-            "name": "zip:get_string",
-            "info": "Get a file from a ZIP file as string data.",
-            "member": [
-                { "name": "path", "info": "Path to file in ZIP file.", "kind": "string" }
-            ],
-            "result": [
-                { "name": "data", "info": "String data.", "kind": "string" }
-            ]
+            "name": "zip:is_path",
+            "info": "TO-DO"
         }
         */
-        method.add_method_mut("get_string", |_: &Lua, this, path: String| {
+        method.add_method_mut("is_path", |_: &Lua, this, path: String| {
             match this.0.by_name(&path) {
-                Ok(mut value) => {
-                    let mut buffer = String::new();
-                    value.read_to_string(&mut buffer)?;
-                    Ok(buffer)
-                }
+                Ok(value) => Ok(value.is_dir()),
+                Err(value) => Err(mlua::Error::runtime(value.to_string())),
+            }
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "zip:is_system_link",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("is_system_link", |_: &Lua, this, path: String| {
+            match this.0.by_name(&path) {
+                Ok(value) => Ok(value.is_symlink()),
                 Err(value) => Err(mlua::Error::runtime(value.to_string())),
             }
         });
@@ -148,6 +174,41 @@ impl Zip {
     fn new(lua: &Lua, path: String) -> mlua::Result<Self> {
         let file = std::fs::File::open(ScriptData::get_path(lua, &path)?)?;
         let file = zip::ZipArchive::new(file).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+        /*
+        for i in 0..file.len() {
+            let file = file.by_index(i).unwrap();
+            let outpath = match file.enclosed_name() {
+                Some(path) => path,
+                None => {
+                    println!("Entry {} has a suspicious path", file.name());
+                    continue;
+                }
+            };
+
+            {
+                let comment = file.comment();
+                if !comment.is_empty() {
+                    println!("Entry {i} comment: {comment}");
+                }
+            }
+
+            if file.is_dir() {
+                println!(
+                    "Entry {} is a directory with name \"{}\"",
+                    i,
+                    outpath.display()
+                );
+            } else {
+                println!(
+                    "Entry {} is a file with name \"{}\" ({} bytes)",
+                    i,
+                    outpath.display(),
+                    file.size()
+                );
+            }
+        }
+        */
 
         Ok(Self(file))
     }

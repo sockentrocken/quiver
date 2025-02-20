@@ -65,7 +65,8 @@ use std::ffi::CString;
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let music = lua.create_table()?;
 
-    music.set("new", lua.create_function(self::Music::new)?)?;
+    music.set("new",             lua.create_async_function(self::Music::new)?)?;
+    music.set("new_from_memory", lua.create_async_function(self::Music::new_from_memory)?)?;
 
     table.set("music", music)?;
 
@@ -95,11 +96,11 @@ impl Music {
         ]
     }
     */
-    fn new(lua: &Lua, path: String) -> mlua::Result<Self> {
-        let name = CString::new(ScriptData::get_path(lua, &path)?)
+    async fn new(lua: Lua, path: String) -> mlua::Result<Self> {
+        let name = CString::new(ScriptData::get_path(&lua, &path)?)
             .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
-        unsafe {
+        tokio::task::spawn_blocking(move || unsafe {
             let data = ffi::LoadMusicStream(name.as_ptr());
 
             if ffi::IsMusicValid(data) {
@@ -108,6 +109,39 @@ impl Music {
                 Err(mlua::Error::RuntimeError(format!(
                     "Music::new(): Could not load file \"{path}\"."
                 )))
+            }
+        })
+        .await
+        .unwrap()
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.music.new_from_memory",
+        "info": "TO-DO"
+    }
+    */
+    async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
+        //let data = crate::system::data::Data::get_buffer(data)?;
+
+        unsafe {
+            //let data = &*data.0;
+
+            let data = std::fs::read("src/asset/example_2D/data/music.wav").unwrap();
+
+            let data = ffi::LoadMusicStreamFromMemory(
+                Script::rust_to_c_string(&kind)?.as_ptr(),
+                data.as_ptr(),
+                data.len() as i32,
+            );
+
+            if ffi::IsMusicValid(data) {
+                Ok(Self(data))
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "Music::new_from_memory(): Could not load file.".to_string(),
+                ))
             }
         }
     }

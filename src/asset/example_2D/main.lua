@@ -5,14 +5,37 @@
 
 --[[----------------------------------------------------------------]]
 
+-- file get/set should be asynchronous, asset loading should be asynchronous.
+
 require "base/main"
 
 local time = 0.0
 
 function quiver.main()
+    local data = quiver.zip.new("data.zip")
+
+    quiver.window.set_state(WINDOW_FLAG.RESIZABLE, true)
+
+    local list = data:get_data_list()
+
+    -- use a lua co-routine to load the music. oh yes.
+    print("music: ...")
+    music = data:get_file("music.wav")
+    music = quiver.music.new_from_memory(music, ".wav")
+    print("music: done.")
+
+    done = true
+
     --- Main entry-point. Quiver will call this on project initialization.
     while not quiver.window.get_close() do
-        time = time + quiver.general.get_frame_time()
+        if routine then
+            if not (coroutine.status(routine) == "dead") then
+                local state, fail = coroutine.resume(routine)
+                if not state then
+                    error(fail)
+                end
+            end
+        end
 
         -- Press F1 to reload Quiver.
         if quiver.input.board.get_press(INPUT_BOARD.F1) then
@@ -20,8 +43,30 @@ function quiver.main()
             return true
         end
 
-        -- Initialize drawing.
-        quiver.draw.begin(draw)
+        if done then
+            time = time + quiver.general.get_frame_time()
+
+            if not music:get_playing() then
+                music:play()
+            end
+
+            music:update()
+
+            table_pool:clear()
+
+            -- Initialize drawing.
+            quiver.draw.begin(draw)
+        else
+            quiver.draw.begin(function()
+                quiver.draw.clear(color:new(0.0, 0.0, 0.0, 255.0))
+
+                local time = math.floor((math.sin(quiver.general.get_time() * 8.0) + 1.0) * 0.5 * 127.0)
+
+                -- Draw text.
+                quiver.draw_2d.draw_text("Loading...", vector_2:new(16.0, 16.0), 32.0,
+                    color:new(127.0 + time, 0.0, 0.0, 255.0))
+            end)
+        end
     end
 
     -- Returning "false" will exit Quiver.
@@ -57,8 +102,11 @@ end
 --[[----------------------------------------------------------------]]
 
 function draw_2d()
-    -- Draw text.
-    quiver.draw_2d.draw_text("Hello, world!", vector_2:new(16.0, 16.0), 32.0, color:new(255.0, 0.0, 0.0, 255.0))
+    --font:draw("Hello, world!", vector_2:new(16.0, 16.0), 32.0, 1.0, color:new(255.0, 0.0, 0.0, 255.0))
+
+    if image then
+        image:draw(vector_2:old(8.0, 8.0), 0.0, 1.0, color:white())
+    end
 end
 
 --[[----------------------------------------------------------------]]

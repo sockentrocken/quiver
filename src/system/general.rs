@@ -62,6 +62,7 @@ use sysinfo::System;
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let general = lua.create_table()?;
 
+    general.set("test",   lua.create_function(self::test)?)?;
     general.set("set_log_level",   lua.create_function(self::set_log_level)?)?;
     general.set("open_link",       lua.create_function(self::open_link)?)?;
     general.set("set_exit_key",    lua.create_function(self::set_exit_key)?)?;
@@ -79,6 +80,17 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 }
 
 //================================================================
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.test",
+    "info": "TO-DO"
+}
+*/
+fn test(_: &Lua, _: ()) -> mlua::Result<bool> {
+    unsafe { Ok(ffi::IsAudioDeviceReady()) }
+}
 
 /* entry
 {
