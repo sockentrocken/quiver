@@ -151,7 +151,7 @@ impl Image {
         "info": "TO-DO"
     }
     */
-    async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
+    pub async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
         let data = crate::system::data::Data::get_buffer(data)?;
 
         tokio::task::spawn_blocking(move || unsafe {

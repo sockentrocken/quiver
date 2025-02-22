@@ -71,7 +71,8 @@ type RLRenderTexture = ffi::RenderTexture2D;
 pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let texture = lua.create_table()?;
 
-    texture.set("new", lua.create_function(self::Texture::new)?)?;
+    texture.set("new",             lua.create_function(self::Texture::new)?)?;
+    texture.set("new_from_memory", lua.create_async_function(self::Texture::new_from_memory)?)?;
 
     table.set("texture", texture)?;
 
@@ -403,6 +404,29 @@ impl Texture {
             } else {
                 Err(mlua::Error::RuntimeError(format!(
                     "Texture::new(): Could not load file \"{path}\"."
+                )))
+            }
+        }
+    }
+
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.texture.new_from_memory",
+        "info": "TO-DO"
+    }
+    */
+    async fn new_from_memory(lua: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
+        let image = crate::system::image::Image::new_from_memory(lua, (data, kind)).await?;
+
+        unsafe {
+            let data = ffi::LoadTextureFromImage(image.0);
+
+            if ffi::IsTextureValid(data) {
+                Ok(Self(data))
+            } else {
+                Err(mlua::Error::RuntimeError(format!(
+                    "Texture::new_from_memory(): Could not load file."
                 )))
             }
         }

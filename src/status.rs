@@ -239,35 +239,13 @@ impl Info {
     pub const MAIN_FILE: &'static str = "main.lua";
 
     pub fn new() -> Result<Self, InfoResult> {
-        // get the path to the main folder.
-        let main_path = std::path::Path::new(Self::MAIN_PATH);
-
-        if main_path.is_dir() {
-            return Ok(Self {
-                safe: true,
-                path: Self::MAIN_PATH.to_string(),
-            });
-        }
-
-        //================================================================
-
-        // get the path to the main file.
-        let main_file = std::path::Path::new(Self::MAIN_FILE);
-
-        if main_file.is_file() {
-            return Ok(Self {
-                safe: true,
-                path: ".".to_string(),
-            });
-        }
-
-        //================================================================
-
         // get the path to the info file.
         let data = std::path::Path::new(Self::FILE_INFO);
 
         // file does exist, read it.
         if data.is_file() {
+            println!("json");
+
             // read file.
             let file = std::fs::read_to_string(data)
                 .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))?;
@@ -277,11 +255,41 @@ impl Info {
 
             info.path = info.path.to_string();
 
-            Ok(info)
-        } else {
-            // file does not exist, return missing.
-            Err(InfoResult::Missing)
+            return Ok(info);
         }
+
+        //================================================================
+
+        // get the path to the main folder or file.
+        let main_path = std::path::Path::new(Self::MAIN_PATH);
+
+        if main_path.is_dir() {
+            println!("path");
+
+            return Ok(Self {
+                safe: true,
+                path: Self::MAIN_PATH.to_string(),
+            });
+        }
+
+        //================================================================
+
+        // get the path to the main.lua file.
+        let main_file = std::path::Path::new(Self::MAIN_FILE);
+
+        if main_file.is_file() {
+            println!("file");
+
+            return Ok(Self {
+                safe: true,
+                path: ".".to_string(),
+            });
+        }
+
+        //================================================================
+
+        // file does not exist, return missing.
+        Err(InfoResult::Missing)
     }
 
     pub fn dump(&self) {

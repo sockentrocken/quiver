@@ -5,8 +5,6 @@
 
 --[[----------------------------------------------------------------]]
 
--- file get/set should be asynchronous, asset loading should be asynchronous.
-
 --require "base/main"
 quiver.general.load_base()
 
@@ -23,6 +21,7 @@ function quiver.main()
     system:set_music("music.wav", nil, ".wav")
     system:set_sound("sound.wav", nil, nil, ".wav")
     system:set_shader("basic", "basic.vs", "basic.fs")
+    system:set_texture("texture.png", nil, ".png")
 
     done = true
 

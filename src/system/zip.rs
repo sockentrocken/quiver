@@ -189,41 +189,6 @@ impl Zip {
         let file = std::fs::File::open(ScriptData::get_path(lua, &path)?)?;
         let file = zip::ZipArchive::new(file).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
-        /*
-        for i in 0..file.len() {
-            let file = file.by_index(i).unwrap();
-            let outpath = match file.enclosed_name() {
-                Some(path) => path,
-                None => {
-                    println!("Entry {} has a suspicious path", file.name());
-                    continue;
-                }
-            };
-
-            {
-                let comment = file.comment();
-                if !comment.is_empty() {
-                    println!("Entry {i} comment: {comment}");
-                }
-            }
-
-            if file.is_dir() {
-                println!(
-                    "Entry {} is a directory with name \"{}\"",
-                    i,
-                    outpath.display()
-                );
-            } else {
-                println!(
-                    "Entry {} is a file with name \"{}\" ({} bytes)",
-                    i,
-                    outpath.display(),
-                    file.size()
-                );
-            }
-        }
-        */
-
         Ok(Self(file))
     }
 }

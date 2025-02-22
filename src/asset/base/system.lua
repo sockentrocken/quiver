@@ -218,9 +218,9 @@ end
 ---Set a texture asset into the file-system model resource table.
 ---@param  faux_path string # The "faux" path to the asset, not taking into consideration the search path in which it was found.
 ---@return texture asset # The asset.
-function system:set_texture(faux_path, force)
-	return file_system_set_asset(self, self.memory_data.texture, self.memory_list.texture, quiver.texture.new, nil, force,
-		faux_path)
+function system:set_texture(faux_path, force, ...)
+	return file_system_set_asset(self, self.memory_data.texture, self.memory_list.texture, quiver.texture.new,
+		quiver.texture.new_from_memory, force, faux_path, ...)
 end
 
 ---Get a model asset from the file-system model resource table.
@@ -233,9 +233,9 @@ end
 ---Set a model asset into the file-system model resource table.
 ---@param  faux_path string # The "faux" path to the asset, not taking into consideration the search path in which it was found.
 ---@return model asset # The asset.
-function system:set_model(faux_path, force)
+function system:set_model(faux_path, force, ...)
 	return file_system_set_asset(self, self.memory_data.model, self.memory_list.model, quiver.model.new, nil, force,
-		faux_path)
+		faux_path, ...)
 end
 
 ---Get a model animation asset from the file-system model animation resource table.
@@ -248,9 +248,9 @@ end
 ---Set a model animation asset into the file-system model animation resource table.
 ---@param  faux_path string # The "faux" path to the asset, not taking into consideration the search path in which it was found.
 ---@return model_animation asset # The asset.
-function system:set_model_animation(faux_path, force)
+function system:set_model_animation(faux_path, force, ...)
 	return file_system_set_asset(self, self.memory_data.model_animation, self.memory_list.model_animation,
-		quiver.model_animation.new, nil, force, faux_path)
+		quiver.model_animation.new, nil, force, faux_path, ...)
 end
 
 ---Get a sound asset from the file-system sound resource table.
@@ -265,8 +265,7 @@ end
 ---@return sound asset # The asset.
 function system:set_sound(faux_path, force, ...)
 	return file_system_set_asset(self, self.memory_data.sound, self.memory_list.sound, quiver.sound.new, quiver.sound
-		.new_from_memory, force, faux_path,
-		...)
+		.new_from_memory, force, faux_path, ...)
 end
 
 ---Get a music asset from the file-system music resource table.

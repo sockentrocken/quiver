@@ -53,9 +53,11 @@ use crate::system::*;
 
 //================================================================
 
+use ::zip::ZipArchive;
 use mlua::prelude::*;
 use serde::Serialize;
 use std::ffi::{CStr, CString};
+use std::io::Read;
 
 //================================================================
 
@@ -122,9 +124,27 @@ impl Script {
         // set the standard Quiver library.
         Self::system(&lua, info)?;
 
-        // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
-        lua.load(format!("require \"{}\"", Self::CALL_MAIN))
-            .exec()?;
+        // get the path to the main folder or file.
+        let main_path = format!("{}/{}", info.path, Self::CALL_MAIN);
+        println!("{main_path}");
+        let main_path = std::path::Path::new(&main_path);
+
+        if main_path.is_file() {
+            let file = std::fs::File::open(main_path)?;
+            let mut file =
+                ZipArchive::new(file).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+            if let Ok(mut value) = file.by_name(Self::NAME_MAIN) {
+                let mut data = String::new();
+                value.read_to_string(&mut data)?;
+
+                // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
+                lua.load(data).exec()?;
+            };
+        } else {
+            // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
+            lua.load(format!("require \"{}\"", Self::CALL_MAIN))
+                .exec()?;
+        }
 
         // get the global table.
         let global = lua.globals();
