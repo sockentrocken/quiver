@@ -43,10 +43,6 @@ example_2D/
 
 and launch Quiver.
 
-[2D game example.](https://github.com/sockentrocken/quiver/tree/main/src/asset/example_2D)
-
-[3D game example.](https://github.com/sockentrocken/quiver/tree/main/src/asset/example_3D)
-
 ## Documentation
 You can find the Lua API and general purpose Quiver documentation [here](https://github.com/sockentrocken/quiver/wiki). Creating a new Quiver project will automatically write a `meta.lua` file for use with the [LuaLS](https://github.com/LuaLS/lua-language-server) LSP.
 
