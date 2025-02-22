@@ -295,7 +295,6 @@ impl Script {
         file::set_global(lua, &quiver)?;
         zip::set_global(lua, &quiver)?;
         request::set_global(lua, &quiver)?;
-        thread::set_global(lua, &quiver)?;
         data::set_global(lua, &quiver)?;
 
         // set the quiver table as a global value.

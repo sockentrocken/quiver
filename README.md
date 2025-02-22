@@ -6,6 +6,27 @@
 
 </div>
 
+## Feature List
+
+As part of the Rust standard library:
+* JSON, YAML, TOML, XML, INI serialization/deserialization
+* Native window dialog
+* File system notifier
+* 3D/2D physics engine
+* .ZIP creation/extraction
+* HTTP GET/POST, socket networking
+* Discord and Steam integration
+* Video playback
+
+As part of the Lua standard library:
+
+* Input abstraction
+* Console/logger
+* Math library
+* Virtual file-system
+* Scene manager
+* User interface
+
 ## Usage
 Download the latest release from [here](https://github.com/sockentrocken/quiver/releases) and launch Quiver. If no `info_quiver.json`, `main.lua` or folder with the name of `main` is found, Quiver will automatically launch the quick start menu to create a new project. From there, simply create a new project and open the newly made `main.lua` file for further information.
 
@@ -31,6 +52,13 @@ You can find the Lua API and general purpose Quiver documentation [here](https:/
 
 ## Build
 Run `cargo build --release` in the root of the Quiver folder.
+
+## Acknowledgement
+[raylib](https://github.com/raysan5/raylib) - main back-end for Quiver's 3D/2D functionality.
+
+[mlua](https://github.com/mlua-rs/mlua) - Lua library for abstracting much of Lua's C API for Rust.
+
+[Rapier](https://github.com/dimforge/rapier) - 3D/2D physics engine.
 
 ## License
 Quiver has a BSD-2-Clause-Patent license.

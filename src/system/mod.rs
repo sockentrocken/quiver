@@ -63,7 +63,6 @@ pub mod request;
 // pub mod discord;
 // pub mod steam;
 pub mod data;
-pub mod thread;
 
 /* draw */
 pub mod draw;
