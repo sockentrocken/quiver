@@ -85,7 +85,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     Ok(())
 }
 
-fn texture_draw(
+pub fn texture_draw(
     lua: &Lua,
     (texture, point, angle, scale, color): (&ffi::Texture, LuaValue, f32, f32, LuaValue),
 ) -> mlua::Result<()> {
@@ -98,7 +98,7 @@ fn texture_draw(
     }
 }
 
-fn texture_pro_draw(
+pub fn texture_pro_draw(
     lua: &Lua,
     (texture, rec_a, rec_b, point, angle, color): (
         &ffi::Texture,
@@ -127,7 +127,7 @@ fn texture_pro_draw(
     }
 }
 
-fn texture_draw_billboard(
+pub fn texture_draw_billboard(
     lua: &Lua,
     (texture, camera, point, scale, color): (&ffi::Texture, LuaValue, LuaValue, f32, LuaValue),
 ) -> mlua::Result<()> {
@@ -141,7 +141,7 @@ fn texture_draw_billboard(
     }
 }
 
-fn texture_draw_billboard_pro(
+pub fn texture_draw_billboard_pro(
     lua: &Lua,
     (texture, camera, source, point, up, scale, origin, angle, color): (
         &ffi::Texture,
@@ -425,9 +425,9 @@ impl Texture {
             if ffi::IsTextureValid(data) {
                 Ok(Self(data))
             } else {
-                Err(mlua::Error::RuntimeError(format!(
-                    "Texture::new_from_memory(): Could not load file."
-                )))
+                Err(mlua::Error::RuntimeError(
+                    "Texture::new_from_memory(): Could not load file.".to_string(),
+                ))
             }
         }
     }
@@ -439,9 +439,9 @@ impl Texture {
             if ffi::IsTextureValid(data) {
                 Ok(Self(data))
             } else {
-                Err(mlua::Error::RuntimeError(format!(
-                    "Texture::new_from_image(): Could not load file."
-                )))
+                Err(mlua::Error::RuntimeError(
+                    "Texture::new_from_image(): Could not load file.".to_string(),
+                ))
             }
         }
     }

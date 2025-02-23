@@ -44,7 +44,8 @@ example_2D/
 and launch Quiver.
 
 ## Documentation
-You can find the Lua API and general purpose Quiver documentation [here](https://github.com/sockentrocken/quiver/wiki). Creating a new Quiver project will automatically write a `meta.lua` file for use with the [LuaLS](https://github.com/LuaLS/lua-language-server) LSP.
+
+You can find the Rust API and general purpose Quiver documentation [here](https://github.com/sockentrocken/quiver/wiki). Creating a new Quiver project will automatically write a `meta.lua` file for use with the [LuaLS](https://github.com/LuaLS/lua-language-server) LSP.
 
 ## Build
 Run `cargo build --release` in the root of the Quiver folder.

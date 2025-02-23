@@ -48,40 +48,74 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-//================================================================
-// engine API
-//================================================================
-
-pub mod general;
+use mlua::prelude::*;
+use raylib::prelude::*;
 
 //================================================================
-// raylib API
-//================================================================
 
-pub mod request;
-// pub mod serialize;
-// pub mod discord;
-// pub mod steam;
-pub mod data;
+/* class
+{ "version": "1.0.0", "name": "quiver.data", "info": "The data API." }
+*/
+#[rustfmt::skip]
+pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+    let data = lua.create_table()?;
 
-/* draw */
-pub mod draw;
+    // CompressData
+    data.set("compress",    lua.create_function(self::compress)?)?;
+    // DecompressData
+    data.set("decompress",  lua.create_function(self::decompress)?)?;
+    // EncodeDataBase64
+    data.set("encode",      lua.create_function(self::encode)?)?;
+    // DecodeDataBase64
+    data.set("decode",      lua.create_function(self::decode)?)?;
+    // ComputeCRC32/MD5/SHA1
+    data.set("hash",        lua.create_function(self::hash)?)?;
+    data.set("serialize",   lua.create_function(self::serialize)?)?;
+    data.set("deserialize", lua.create_function(self::deserialize)?)?;
+    data.set("to_data",     lua.create_function(self::to_data)?)?;
+    data.set("from_data",   lua.create_function(self::from_data)?)?;
+    data.set("from_data",   lua.create_function(self::from_data)?)?;
+    data.set("new",         lua.create_function(self::Data::<u8>::new)?)?;
 
-/* miscellaneous */
-pub mod file;
-pub mod input;
-pub mod window;
+    table.set("data", data)?;
 
-/* user-data */
-pub mod font;
-pub mod image;
-pub mod model;
-pub mod music;
-pub mod shader;
-pub mod sound;
-pub mod texture;
-pub mod video;
-pub mod zip;
+    Ok(())
+}
 
-/* rapier API */
-pub mod rapier;
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.data.compress",
+    "info": "TO-DO"
+}
+*/
+fn compress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
+    let data = Data::get_buffer(data)?;
+    let data = &data.0;
+    let mut out = 0;
+    unsafe {
+        let value = ffi::CompressData(data.as_ptr(), data.len() as i32, &mut out);
+        let slice = std::slice::from_raw_parts(value, out as usize).to_vec();
+
+        Data::new(lua, slice)
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.data.decompress",
+    "info": "TO-DO"
+}
+*/
+fn decompress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
+    let data = Data::get_buffer(data)?;
+    let data = &data.0;
+    let mut out = 0;
+    unsafe {
+        let value = ffi::DecompressData(data.as_ptr(), data.len() as i32, &mut out);
+        let slice = std::slice::from_raw_parts(value, out as usize).to_vec();
+
+        Data::new(lua, slice)
+    }
+}

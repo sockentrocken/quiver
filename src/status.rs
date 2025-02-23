@@ -54,9 +54,14 @@ use crate::window::*;
 //================================================================
 
 use raylib::prelude::*;
+use rust_embed::Embed;
 use serde::{Deserialize, Serialize};
 
 //================================================================
+
+#[derive(Embed)]
+#[folder = "test"]
+pub struct Asset;
 
 pub enum Status {
     Missing(Window),
@@ -244,8 +249,6 @@ impl Info {
 
         // file does exist, read it.
         if data.is_file() {
-            println!("json");
-
             // read file.
             let file = std::fs::read_to_string(data)
                 .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))?;
@@ -264,8 +267,6 @@ impl Info {
         let main_path = std::path::Path::new(Self::MAIN_PATH);
 
         if main_path.is_dir() {
-            println!("path");
-
             return Ok(Self {
                 safe: true,
                 path: Self::MAIN_PATH.to_string(),
@@ -278,8 +279,6 @@ impl Info {
         let main_file = std::path::Path::new(Self::MAIN_FILE);
 
         if main_file.is_file() {
-            println!("file");
-
             return Ok(Self {
                 safe: true,
                 path: ".".to_string(),

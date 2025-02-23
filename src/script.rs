@@ -83,7 +83,7 @@ pub struct Script {
 impl Script {
     const FILE_MAIN: &'static str = include_str!("asset/main.lua");
     #[rustfmt::skip]
-    pub const FILE_BASE: [BaseFile; 10] = [
+    pub const FILE_BASE: [BaseFile; 9] = [
         BaseFile::new("base/constant.lua",    include_str!("asset/base/constant.lua")),
         BaseFile::new("base/extension.lua",   include_str!("asset/base/extension.lua")),
         BaseFile::new("base/allocator.lua",   include_str!("asset/base/allocator.lua")),
@@ -93,7 +93,6 @@ impl Script {
         BaseFile::new("base/logger.lua",      include_str!("asset/base/logger.lua")),
         BaseFile::new("base/system.lua",      include_str!("asset/base/system.lua")),
         BaseFile::new("base/scene.lua",       include_str!("asset/base/scene.lua")),
-        BaseFile::new("base/path_finder.lua", include_str!("asset/base/path_finder.lua")),
     ];
     const FILE_BASE_MAIN: BaseFile =
         BaseFile::new("base/main.lua", include_str!("asset/base/main.lua"));
@@ -126,7 +125,6 @@ impl Script {
 
         // get the path to the main folder or file.
         let main_path = format!("{}/{}", info.path, Self::CALL_MAIN);
-        println!("{main_path}");
         let main_path = std::path::Path::new(&main_path);
 
         if main_path.is_file() {
@@ -294,6 +292,7 @@ impl Script {
         shader::set_global(lua, &quiver)?;
         file::set_global(lua, &quiver)?;
         zip::set_global(lua, &quiver)?;
+        video::set_global(lua, &quiver)?;
         request::set_global(lua, &quiver)?;
         data::set_global(lua, &quiver)?;
 
