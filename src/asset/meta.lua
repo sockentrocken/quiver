@@ -20,7 +20,7 @@ quiver.sound = {}
 ---An unique handle for sound in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L82)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L81)
 ---@class sound
 sound = {}
 
@@ -30,89 +30,83 @@ sound = {}
 ---@return sound sound # Sound resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L101)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L100)
 function quiver.sound.new(path,alias) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L134)
-function quiver.sound.new_from_embed() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L186)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L133)
 function quiver.sound.new_from_memory() end
 
 ---Create a sound alias.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L253)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L200)
 function sound:create_alias() end
 
 ---Remove a sound alias.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L263)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L210)
 function sound:remove_alias() end
 
 ---Clear every sound alias.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L277)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L224)
 function sound:remove_alias() end
 
 ---Play the sound.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L290)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L237)
 function sound:play() end
 
 ---Check if sound is currently playing.
 ---@return boolean state # State of the sound.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L314)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L261)
 function sound:get_playing() end
 
 ---Stop the sound.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L331)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L278)
 function sound:stop() end
 
 ---Pause the sound.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L348)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L295)
 function sound:pause() end
 
 ---Resume the sound.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L365)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L312)
 function sound:resume() end
 
 ---Set volume for the sound. (range: 0.0 - 1.0)
 ---@param volume number # Current volume.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L391)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L338)
 function sound:set_volume(volume) end
 
 ---Set pitch for the sound.
 ---@param pitch number # Current pitch.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L420)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L367)
 function sound:set_pitch(pitch) end
 
 ---Set pan for the sound. (range: 0.0 - 1.0; 0.5 is center)
 ---@param pan number # Current pan.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L449)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L396)
 function sound:set_pan(pan) end
 
 ---The input API.
@@ -673,7 +667,7 @@ function rapier:debug_render() end
 ---The video API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L72)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L71)
 ---@class quiver.video
 quiver.video = {}
 
@@ -718,6 +712,12 @@ function video:draw_pro(box_a,box_b,point,angle,color) end
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L186)
 function quiver.video.new(path) end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L219)
+function quiver.video.new_from_memory() end
 
 ---The request API.
 ---
@@ -896,30 +896,30 @@ zip = {}
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L90)
-function zip:get_data_list() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L103)
 function zip:get_file() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L137)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L128)
+function zip:get_list() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L141)
 function zip:is_file() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L151)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L155)
 function zip:is_path() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L165)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L169)
 function zip:is_link() end
 
 ---Create a new ZIP resource.
@@ -927,7 +927,7 @@ function zip:is_link() end
 ---@return zip zip # ZIP resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L188)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/zip.rs#L192)
 function quiver.zip.new(path) end
 
 ---The model API.
@@ -1477,49 +1477,49 @@ quiver.data = {}
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L136)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L137)
 function data:foo() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L145)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L146)
 function data:get_buffer() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L154)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L155)
 function data:get_slice() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L180)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L181)
 function quiver.data.compress() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L199)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L200)
 function quiver.data.decompress() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L220)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L221)
 function quiver.data.encode() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L239)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L240)
 function quiver.data.decode() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L267)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L268)
 function quiver.data.hash() end
 
 ---Serialize a given Lua value as another format, in the form of a string.
@@ -1528,7 +1528,7 @@ function quiver.data.hash() end
 ---@return string value # The value, in string form.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L329)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L330)
 function quiver.data.serialize(text,kind) end
 
 ---Deserialize a given format string as a Lua value.
@@ -1537,39 +1537,32 @@ function quiver.data.serialize(text,kind) end
 ---@return any value # The value, in Lua value form.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L370)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L371)
 function quiver.data.deserialize(text,kind) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L411)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L412)
 function quiver.data.to_data() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L435)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L436)
 function quiver.data.from_data() end
 
----The data API.
+---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/embed.rs#L59)
----@class quiver.data
-quiver.data = {}
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L463)
+function quiver.data.get_embed_file() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/embed.rs#L92)
-function quiver.data.compress() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/embed.rs#L111)
-function quiver.data.decompress() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L481)
+function quiver.data.get_embed_list() end
 
 ---The file API.
 ---
@@ -1697,84 +1690,84 @@ function quiver.general.load_base() end
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L107)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L110)
 function quiver.general.set_log_level() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L121)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L124)
 function quiver.general.open_link() end
 
 ---Load the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L131)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L134)
 function quiver.general.load() end
 
 ---Exit the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L135)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L138)
 function quiver.general.exit() end
 
 ---Set a key to exit Quiver.
 ---@param key input_board # Key to exit Quiver with.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L145)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L148)
 function quiver.general.set_exit_key(key) end
 
 ---Get the current time. Will count up since the initialization of the window.
 ---@return number time # Current time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L161)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L164)
 function quiver.general.get_time() end
 
 ---Get the current frame time.
 ---@return number frame_time # Current frame time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L174)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L177)
 function quiver.general.get_frame_time() end
 
 ---Get the current frame rate.
 ---@return number frame_rate # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L187)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L190)
 function quiver.general.get_frame_rate() end
 
 ---Set the current frame rate.
 ---@param frame_rate number # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L200)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L203)
 function quiver.general.set_frame_rate(frame_rate) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L214)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L217)
 function quiver.general.get_argument() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L227)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L230)
 function quiver.general.get_system() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L241)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L244)
 function quiver.general.get_memory() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L252)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L255)
 function quiver.general.get_info() end
 
 ---The shader API.

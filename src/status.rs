@@ -60,7 +60,7 @@ use serde::{Deserialize, Serialize};
 //================================================================
 
 #[derive(Embed)]
-#[folder = "test"]
+#[folder = "embed"]
 pub struct Asset;
 
 pub enum Status {
@@ -263,7 +263,17 @@ impl Info {
 
         //================================================================
 
-        // get the path to the main folder or file.
+        let embed_file = Asset::get("main.lua");
+
+        if embed_file.is_some() {
+            return Ok(Self {
+                safe: true,
+                path: ".".to_string(),
+            });
+        }
+
+        //================================================================
+
         let main_path = std::path::Path::new(Self::MAIN_PATH);
 
         if main_path.is_dir() {

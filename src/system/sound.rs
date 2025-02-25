@@ -48,7 +48,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-use crate::{script::*, Asset};
+use crate::script::*;
 
 //================================================================
 
@@ -66,7 +66,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let sound = lua.create_table()?;
 
     sound.set("new",             lua.create_async_function(self::Sound::new)?)?;
-    sound.set("new_from_embed",  lua.create_async_function(self::Sound::new_from_embed)?)?;
     sound.set("new_from_memory", lua.create_async_function(self::Sound::new_from_memory)?)?;
 
     table.set("sound", sound)?;
@@ -118,58 +117,6 @@ impl Sound {
                 Err(mlua::Error::RuntimeError(format!(
                     "Sound::new(): Could not load file \"{path}\"."
                 )))
-            }
-        })
-        .await
-        .unwrap()
-    }
-
-    /* entry
-    {
-        "version": "1.0.0",
-        "name": "quiver.sound.new_from_embed",
-        "info": "TO-DO"
-    }
-    */
-    async fn new_from_embed(
-        _: Lua,
-        (path, alias, kind): (String, Option<usize>, String),
-    ) -> mlua::Result<Self> {
-        let data = Asset::get(&path).unwrap();
-
-        tokio::task::spawn_blocking(move || unsafe {
-            let data = &data;
-
-            let data = ffi::LoadWaveFromMemory(
-                Script::rust_to_c_string(&kind)?.as_ptr(),
-                data.data.as_ptr(),
-                data.data.len() as i32,
-            );
-
-            if ffi::IsWaveValid(data) {
-                let sound = ffi::LoadSoundFromWave(data);
-                let alias = alias.unwrap_or_default();
-                let mut array = Vec::with_capacity(alias);
-
-                ffi::UnloadWave(data);
-
-                if ffi::IsSoundValid(sound) {
-                    for _ in 0..alias {
-                        let data = ffi::LoadSoundAlias(sound);
-                        println!("Pushing alias...");
-                        array.push(data);
-                    }
-
-                    Ok(Self(sound, array))
-                } else {
-                    Err(mlua::Error::RuntimeError(
-                        "Sound::new_from_memory(): Could not load file.".to_string(),
-                    ))
-                }
-            } else {
-                Err(mlua::Error::RuntimeError(
-                    "Sound::new_from_memory(): Could not load file.".to_string(),
-                ))
             }
         })
         .await

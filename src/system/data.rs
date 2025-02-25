@@ -61,21 +61,22 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     let data = lua.create_table()?;
 
     // CompressData
-    data.set("compress",    lua.create_function(self::compress)?)?;
+    data.set("compress",       lua.create_function(self::compress)?)?;
     // DecompressData
-    data.set("decompress",  lua.create_function(self::decompress)?)?;
+    data.set("decompress",     lua.create_function(self::decompress)?)?;
     // EncodeDataBase64
-    data.set("encode",      lua.create_function(self::encode)?)?;
+    data.set("encode",         lua.create_function(self::encode)?)?;
     // DecodeDataBase64
-    data.set("decode",      lua.create_function(self::decode)?)?;
+    data.set("decode",         lua.create_function(self::decode)?)?;
     // ComputeCRC32/MD5/SHA1
-    data.set("hash",        lua.create_function(self::hash)?)?;
-    data.set("serialize",   lua.create_function(self::serialize)?)?;
-    data.set("deserialize", lua.create_function(self::deserialize)?)?;
-    data.set("to_data",     lua.create_function(self::to_data)?)?;
-    data.set("from_data",   lua.create_function(self::from_data)?)?;
-    data.set("from_data",   lua.create_function(self::from_data)?)?;
-    data.set("new",         lua.create_function(self::Data::<u8>::new)?)?;
+    data.set("hash",           lua.create_function(self::hash)?)?;
+    data.set("serialize",      lua.create_function(self::serialize)?)?;
+    data.set("deserialize",    lua.create_function(self::deserialize)?)?;
+    data.set("to_data",        lua.create_function(self::to_data)?)?;
+    data.set("from_data",      lua.create_function(self::from_data)?)?;
+    data.set("get_embed_file", lua.create_function(self::get_embed_file)?)?;
+    data.set("get_embed_list", lua.create_function(self::get_embed_list)?)?;
+    data.set("new",            lua.create_function(self::Data::<u8>::new)?)?;
 
     table.set("data", data)?;
 
@@ -450,4 +451,37 @@ fn from_data(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<LuaValue>
             lua.to_value(&data)
         }
     }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.data.get_embed_file",
+    "info": "TO-DO"
+}
+*/
+fn get_embed_file(lua: &Lua, path: String) -> mlua::Result<LuaValue> {
+    if let Some(asset) = crate::status::Asset::get(&path) {
+        let data = crate::system::data::Data::new(lua, asset.data.to_vec())?;
+        let data = lua.create_userdata(data)?;
+
+        Ok(mlua::Value::UserData(data))
+    } else {
+        Ok(mlua::Value::Nil)
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.data.get_embed_list",
+    "info": "TO-DO"
+}
+*/
+fn get_embed_list(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+    let list: Vec<String> = crate::status::Asset::iter()
+        .map(|i| i.to_string())
+        .collect();
+
+    lua.to_value(&list)
 }

@@ -83,7 +83,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 type RLModel = raylib::models::Model;
 
 #[derive(Deserialize)]
-struct TransformBatch(usize, f32, f32, f32);
+pub struct TransformBatch(usize, f32, f32, f32);
 
 /* class
 {

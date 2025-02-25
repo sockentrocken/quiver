@@ -61,7 +61,7 @@ end
 function string.tokenize(text, find)
 	local i = {}
 
-	for token in text:gmatch(find) do
+	for token in text:gmatch("([^" .. find .. "]+)") do
 		table.insert(i, token)
 	end
 

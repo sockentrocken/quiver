@@ -90,8 +90,11 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 }
 */
 fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
+    // TO-DO only for debug. do not re-load from disk on release.
     for base in crate::script::Script::FILE_BASE {
-        lua.load(base.data).exec()?;
+        let data = std::fs::read_to_string(&format!("src/asset/{}", base.name)).unwrap();
+
+        lua.load(data).exec()?;
     }
 
     Ok(())

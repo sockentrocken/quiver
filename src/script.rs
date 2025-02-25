@@ -123,67 +123,31 @@ impl Script {
         // set the standard Quiver library.
         Self::system(&lua, info)?;
 
-        // get the path to the main folder or file.
-        let main_path = format!("{}/{}", info.path, Self::CALL_MAIN);
-        let main_path = std::path::Path::new(&main_path);
-
-        if main_path.is_file() {
-            let file = std::fs::File::open(main_path)?;
-            let mut file =
-                ZipArchive::new(file).map_err(|e| mlua::Error::runtime(e.to_string()))?;
-            if let Ok(mut value) = file.by_name(Self::NAME_MAIN) {
-                let mut data = String::new();
-                value.read_to_string(&mut data)?;
-
-                // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
-                lua.load(data).exec()?;
-            };
-        } else {
-            // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
-            lua.load(format!("require \"{}\"", Self::CALL_MAIN))
+        if let Some(embed_file) = Asset::get("main.lua") {
+            lua.load(String::from_utf8(embed_file.data.to_vec()).unwrap())
                 .exec()?;
+        } else {
+            // get the path to the main folder or file.
+            let main_path = format!("{}/{}", info.path, Self::CALL_MAIN);
+            let main_path = std::path::Path::new(&main_path);
+
+            if main_path.is_file() {
+                let file = std::fs::File::open(main_path)?;
+                let mut file =
+                    ZipArchive::new(file).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+                if let Ok(mut value) = file.by_name(Self::NAME_MAIN) {
+                    let mut data = String::new();
+                    value.read_to_string(&mut data)?;
+
+                    // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
+                    lua.load(data).exec()?;
+                };
+            } else {
+                // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
+                lua.load(format!("require \"{}\"", Self::CALL_MAIN))
+                    .exec()?;
+            }
         }
-
-        // get the global table.
-        let global = lua.globals();
-        // get the quiver table.
-        let quiver = global.get::<mlua::Table>("quiver")?;
-
-        // get the main function.
-        let main: mlua::Function = quiver.get(Self::CALL_MAIN)?;
-        // get the fail function. note that it may not exist in the lua space, so we use our own crash-handler instead.
-        let fail = {
-            if quiver.contains_key(Self::CALL_FAIL)? {
-                Some(quiver.get::<mlua::Function>(Self::CALL_FAIL)?)
-            } else {
-                None
-            }
-        };
-
-        Ok(Self { lua, main, fail })
-    }
-
-    // create a new script instance, for a thread.
-    pub fn clone(info: &Info, code: &str) -> mlua::Result<Self> {
-        // initialize lua VM, depending on what safe flag is set.
-        let lua = {
-            if info.safe {
-                // quiver is in safe mode, only load the safe standard Lua library.
-                Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())?
-            } else {
-                // quiver is in unsafe mode, load every Lua library and allow loading foreign native code.
-                unsafe { Lua::unsafe_new_with(LuaStdLib::ALL, LuaOptions::new()) }
-            }
-        };
-
-        // set script data.
-        lua.set_app_data(ScriptData::new(info.clone()));
-
-        // set the standard Quiver library.
-        Self::system(&lua, &info)?;
-
-        // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
-        lua.load(code).exec()?;
 
         // get the global table.
         let global = lua.globals();
@@ -273,6 +237,22 @@ impl Script {
                 info.path
             ),
         )?;
+        let loader: mlua::Table = package.get("loaders")?;
+        loader.push(lua.create_function(|lua, path: String| {
+            let path = format!("{path}.lua");
+
+            if let Some(asset) = Asset::get(&path) {
+                if let Ok(asset) = String::from_utf8(asset.data.to_vec()) {
+                    Ok(mlua::Value::Function(lua.load(asset).into_function()?))
+                } else {
+                    Err(mlua::Error::runtime(format!(
+                        "File '\"{path}\"' did not contain valid UTF-8 data."
+                    )))
+                }
+            } else {
+                lua.to_value(&format!("\n\tno file '\"{path}\"' in embed data"))
+            }
+        })?)?;
 
         // create the quiver table.
         let quiver = lua.create_table()?;

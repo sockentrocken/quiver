@@ -48,6 +48,29 @@
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
+---@enum FILE_KIND
+FILE_KIND = {
+	DISK  = 0,
+	PACK  = 1,
+	EMBED = 2,
+}
+
+---@class file_entry
+file_entry = {
+	__meta = {}
+}
+
+function file_entry:new(path, kind)
+	local i = {}
+	setmetatable(i, self.__meta)
+	getmetatable(i).__index = self
+
+	i.path = path
+	i.kind = kind
+
+	return i
+end
+
 ---@class system
 ---@field search      table
 ---@field locate      table
@@ -103,11 +126,14 @@ function system:new(search)
 
 	i:scan(search)
 
+
 	return i
 end
 
 ---Scan every directory in the asset's search table, to update the asset look-up table.
 function system:scan(search)
+	local embed_list = quiver.data.get_embed_list()
+
 	-- for each search path in the search table...
 	for _, search_path in ipairs(search) do
 		-- check if the given path is a folder or a file.
@@ -116,17 +142,55 @@ function system:scan(search)
 			local list = quiver.file.scan_path(search_path, nil, true, true)
 
 			for _, search_file in ipairs(list) do
-				self.locate[search_file] = search_path .. "/" .. search_file
+				self.locate[search_file] = file_entry:new(search_path .. "/" .. search_file, FILE_KIND.DISK)
 			end
 		else
-			local pack = quiver.zip.new(search_path)
-			local list = pack:get_data_list()
+			if quiver.file.get_file_exist(search_path) then
+				local pack = quiver.zip.new(search_path)
+				local list = pack:get_list()
 
-			for _, search_file in ipairs(list) do
-				self.locate[search_file] = pack
+				for _, search_file in ipairs(list) do
+					print(search_file)
+
+					self.locate[search_file] = file_entry:new(pack, FILE_KIND.PACK)
+				end
+			else
+				for _, search_file in ipairs(embed_list) do
+					local token = string.tokenize(search_file, "/")
+
+					if token[2] then
+						if token[1] == search_path then
+							self.locate[token[2]] = file_entry:new(search_file, FILE_KIND.EMBED)
+						end
+					end
+				end
 			end
 		end
 	end
+
+	-- TO-DO this might conflict with quiver's own embed file loader for require...?
+	-- file-system loader
+	-- embed loader
+	-- lua loader, which will check for disk, .ZIP and embed, again.
+	-- this should *probably* take the highest priority of all...?
+	table.insert(package.loaders, function(path)
+		local asset = self.locate[path .. ".lua"]
+
+		if asset then
+			if asset.kind == FILE_KIND.DISK then
+				asset = quiver.file.get(asset.path)
+			elseif asset.kind == FILE_KIND.PACK then
+				asset = asset.path:get_file(path .. ".lua", false, true)
+			elseif asset.kind == FILE_KIND.EMBED then
+				asset = quiver.data.get_embed_file(asset.path)
+			end
+
+			print("returning...")
+			return loadstring(asset, path)
+		else
+			return string.format("\n\tno file '\"%s\"' in system user-data", path)
+		end
+	end)
 end
 
 function system:list(search)
@@ -177,19 +241,25 @@ local function file_system_set_asset(self, memory_data, memory_list, call_new, c
 	-- locate the asset.
 	local asset = self.locate[faux_path]
 
-	-- asset is not a path to the real asset, but a package...
-	if not (type(asset) == "string") and call_new_memory then
-		print("Loading from memory...")
-
-		local data = asset:get_file(faux_path, true)
-
-		-- create the asset.
-		asset = call_new_memory(data, ...)
-	else
+	if asset.kind == FILE_KIND.DISK then
 		print("Loading from disk...")
 
 		-- create the asset.
-		asset = call_new(asset, ...)
+		asset = call_new(asset.path, ...)
+	elseif asset.kind == FILE_KIND.PACK then
+		print("Loading from pack...")
+
+		local data = asset.path:get_file(faux_path, true)
+
+		-- create the asset.
+		asset = call_new_memory(data, ...)
+	elseif asset.kind == FILE_KIND.EMBED then
+		print("Loading from embed...")
+
+		local data = quiver.data.get_embed_file(asset.path, true)
+
+		-- create the asset.
+		asset = call_new_memory(data, ...)
 	end
 
 	-- insert into the book-keeping memory table.
@@ -319,21 +389,20 @@ function system:set_shader(faux_name, faux_path_vs, faux_path_fs, force)
 	local asset_vs = self.locate[faux_path_vs]
 	local asset_fs = self.locate[faux_path_fs]
 
-	-- asset is not a path to the real asset, but a package...
-	if not (type(asset_vs) == "string") then
-		print("Loading .VS from memory...")
-		asset_vs = asset_vs:get_file(faux_path_vs)
-	else
-		print("Loading .VS from disk...")
-		asset_vs = quiver.file.get(asset_vs)
+	if asset_vs.kind == FILE_KIND.DISK then
+		asset_vs = quiver.file.get(asset_vs.path)
+	elseif asset_vs.kind == FILE_KIND.PACK then
+		asset_vs = asset_vs.path:get_file(faux_path_vs)
+	elseif asset_vs.kind == FILE_KIND.EMBED then
+		asset_vs = quiver.data.get_embed_file(asset_vs.path)
 	end
 
-	if not (type(asset_fs) == "string") then
-		print("Loading .FS from memory...")
-		asset_fs = asset_fs:get_file(faux_path_fs)
-	else
-		print("Loading .FS from disk...")
-		asset_fs = quiver.file.get(asset_fs)
+	if asset_fs.kind == FILE_KIND.DISK then
+		asset_fs = quiver.file.get(asset_fs.path)
+	elseif asset_fs.kind == FILE_KIND.PACK then
+		asset_fs = asset_fs.path:get_file(faux_path_vs)
+	elseif asset_fs.kind == FILE_KIND.EMBED then
+		asset_fs = quiver.data.get_embed_file(asset_fs.path)
 	end
 
 	-- create the asset.

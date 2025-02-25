@@ -48,20 +48,6 @@
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
--- TO-DO
--- video library
--- more "load from memory" stuff
--- get system data (CPU, GPU, RAM, OS)
--- get command argument
--- steam API
--- easing lua library
--- create, remove, move, copy file API
--- discord API
--- HTTP API
--- file watcher API
--- clean up quiver API documentation
--- word wrap + scroll for error message
-
 ---@class scene
 scene = {}
 

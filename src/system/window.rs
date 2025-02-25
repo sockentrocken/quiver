@@ -141,7 +141,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 
     /* RFD-specific */
     window.set("file_dialog", lua.create_async_function(self::file_dialog)?)?;
-//    window.set("text_dialog", lua.create_async_function(self::text_dialog)?)?;
+    window.set("text_dialog", lua.create_async_function(self::text_dialog)?)?;
 
     table.set("window", window)?;
 
@@ -232,6 +232,53 @@ async fn file_dialog(
                 Ok(mlua::Nil)
             }
         }
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.window.text_dialog",
+    "info": "TO-DO"
+}
+*/
+async fn text_dialog(
+    lua: Lua,
+    (level, title, description, button): (Option<i32>, Option<String>, Option<String>, Option<i32>),
+) -> mlua::Result<LuaValue> {
+    let mut text = rfd::AsyncMessageDialog::new();
+
+    if let Some(level) = level {
+        match level {
+            0 => text = text.set_level(rfd::MessageLevel::Info),
+            1 => text = text.set_level(rfd::MessageLevel::Warning),
+            _ => text = text.set_level(rfd::MessageLevel::Error),
+        }
+    }
+
+    if let Some(title) = title {
+        text = text.set_title(title)
+    }
+
+    if let Some(description) = description {
+        text = text.set_description(description)
+    }
+
+    if let Some(button) = button {
+        match button {
+            0 => text = text.set_buttons(rfd::MessageButtons::Ok),
+            1 => text = text.set_buttons(rfd::MessageButtons::OkCancel),
+            2 => text = text.set_buttons(rfd::MessageButtons::YesNo),
+            _ => text = text.set_buttons(rfd::MessageButtons::YesNoCancel),
+        }
+    }
+
+    match text.show().await {
+        rfd::MessageDialogResult::Yes => lua.to_value(&0),
+        rfd::MessageDialogResult::No => lua.to_value(&1),
+        rfd::MessageDialogResult::Ok => lua.to_value(&2),
+        rfd::MessageDialogResult::Cancel => lua.to_value(&3),
+        rfd::MessageDialogResult::Custom(result) => lua.to_value(&result),
     }
 }
 

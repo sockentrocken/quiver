@@ -837,10 +837,10 @@ impl mlua::UserData for Rapier {
         */
         method.add_method_mut("rigid_body", |lua, this, kind: i32| {
             let rigid = match kind {
-                _ => RigidBodyBuilder::fixed(),
                 1 => RigidBodyBuilder::dynamic(),
                 2 => RigidBodyBuilder::kinematic_position_based(),
                 3 => RigidBodyBuilder::kinematic_velocity_based(),
+                _ => RigidBodyBuilder::fixed(),
             };
 
             lua.to_value(&this.rigid_body_set.insert(rigid))
@@ -1207,21 +1207,13 @@ impl Default for QuiverEvent {
     }
 }
 
-impl QuiverHandler {
-    pub fn new() -> Self {
-        Self {
-            event_list: Arc::new(Mutex::new(Vec::new())),
-        }
-    }
-}
-
 impl EventHandler for QuiverHandler {
     fn handle_collision_event(
         &self,
-        bodies: &RigidBodySet,
-        colliders: &ColliderSet,
+        _: &RigidBodySet,
+        _: &ColliderSet,
         event: CollisionEvent,
-        contact_pair: Option<&ContactPair>,
+        _: Option<&ContactPair>,
     ) {
         let mut lock = self.event_list.lock().unwrap();
         match event {
@@ -1246,11 +1238,11 @@ impl EventHandler for QuiverHandler {
 
     fn handle_contact_force_event(
         &self,
-        dt: f32,
-        bodies: &RigidBodySet,
-        colliders: &ColliderSet,
-        contact_pair: &ContactPair,
-        total_force_magnitude: f32,
+        _: f32,
+        _: &RigidBodySet,
+        _: &ColliderSet,
+        _: &ContactPair,
+        _: f32,
     ) {
         println!("bar");
     }

@@ -83,27 +83,14 @@ impl mlua::UserData for Zip {
         /* entry
         {
             "version": "1.0.0",
-            "name": "zip:get_data_list",
-            "info": "TO-DO"
-        }
-        */
-        method.add_method_mut("get_data_list", |_: &Lua, this, _: ()| {
-            let name: Vec<String> = this.0.file_names().map(|x| x.to_string()).collect();
-
-            Ok(name)
-        });
-
-        /* entry
-        {
-            "version": "1.0.0",
             "name": "zip:get_file",
             "info": "TO-DO"
         }
         */
         method.add_async_method_mut(
             "get_file",
-            |lua: Lua, mut this, (path, binary): (String, bool)| async move {
-                tokio::task::spawn_blocking(move || match this.0.by_name(&path) {
+            |lua: Lua, mut this, (path, binary, sync): (String, bool, bool)| async move {
+                let mut function = move || match this.0.by_name(&path) {
                     Ok(mut value) => {
                         if binary {
                             let mut data = Vec::new();
@@ -121,11 +108,28 @@ impl mlua::UserData for Zip {
                         }
                     }
                     Err(value) => Err(mlua::Error::runtime(value.to_string())),
-                })
-                .await
-                .unwrap()
+                };
+
+                if sync {
+                    function()
+                } else {
+                    tokio::task::spawn_blocking(function).await.unwrap()
+                }
             },
         );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "zip:get_list",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("get_list", |_: &Lua, this, _: ()| {
+            let name: Vec<String> = this.0.file_names().map(|x| x.to_string()).collect();
+
+            Ok(name)
+        });
 
         /* entry
         {
