@@ -275,6 +275,8 @@ impl Script {
         video::set_global(lua, &quiver)?;
         request::set_global(lua, &quiver)?;
         data::set_global(lua, &quiver)?;
+        discord::set_global(lua, &quiver)?;
+        steam::set_global(lua, &quiver)?;
 
         // set the quiver table as a global value.
         global.set("quiver", quiver)?;

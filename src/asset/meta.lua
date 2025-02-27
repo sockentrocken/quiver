@@ -667,7 +667,7 @@ function rapier:debug_render() end
 ---The video API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L71)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L72)
 ---@class quiver.video
 quiver.video = {}
 
@@ -691,7 +691,7 @@ function video:update() end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L126)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L128)
 function video:draw(point,angle,scale,color) end
 
 ---Draw a texture (pro).
@@ -702,7 +702,7 @@ function video:draw(point,angle,scale,color) end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L151)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L153)
 function video:draw_pro(box_a,box_b,point,angle,color) end
 
 ---Create a new video resource.
@@ -710,14 +710,8 @@ function video:draw_pro(box_a,box_b,point,angle,color) end
 ---@return video video # Video resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L186)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L188)
 function quiver.video.new(path) end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L219)
-function quiver.video.new_from_memory() end
 
 ---The request API.
 ---
@@ -1984,53 +1978,59 @@ quiver.window = {}
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L158)
 function quiver.window.file_dialog() end
 
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L245)
+function quiver.window.text_dialog() end
+
 ---Get if the window should close.
 ---@return boolean close # True if the window should close.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L248)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L295)
 function quiver.window.get_close() end
 
 ---Get the state of the window (full-screen).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L262)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L309)
 function quiver.window.get_fullscreen() end
 
 ---Get the state of the window (hidden).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L276)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L323)
 function quiver.window.get_hidden() end
 
 ---Get the state of the window (minimize).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L290)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L337)
 function quiver.window.get_minimize() end
 
 ---Get the state of the window (maximize).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L304)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L351)
 function quiver.window.get_maximize() end
 
 ---Get the state of the window (focus).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L318)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L365)
 function quiver.window.get_focus() end
 
 ---Get the state of the window (resize).
 ---@return boolean state # State of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L332)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L379)
 function quiver.window.get_resize() end
 
 ---Get the state of a window flag.
@@ -2038,7 +2038,7 @@ function quiver.window.get_resize() end
 ---@return boolean state # Window flag state.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L349)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L396)
 function quiver.window.get_state(flag) end
 
 ---Set the state of a window flag.
@@ -2046,97 +2046,97 @@ function quiver.window.get_state(flag) end
 ---@param state boolean # Window flag state.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L364)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L411)
 function quiver.window.set_state(flag,state) end
 
 ---Set the window to full-screen mode.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L379)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L426)
 function quiver.window.set_fullscreen() end
 
 ---Set the window to border-less mode.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L389)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L436)
 function quiver.window.set_borderless() end
 
 ---Minimize the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L399)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L446)
 function quiver.window.set_minimize() end
 
 ---Maximize the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L409)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L456)
 function quiver.window.set_maximize() end
 
 ---Restore the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L419)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L466)
 function quiver.window.set_restore() end
 
 ---Set the window icon.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L429)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L476)
 function quiver.window.set_icon() end
 
 ---Set the window name.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L448)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L495)
 function quiver.window.set_name() end
 
 ---Set the window point.
 ---@param point vector_2 # Point of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L467)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L514)
 function quiver.window.set_point(point) end
 
 ---Set the window monitor.
 ---@param index number # Index of monitor to move window to.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L486)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L533)
 function quiver.window.set_screen(index) end
 
 ---Set the minimum window shape.
 ---@param shape vector_2 # Minimum shape of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L503)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L550)
 function quiver.window.set_shape_min(shape) end
 
 ---Set the maximum window shape.
 ---@param shape vector_2 # Maximum shape of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L522)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L569)
 function quiver.window.set_shape_max(shape) end
 
 ---Set the current window shape.
 ---@param shape vector_2 # Shape of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L541)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L588)
 function quiver.window.set_shape(shape) end
 
 ---Set the window alpha.
 ---@param alpha number # Alpha of the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L560)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L607)
 function quiver.window.set_alpha(alpha) end
 
 ---Focus the window.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L570)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L617)
 function quiver.window.set_focus() end
 
 ---Get the shape of the window.
@@ -2144,7 +2144,7 @@ function quiver.window.set_focus() end
 ---@return number shape_y # Shape of the window (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L588)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L635)
 function quiver.window.get_shape() end
 
 ---Get the shape of the current render view.
@@ -2152,21 +2152,21 @@ function quiver.window.get_shape() end
 ---@return number shape_y # Shape of the render view (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L603)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L650)
 function quiver.window.get_render_shape() end
 
 ---Get the available monitor amount.
 ---@return number count # Monitor count.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L617)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L664)
 function quiver.window.get_screen_count() end
 
 ---Get the current active monitor, where the window is.
 ---@return number index # Current active monitor index.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L631)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L678)
 function quiver.window.get_screen_focus() end
 
 ---Get the point of the given monitor.
@@ -2175,7 +2175,7 @@ function quiver.window.get_screen_focus() end
 ---@return number point_y # Point of the monitor (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L649)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L696)
 function quiver.window.get_screen_point(index) end
 
 ---Get the shape of the given monitor.
@@ -2184,7 +2184,7 @@ function quiver.window.get_screen_point(index) end
 ---@return number shape_y # Shape of the window (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L670)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L717)
 function quiver.window.get_screen_shape(index) end
 
 ---Get the physical shape of the given monitor.
@@ -2193,7 +2193,7 @@ function quiver.window.get_screen_shape(index) end
 ---@return number shape_y # Physical shape of the window (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L688)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L735)
 function quiver.window.get_screen_shape_physical(index) end
 
 ---Get the refresh rate of the given monitor.
@@ -2201,7 +2201,7 @@ function quiver.window.get_screen_shape_physical(index) end
 ---@return number rate # Refresh rate of the monitor.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L710)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L757)
 function quiver.window.get_screen_rate(index) end
 
 ---Get the point of the window.
@@ -2209,7 +2209,7 @@ function quiver.window.get_screen_rate(index) end
 ---@return number point_y # Point of the window (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L725)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L772)
 function quiver.window.get_point() end
 
 ---Get the DPI scale of the window.
@@ -2217,7 +2217,7 @@ function quiver.window.get_point() end
 ---@return number scale_y # Scale of the window (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L744)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L791)
 function quiver.window.get_scale() end
 
 ---Get the name of the given monitor.
@@ -2225,13 +2225,13 @@ function quiver.window.get_scale() end
 ---@return string name # Name of the monitor.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L765)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L812)
 function quiver.window.get_screen_name(index) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L782)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L829)
 function quiver.window.get_screen_shot() end
 
 ---The music API.

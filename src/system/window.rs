@@ -139,7 +139,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     // TakeScreenshot
     window.set("get_screen_shot", lua.create_function(self::get_screen_shot)?)?;
 
-    /* RFD-specific */
+    /* RFD specific */
     window.set("file_dialog", lua.create_async_function(self::file_dialog)?)?;
     window.set("text_dialog", lua.create_async_function(self::text_dialog)?)?;
 

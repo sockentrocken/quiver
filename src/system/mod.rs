@@ -58,11 +58,10 @@ pub mod general;
 // raylib API
 //================================================================
 
-pub mod request;
-// pub mod serialize;
-// pub mod discord;
-// pub mod steam;
 pub mod data;
+pub mod discord;
+pub mod request;
+pub mod steam;
 
 /* draw */
 pub mod draw;

@@ -54,7 +54,6 @@ use crate::script::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::{CStr, CString};
 
 //================================================================
 
@@ -67,17 +66,31 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 
     file.set("get",                       lua.create_function(self::get)?)?;
     file.set("set",                       lua.create_function(self::set)?)?;
+
+    // FileExists
     file.set("get_file_exist",            lua.create_function(self::get_file_exist)?)?;
+    // DirectoryExists
     file.set("get_path_exist",            lua.create_function(self::get_path_exist)?)?;
+    // IsFileExtension
     file.set("get_file_extension_check",  lua.create_function(self::get_file_extension_check)?)?;
+    // GetFileLength
     file.set("get_file_size",             lua.create_function(self::get_file_size)?)?;
+    // GetFileExtension
     file.set("get_file_extension",        lua.create_function(self::get_file_extension)?)?;
+    // GetFileName/GetFileNameWithoutExt    
     file.set("get_file_name",             lua.create_function(self::get_file_name)?)?;
+    // GetWorkingDirectory
     file.set("get_work_directory",        lua.create_function(self::get_work_directory)?)?;
+    // GetApplicationDirectory
     file.set("get_application_directory", lua.create_function(self::get_application_directory)?)?;
+    // LoadDirectoryFiles/LoadDirectoryFilesEx
     file.set("scan_path",                 lua.create_function(self::scan_path)?)?;
     file.set("get_path_escape",           lua.create_function(self::get_path_escape)?)?;
     file.set("set_path_escape",           lua.create_function(self::set_path_escape)?)?;
+    file.set("move",                      lua.create_function(self::move_file)?)?;
+    file.set("copy",                      lua.create_function(self::copy)?)?;
+    file.set("remove_file",               lua.create_function(self::remove_file)?)?;
+    file.set("remove_path",               lua.create_function(self::remove_path)?)?;
 
     table.set("file", file)?;
 
@@ -153,8 +166,7 @@ fn set(lua: &Lua, (path, data, binary): (String, LuaValue, bool)) -> mlua::Resul
 }
 */
 fn get_file_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
-    let path = CString::new(ScriptData::get_path(lua, &path)?)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let path = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
 
     unsafe { Ok(ffi::FileExists(path.as_ptr())) }
 }
@@ -173,8 +185,7 @@ fn get_file_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
 }
 */
 fn get_path_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
-    let path = CString::new(ScriptData::get_path(lua, &path)?)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let path = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
 
     unsafe { Ok(ffi::DirectoryExists(path.as_ptr())) }
 }
@@ -194,9 +205,9 @@ fn get_path_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
 }
 */
 fn get_file_extension_check(lua: &Lua, (path, extension): (String, String)) -> mlua::Result<bool> {
-    let path = CString::new(ScriptData::get_path(lua, &path)?)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
-    let extension = CString::new(extension).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let path = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
+    let extension =
+        Script::rust_to_c_string(&extension).map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
     unsafe { Ok(ffi::IsFileExtension(path.as_ptr(), extension.as_ptr())) }
 }
@@ -215,8 +226,7 @@ fn get_file_extension_check(lua: &Lua, (path, extension): (String, String)) -> m
 }
 */
 fn get_file_size(lua: &Lua, path: String) -> mlua::Result<i32> {
-    let path = CString::new(ScriptData::get_path(lua, &path)?)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let path = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
 
     unsafe { Ok(ffi::GetFileLength(path.as_ptr())) }
 }
@@ -235,15 +245,11 @@ fn get_file_size(lua: &Lua, path: String) -> mlua::Result<i32> {
 }
 */
 fn get_file_extension(lua: &Lua, path: String) -> mlua::Result<String> {
-    let path = CString::new(ScriptData::get_path(lua, &path)?)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let path = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
 
     unsafe {
         let result = ffi::GetFileExtension(path.as_ptr());
-        Ok(CStr::from_ptr(result)
-            .to_str()
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?
-            .to_string())
+        Script::c_to_rust_string(result)
     }
 }
 
@@ -262,22 +268,15 @@ fn get_file_extension(lua: &Lua, path: String) -> mlua::Result<String> {
 }
 */
 fn get_file_name(lua: &Lua, (path, extension): (String, bool)) -> mlua::Result<String> {
-    let path = CString::new(ScriptData::get_path(lua, &path)?)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let path = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
 
     unsafe {
         if extension {
             let result = ffi::GetFileName(path.as_ptr());
-            Ok(CStr::from_ptr(result)
-                .to_str()
-                .map_err(|e| mlua::Error::runtime(e.to_string()))?
-                .to_string())
+            Script::c_to_rust_string(result)
         } else {
             let result = ffi::GetFileNameWithoutExt(path.as_ptr());
-            Ok(CStr::from_ptr(result)
-                .to_str()
-                .map_err(|e| mlua::Error::runtime(e.to_string()))?
-                .to_string())
+            Script::c_to_rust_string(result)
         }
     }
 }
@@ -295,10 +294,7 @@ fn get_file_name(lua: &Lua, (path, extension): (String, bool)) -> mlua::Result<S
 fn get_work_directory(_: &Lua, _: ()) -> mlua::Result<String> {
     unsafe {
         let result = ffi::GetWorkingDirectory();
-        Ok(CStr::from_ptr(result)
-            .to_str()
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?
-            .to_string())
+        Script::c_to_rust_string(result)
     }
 }
 
@@ -315,10 +311,7 @@ fn get_work_directory(_: &Lua, _: ()) -> mlua::Result<String> {
 fn get_application_directory(_: &Lua, _: ()) -> mlua::Result<String> {
     unsafe {
         let result = ffi::GetApplicationDirectory();
-        Ok(CStr::from_ptr(result)
-            .to_str()
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?
-            .to_string())
+        Script::c_to_rust_string(result)
     }
 }
 
@@ -342,15 +335,14 @@ fn scan_path(
     lua: &Lua,
     (path, filter, recursive, relative): (String, Option<String>, bool, bool),
 ) -> mlua::Result<LuaValue> {
-    let c_path = CString::new(ScriptData::get_path(lua, &path)?)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let c_path = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
     let mut data: Vec<String> = Vec::new();
 
     unsafe {
         let result = {
             if let Some(filter) = filter {
-                let filter =
-                    CString::new(filter).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+                let filter = Script::rust_to_c_string(&filter)
+                    .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
                 ffi::LoadDirectoryFilesEx(c_path.as_ptr(), filter.as_ptr(), recursive)
             } else {
@@ -361,10 +353,7 @@ fn scan_path(
         for x in 0..result.count {
             let result_path = *result.paths.wrapping_add(x.try_into().unwrap());
 
-            let result_path = CStr::from_ptr(result_path)
-                .to_str()
-                .map_err(|e| mlua::Error::runtime(e.to_string()))?
-                .to_string();
+            let result_path = Script::c_to_rust_string(result_path)?;
 
             if relative {
                 let path: Vec<&str> = result_path.split(&path).collect();
@@ -408,4 +397,66 @@ fn get_path_escape(lua: &Lua, _: ()) -> mlua::Result<bool> {
 */
 fn set_path_escape(lua: &Lua, state: bool) -> mlua::Result<()> {
     ScriptData::set_path_escape(lua, state)
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.file.move",
+    "info": "TO-DO"
+}
+*/
+fn move_file(lua: &Lua, (source, target): (String, String)) -> mlua::Result<()> {
+    let source = ScriptData::get_path(lua, &source)?;
+    let target = ScriptData::get_path(lua, &target)?;
+
+    std::fs::rename(source, target).unwrap();
+
+    Ok(())
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.file.copy",
+    "info": "TO-DO"
+}
+*/
+fn copy(lua: &Lua, (source, target): (String, String)) -> mlua::Result<()> {
+    let source = ScriptData::get_path(lua, &source)?;
+    let target = ScriptData::get_path(lua, &target)?;
+
+    std::fs::copy(source, target).unwrap();
+
+    Ok(())
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.file.remove_file",
+    "info": "TO-DO"
+}
+*/
+fn remove_file(lua: &Lua, path: String) -> mlua::Result<()> {
+    let path = ScriptData::get_path(lua, &path)?;
+
+    std::fs::remove_file(path).unwrap();
+
+    Ok(())
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.file.remove_path",
+    "info": "TO-DO"
+}
+*/
+fn remove_path(lua: &Lua, path: String) -> mlua::Result<()> {
+    let path = ScriptData::get_path(lua, &path)?;
+
+    std::fs::remove_dir_all(path).unwrap();
+
+    Ok(())
 }

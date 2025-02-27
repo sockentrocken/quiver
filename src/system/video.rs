@@ -62,7 +62,6 @@ use crate::script::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::io::Read;
 
 //================================================================
 
@@ -92,6 +91,52 @@ impl mlua::UserData for Video {
         field.add_field_method_get("ID", |_: &Lua, this| Ok(this.0.videoTexture.id));
         field.add_field_method_get("shape_x", |_: &Lua, this| Ok(this.0.videoTexture.width));
         field.add_field_method_get("shape_y", |_: &Lua, this| Ok(this.0.videoTexture.height));
+
+        // GetMediaProperties
+        field.add_field_method_get("duration", |_: &Lua, this| unsafe {
+            let property = GetMediaProperties(this.0);
+            Ok(property.durationSec)
+        });
+        field.add_field_method_get("frame_rate", |_: &Lua, this| unsafe {
+            let property = GetMediaProperties(this.0);
+            Ok(property.avgFPS)
+        });
+        field.add_field_method_get("video", |_: &Lua, this| unsafe {
+            let property = GetMediaProperties(this.0);
+            Ok(property.hasVideo)
+        });
+        field.add_field_method_get("audio", |_: &Lua, this| unsafe {
+            let property = GetMediaProperties(this.0);
+            Ok(property.hasAudio)
+        });
+
+        // GetMediaState
+        field.add_field_method_get("state", |_: &Lua, this| unsafe {
+            Ok(GetMediaState(this.0))
+        });
+
+        // SetMediaState
+        field.add_field_method_set("state", |_: &Lua, this, value| unsafe {
+            SetMediaState(this.0, value);
+            Ok(())
+        });
+
+        // GetMediaPosition
+        field.add_field_method_get("position", |_: &Lua, this| unsafe {
+            Ok(GetMediaPosition(this.0))
+        });
+
+        // SetMediaPosition
+        field.add_field_method_set("position", |_: &Lua, this, value| unsafe {
+            SetMediaPosition(this.0, value);
+            Ok(())
+        });
+
+        // SetMediaLooping
+        field.add_field_method_set("loop", |_: &Lua, this, value| unsafe {
+            SetMediaLooping(this.0, value);
+            Ok(())
+        });
     }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
@@ -109,6 +154,8 @@ impl mlua::UserData for Video {
 
             Ok(())
         });
+
+        //================================================================
 
         /* entry
         {

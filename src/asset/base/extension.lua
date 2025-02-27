@@ -207,8 +207,6 @@ end
 
 --[[----------------------------------------------------------------]]
 
-math.euler = 2.71828
-
 ---Check the sanity of a number, which will check for NaN and Infinite.
 ---@param value number # Number to check.
 ---@return boolean sanity # True if number is not sane, false otherwise.
@@ -345,36 +343,71 @@ function math.radian_to_degree(value)
 	return value * (180.0 / math.pi)
 end
 
-function math.out_sine(value)
-	return math.sin((value * math.pi) * 0.5)
+--[[----------------------------------------------------------------]]
+
+-- all code from https://easings.net/.
+
+ease = {}
+
+---Ease in sine. (https://easings.net/#easeInSine)
+---@param value number
+---@return number value # Result.
+function ease.in_sine(value)
+	return 1 - math.cos((value * math.pi) / 2)
 end
 
-function math.out_quad(value)
-	return 1.0 - (1.0 - value) * (1.0 - value)
+---Ease out sine. (https://easings.net/#easeOutSine)
+---@param value number
+---@return number value # Result.
+function ease.out_sine(value)
+	return math.sin((value * math.pi) / 2)
 end
 
-function math.bell_curve(value)
-	return math.euler ^ -value ^ 2
+---Ease in-out sine. (https://easings.net/#easeInOutSine)
+---@param value number
+---@return number value # Result.
+function ease.in_out_sine(value)
+	return -(math.cos(math.pi * value) - 1) / 2
 end
 
-function math.ease_interval(min_a, min_b, max_a, max_b, value)
-	if value >= min_a and value <= min_b then
-		value = math.percentage_from_value(min_a, min_b, value)
-		return (math.sin(value * math.pi + math.pi * 0.5) - 1.0) * 0.5 * -1.0
-	end
+---Ease in quad. (https://easings.net/#easeInQuad)
+---@param value number
+---@return number value # Result.
+function ease.in_quad(value)
+	return value * value
+end
 
-	if max_a and max_b then
-		if value >= max_a and value <= max_b then
-			value = math.percentage_from_value(max_a, max_b, value)
-			return (math.sin(value * math.pi - math.pi * 0.5) - 1.0) * 0.5 * -1.0
-		end
-	end
+---Ease out quad. (https://easings.net/#easeOutQuad)
+---@param value number
+---@return number value # Result.
+function ease.out_quad(value)
+	return 1 - (1 - value) * (1 - value)
+end
 
-	if value <= min_a or (max_b and value >= max_b) then
-		return 0.0
-	end
+---Ease in-out quad. (https://easings.net/#easeInOutQuad)
+---@param value number
+---@return number value # Result.
+function ease.in_out_quad(value)
+	return value < 0.5 and 2 * value * value or 1 - math.pow(-2 * value + 2, 2) / 2
+end
 
-	if value >= min_b and (max_a and value <= max_a or not max_a) then
-		return 1.0
-	end
+---Ease in cubic. (https://easings.net/#easeInCubic)
+---@param value number
+---@return number value # Result.
+function ease.in_cubic(value)
+	return value * value * value
+end
+
+---Ease out cubic. (https://easings.net/#easeOutCubic)
+---@param value number
+---@return number value # Result.
+function ease.out_cubic(value)
+	return 1 - math.pow(1 - value, 3)
+end
+
+---Ease in-out cubic. (https://easings.net/#easeInOutCubic)
+---@param value number
+---@return number value # Result.
+function ease.in_out_cubic(value)
+	return value < 0.5 and 4 * value * value * value or 1 - math.pow(-2 * value + 2, 3) / 2;
 end
