@@ -153,6 +153,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     "version": "1.0.0",
     "name": "quiver.input.board.set_clipboard_text",
     "info": "Set the clipboard text.",
+    "test": "input/set_clipboard_text.lua",
     "member": [
         { "name": "text", "info": "Clipboard text.", "kind": "string" }
     ]

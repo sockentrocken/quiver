@@ -161,9 +161,7 @@ fn main() {
 struct Parser {
     class: bool,
     entry: bool,
-    example: bool,
     comment_line: String,
-    example_line: String,
     wiki_file: Option<BufWriter<File>>,
     meta_file: BufWriter<File>,
 }
@@ -305,9 +303,7 @@ r#"* Return: `{name}` – {info}
         Self {
             class: false,
             entry: false,
-            example: false,
             comment_line: String::new(),
-            example_line: String::new(),
             wiki_file: None,
             meta_file,
         }
@@ -344,24 +340,11 @@ r#"* Return: `{name}` – {info}
             // reset mode.
             self.class = false;
             self.entry = false;
-            self.example = false;
             self.comment_line.clear();
-            self.example_line.clear();
         }
 
-        // we are currently writing an example comment. push a new line.
-        if self.example {
-            self.example_line.push_str(text);
-            self.example_line.push('\n');
-        }
-
-        // example comment. enable example mode.
-        if text == "example" {
-            self.example = true;
-        }
-
-        // we are currently writing either a class or an entry comment, and we are not currently writing an example comment. push a new line.
-        if (self.class || self.entry) && !self.example {
+        // we are currently writing either a class or an entry comment, push a new line.
+        if self.class || self.entry {
             self.comment_line.push_str(text);
         }
 
@@ -386,13 +369,19 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{path}", path);
         data = data.replace("{line}", &format!("{}", line + 2));
 
-        if self.example {
+        if let Some(test) = class.test {
+            let test = std::fs::read_to_string(&format!("test/{test}")).expect(&format!(
+                "Meta::write_meta_class(): Could not read file {test}."
+            ));
+
             data.push_str("---```lua\n");
 
-            let split: Vec<&str> = self.example_line.split("\n").collect();
+            let split: Vec<&str> = test.split("\n").collect();
 
             for text in split {
-                data.push_str(&format!("---{text}\n"));
+                if !text.is_empty() {
+                    data.push_str(&format!("---{text}\n"));
+                }
             }
 
             data.push_str("---```\n");
@@ -427,13 +416,19 @@ r#"* Return: `{name}` – {info}
         let mut data = Self::META_ENTRY_HEADER.to_string();
         data = data.replace("{info}", &entry.info);
 
-        if self.example {
+        if let Some(test) = entry.test {
+            let test = std::fs::read_to_string(&format!("test/{test}")).expect(&format!(
+                "Meta::write_meta_entry(): Could not read file {test}."
+            ));
+
             data.push_str("---```lua\n");
 
-            let split: Vec<&str> = self.example_line.split("\n").collect();
+            let split: Vec<&str> = test.split("\n").collect();
 
             for text in split {
-                data.push_str(&format!("---{text}\n"));
+                if !text.is_empty() {
+                    data.push_str(&format!("---{text}\n"));
+                }
             }
 
             data.push_str("---```\n");
@@ -496,10 +491,14 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{code}", &format!("{} = {{}}", class.name));
         data = data.replace("{info}", &class.info);
 
-        if self.example {
-            data.push_str("```lua\n");
-            data.push_str(&self.example_line);
-            data.push_str("```\n\n");
+        if let Some(test) = class.test {
+            let test = std::fs::read_to_string(&format!("test/{test}")).expect(&format!(
+                "Meta::write_wiki_class(): Could not read file {test}."
+            ));
+
+            data.push_str("---```lua\n");
+            data.push_str(&test);
+            data.push_str("---```\n");
         }
 
         if let Some(class_member) = class.member {
@@ -558,10 +557,14 @@ r#"* Return: `{name}` – {info}
             &format!("function {}({}){}", entry.name, data_member, data_result),
         );
 
-        if self.example {
-            data.push_str("```lua\n");
-            data.push_str(&self.example_line);
-            data.push_str("```\n\n");
+        if let Some(test) = entry.test {
+            let test = std::fs::read_to_string(&format!("test/{test}")).expect(&format!(
+                "Meta::write_wiki_entry(): Could not read file {test}."
+            ));
+
+            data.push_str("---```lua\n");
+            data.push_str(&test);
+            data.push_str("---```\n");
         }
 
         if let Some(entry_member) = &entry.member {
@@ -603,6 +606,7 @@ struct Class {
     pub version: String,
     pub name: String,
     pub info: String,
+    pub test: Option<String>,
     pub member: Option<Vec<Variable>>,
 }
 
@@ -612,6 +616,7 @@ struct Entry {
     pub version: String,
     pub name: String,
     pub info: String,
+    pub test: Option<String>,
     pub member: Option<Vec<Variable>>,
     pub result: Option<Vec<Variable>>,
 }
