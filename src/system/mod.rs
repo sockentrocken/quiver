@@ -48,39 +48,35 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-//================================================================
-// engine API
-//================================================================
-
-pub mod general;
-
-//================================================================
-// raylib API
-//================================================================
-
+/* base library */
 pub mod data;
-pub mod discord;
-pub mod request;
-pub mod steam;
-
-/* draw */
 pub mod draw;
-
-/* miscellaneous */
 pub mod file;
-pub mod input;
-pub mod window;
-
-/* user-data */
 pub mod font;
+pub mod general;
 pub mod image;
+pub mod input;
 pub mod model;
 pub mod music;
 pub mod shader;
 pub mod sound;
 pub mod texture;
-pub mod video;
+pub mod window;
+
+#[cfg(feature = "rapier3d")]
+pub mod rapier;
+
+#[cfg(feature = "zip")]
 pub mod zip;
 
-/* rapier API */
-pub mod rapier;
+#[cfg(feature = "request")]
+pub mod request;
+
+#[cfg(feature = "steam")]
+pub mod steam;
+
+#[cfg(feature = "discord")]
+pub mod discord;
+
+#[cfg(feature = "video")]
+pub mod video;

@@ -53,11 +53,15 @@ use crate::system::*;
 
 //================================================================
 
+#[cfg(feature = "zip")]
 use ::zip::ZipArchive;
+
+#[cfg(feature = "zip")]
+use std::io::Read;
+
 use mlua::prelude::*;
 use serde::Serialize;
 use std::ffi::{CStr, CString};
-use std::io::Read;
 
 //================================================================
 
@@ -123,10 +127,11 @@ impl Script {
         // set the standard Quiver library.
         Self::system(&lua, info)?;
 
-        if let Some(embed_file) = Asset::get("main.lua") {
-            lua.load(String::from_utf8(embed_file.data.to_vec()).unwrap())
-                .exec()?;
-        } else {
+        #[allow(unused_mut)]
+        let mut main_data = format!("require \"{}\"", Self::CALL_MAIN);
+
+        #[cfg(feature = "zip")]
+        {
             // get the path to the main folder or file.
             let main_path = format!("{}/{}", info.path, Self::CALL_MAIN);
             let main_path = std::path::Path::new(&main_path);
@@ -136,18 +141,20 @@ impl Script {
                 let mut file =
                     ZipArchive::new(file).map_err(|e| mlua::Error::runtime(e.to_string()))?;
                 if let Ok(mut value) = file.by_name(Self::NAME_MAIN) {
-                    let mut data = String::new();
-                    value.read_to_string(&mut data)?;
+                    let mut buffer = String::new();
+                    value.read_to_string(&mut buffer)?;
 
-                    // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
-                    lua.load(data).exec()?;
+                    main_data = buffer;
                 };
-            } else {
-                // load the main entry-point file, which should add a "quiver.main" entry-point to the quiver table.
-                lua.load(format!("require \"{}\"", Self::CALL_MAIN))
-                    .exec()?;
             }
         }
+
+        #[cfg(feature = "embed")]
+        if let Some(embed_file) = Asset::get("main.lua") {
+            main_data = String::from_utf8(embed_file.data.to_vec()).unwrap()
+        }
+
+        lua.load(main_data).exec()?;
 
         // get the global table.
         let global = lua.globals();
@@ -237,29 +244,32 @@ impl Script {
                 info.path
             ),
         )?;
-        let loader: mlua::Table = package.get("loaders")?;
-        loader.push(lua.create_function(|lua, path: String| {
-            let path = format!("{path}.lua");
 
-            if let Some(asset) = Asset::get(&path) {
-                if let Ok(asset) = String::from_utf8(asset.data.to_vec()) {
-                    Ok(mlua::Value::Function(lua.load(asset).into_function()?))
+        #[cfg(feature = "embed")]
+        {
+            let loader: mlua::Table = package.get("loaders")?;
+            loader.push(lua.create_function(|lua, path: String| {
+                let path = format!("{path}.lua");
+
+                if let Some(asset) = Asset::get(&path) {
+                    if let Ok(asset) = String::from_utf8(asset.data.to_vec()) {
+                        Ok(mlua::Value::Function(lua.load(asset).into_function()?))
+                    } else {
+                        Err(mlua::Error::runtime(format!(
+                            "File '\"{path}\"' did not contain valid UTF-8 data."
+                        )))
+                    }
                 } else {
-                    Err(mlua::Error::runtime(format!(
-                        "File '\"{path}\"' did not contain valid UTF-8 data."
-                    )))
+                    lua.to_value(&format!("\n\tno file '\"{path}\"' in embed data"))
                 }
-            } else {
-                lua.to_value(&format!("\n\tno file '\"{path}\"' in embed data"))
-            }
-        })?)?;
+            })?)?;
+        }
 
         // create the quiver table.
         let quiver = lua.create_table()?;
 
         // set the standard Quiver library.
         general::set_global(lua, &quiver)?;
-        rapier::set_global(lua, &quiver)?;
         window::set_global(lua, &quiver)?;
         draw::set_global(lua, &quiver)?;
         input::set_global(lua, &quiver)?;
@@ -271,12 +281,25 @@ impl Script {
         font::set_global(lua, &quiver)?;
         shader::set_global(lua, &quiver)?;
         file::set_global(lua, &quiver)?;
-        zip::set_global(lua, &quiver)?;
-        video::set_global(lua, &quiver)?;
-        request::set_global(lua, &quiver)?;
         data::set_global(lua, &quiver)?;
-        discord::set_global(lua, &quiver)?;
+
+        #[cfg(feature = "rapier3d")]
+        rapier::set_global(lua, &quiver)?;
+
+        #[cfg(feature = "zip")]
+        zip::set_global(lua, &quiver)?;
+
+        #[cfg(feature = "request")]
+        request::set_global(lua, &quiver)?;
+
+        #[cfg(feature = "steam")]
         steam::set_global(lua, &quiver)?;
+
+        #[cfg(feature = "discord")]
+        discord::set_global(lua, &quiver)?;
+
+        #[cfg(feature = "video")]
+        video::set_global(lua, &quiver)?;
 
         // set the quiver table as a global value.
         global.set("quiver", quiver)?;

@@ -58,8 +58,8 @@ use std::path::PathBuf;
 
 const PATH_SYSTEM: &str = "src/system/";
 
-// this function is responsible for parsing the src/system/ folder and finding every special comment in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
-fn main() {
+#[allow(dead_code)]
+fn compile_external_dependency() {
     // Tell cargo to look for shared libraries in the specified directory
     //println!("cargo:rustc-link-search=/path/to/lib");
 
@@ -96,6 +96,16 @@ fn main() {
     println!("cargo:rustc-link-lib=avutil");
     println!("cargo:rustc-link-lib=swresample");
     println!("cargo:rustc-link-lib=swscale");
+}
+
+// this function is responsible for parsing the src/system/ folder and finding every special comment in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
+fn main() {
+    #[cfg(feature = "video")]
+    compile_external_dependency();
+
+    // must use this to make the binary link to libsteam.
+    #[cfg(target_os = "linux")]
+    println!("cargo:rustc-link-arg=-Wl,-rpath,$ORIGIN");
 
     //================================================================
 

@@ -54,11 +54,15 @@ use crate::window::*;
 //================================================================
 
 use raylib::prelude::*;
+
+#[cfg(feature = "embed")]
 use rust_embed::Embed;
+
 use serde::{Deserialize, Serialize};
 
 //================================================================
 
+#[cfg(feature = "embed")]
 #[derive(Embed)]
 #[folder = "embed"]
 pub struct Asset;
@@ -71,6 +75,7 @@ pub enum Status {
 }
 
 impl Status {
+    pub const VERSION: [i32; 3] = [1, 0, 0];
     pub const FONT: &'static [u8] = include_bytes!("asset/font.ttf");
     pub const LOGO: &'static [u8] = include_bytes!("asset/logo.png");
     pub const ICON: &'static [u8] = include_bytes!("asset/icon.png");
@@ -84,7 +89,53 @@ impl Status {
             // info does exist and did not fail to read, create script instance.
             Ok(info) => match Script::new(&info) {
                 // script is OK, run Quiver normally.
-                Ok(script)  => Self::Success(script),
+                Ok(script)  => {
+                    println!("//================================================================");
+                    println!("// Quiver {}.{}.{}", Self::VERSION[0], Self::VERSION[1], Self::VERSION[2]);
+                    println!("//");
+                    println!("// -> Info manifest:");
+                    println!("//   * Safe: {}", info.safe);
+                    println!("//   * Path: {}", info.path);
+                    println!("//");
+                    println!("// -> Feature list:");
+
+                    #[cfg(feature = "serialization")]
+                    println!("//   * YAML/TOML/XML/INI serialization/deserialization");
+
+                    #[cfg(feature = "system_info")]
+                    println!("//   * System info");
+
+                    #[cfg(feature = "file_notify")]
+                    println!("//   * File notify");
+
+                    #[cfg(feature = "rapier3d")]
+                    println!("//   * Rapier3D");
+
+                    #[cfg(feature = "rapier2d")]
+                    println!("//   * Rapier2D");
+
+                    #[cfg(feature = "zip")]
+                    println!("//   * ZIP");
+
+                    #[cfg(feature = "request")]
+                    println!("//   * HTTP request");
+
+                    #[cfg(feature = "steam")]
+                    println!("//   * Steam");
+
+                    #[cfg(feature = "discord")]
+                    println!("//   * Discord");
+
+                    #[cfg(feature = "embed")]
+                    println!("//   * File embed");
+
+                    #[cfg(feature = "video")]
+                    println!("//   * Video");
+
+                    println!("//================================================================");
+
+                    Self::Success(script)
+                },
                 // script is  not OK, go-to failure state.
                 Err(script) => Self::Failure(Window::new(handle, thread), None, script.to_string()),
             },
@@ -244,6 +295,47 @@ impl Info {
     pub const MAIN_FILE: &'static str = "main.lua";
 
     pub fn new() -> Result<Self, InfoResult> {
+        let mut result: Option<Info> = None;
+
+        //================================================================
+
+        // get the path to the main.lua file.
+        let main_file = std::path::Path::new(Self::MAIN_FILE);
+
+        if main_file.is_file() {
+            result = Some(Self {
+                safe: true,
+                path: ".".to_string(),
+            });
+        }
+
+        //================================================================
+
+        let main_path = std::path::Path::new(Self::MAIN_PATH);
+
+        if main_path.is_dir() {
+            result = Some(Self {
+                safe: true,
+                path: Self::MAIN_PATH.to_string(),
+            });
+        }
+
+        //================================================================
+
+        #[cfg(feature = "embed")]
+        {
+            let embed_file = Asset::get("main.lua");
+
+            if embed_file.is_some() {
+                result = Some(Self {
+                    safe: true,
+                    path: ".".to_string(),
+                });
+            }
+        }
+
+        //================================================================
+
         // get the path to the info file.
         let data = std::path::Path::new(Self::FILE_INFO);
 
@@ -258,47 +350,55 @@ impl Info {
 
             info.path = info.path.to_string();
 
-            return Ok(info);
+            result = Some(info);
         }
 
         //================================================================
 
-        let embed_file = Asset::get("main.lua");
+        let mut argument_pick = false;
+        let mut argument_info = Info::default();
+        let mut argument_list = std::env::args();
 
-        if embed_file.is_some() {
-            return Ok(Self {
-                safe: true,
-                path: ".".to_string(),
-            });
+        while let Some(argument) = argument_list.next() {
+            match &*argument {
+                "--safe" => {
+                    if let Some(next) = argument_list.next() {
+                        if next == "true" {
+                            argument_info.safe = true;
+                        } else {
+                            argument_info.safe = false;
+                        }
+
+                        argument_pick = true;
+                    } else {
+                        eprintln!("ERROR: Was expecting argument for --safe. (true, false)")
+                    }
+                }
+                "--path" => {
+                    if let Some(next) = argument_list.next() {
+                        argument_info.path = next;
+                    } else {
+                        eprintln!("ERROR: Was expecting argument for --path.")
+                    }
+
+                    argument_pick = true;
+                }
+                _ => {}
+            }
         }
 
-        //================================================================
-
-        let main_path = std::path::Path::new(Self::MAIN_PATH);
-
-        if main_path.is_dir() {
-            return Ok(Self {
-                safe: true,
-                path: Self::MAIN_PATH.to_string(),
-            });
-        }
-
-        //================================================================
-
-        // get the path to the main.lua file.
-        let main_file = std::path::Path::new(Self::MAIN_FILE);
-
-        if main_file.is_file() {
-            return Ok(Self {
-                safe: true,
-                path: ".".to_string(),
-            });
+        if argument_pick {
+            result = Some(argument_info);
         }
 
         //================================================================
 
         // file does not exist, return missing.
-        Err(InfoResult::Missing)
+        if let Some(result) = result {
+            Ok(result)
+        } else {
+            Err(InfoResult::Missing)
+        }
     }
 
     pub fn dump(&self) {

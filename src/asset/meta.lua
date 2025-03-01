@@ -664,24 +664,422 @@ function rapier:step() end
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1171)
 function rapier:debug_render() end
 
+---The Steam API.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L58)
+---@class quiver.steam
+quiver.steam = {}
+
+---An unique handle to a Steam client.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L72)
+---@class steam
+steam = {}
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L127)
+function steam:update() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L143)
+function steam:get_app_ID() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L154)
+function steam:get_IP_country() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L165)
+function steam:get_UI_language() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L176)
+function steam:get_server_time() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L187)
+function steam:set_overlay_position() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L225)
+function steam:get_app_install() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L236)
+function steam:get_DLC_install() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L247)
+function steam:get_app_subscribe() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L258)
+function steam:get_VAC_ban() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L269)
+function steam:get_cyber_cafe() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L280)
+function steam:get_low_violence() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L291)
+function steam:get_subscribe() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L302)
+function steam:get_app_build_ID() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L313)
+function steam:get_app_install_directory() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L324)
+function steam:get_app_owner() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L335)
+function steam:get_game_language_list() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L346)
+function steam:get_game_language() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L357)
+function steam:get_beta_name() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L368)
+function steam:get_launch_command_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L383)
+function steam:get_name() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L394)
+function steam:activate_overlay() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L406)
+function steam:activate_overlay_link() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L418)
+function steam:activate_overlay_store() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L439)
+function steam:activate_overlay_user() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L455)
+function steam:activate_invite_dialog() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L477)
+function steam:get_steam_ID() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L488)
+function steam:get_level() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L497)
+function steam:get_log_on() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L512)
+function steam:get_leader_board() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L532)
+function steam:get_or_create_leader_board() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L565)
+function steam:upload_leader_board_score() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L624)
+function steam:get_leader_board_show_kind() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L656)
+function steam:get_leader_board_sort_kind() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L687)
+function steam:get_leader_board_name() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L714)
+function steam:get_leader_board_entry_count() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L741)
+function steam:pull_user_statistic() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L754)
+function steam:push_user_statistic() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L767)
+function steam:reset_user_statistic() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L787)
+function steam:get_user_statistic() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L809)
+function steam:set_user_statistic() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L833)
+function steam:get_achievement() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L852)
+function steam:get_achievement_list() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L869)
+function steam:set_achievement() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L895)
+function steam:get_achievement_percent() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L914)
+function steam:get_achievement_name() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L933)
+function steam:get_achievement_info() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L952)
+function steam:get_achievement_hidden() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L971)
+function steam:get_achievement_icon() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1000)
+function steam:get_session_user() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1013)
+function steam:get_session_client_name() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1026)
+function steam:get_session_client_form_factor() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1051)
+function steam:get_session_client_resolution() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1071)
+function steam:invite_session() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1091)
+function steam:set_cloud_app() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1103)
+function steam:get_cloud_app() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1114)
+function steam:get_cloud_account() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1125)
+function steam:get_file_list() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1145)
+function steam:file_delete() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1158)
+function steam:file_forget() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1171)
+function steam:file_exist() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1184)
+function steam:get_file_persist() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1197)
+function steam:get_file_time_stamp() end
+
+---Create a new Steam client.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1219)
+function quiver.steam.new() end
+
 ---The video API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L72)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L71)
 ---@class quiver.video
 quiver.video = {}
 
 ---An unique handle to a video in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L86)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L85)
 ---@class video
 video = {}
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L105)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L150)
 function video:update() end
 
 ---Draw a texture.
@@ -691,7 +1089,7 @@ function video:update() end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L128)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L173)
 function video:draw(point,angle,scale,color) end
 
 ---Draw a texture (pro).
@@ -702,7 +1100,7 @@ function video:draw(point,angle,scale,color) end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L153)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L198)
 function video:draw_pro(box_a,box_b,point,angle,color) end
 
 ---Create a new video resource.
@@ -710,7 +1108,7 @@ function video:draw_pro(box_a,box_b,point,angle,color) end
 ---@return video video # Video resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L188)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L233)
 function quiver.video.new(path) end
 
 ---The request API.
@@ -1471,49 +1869,49 @@ quiver.data = {}
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L137)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L142)
 function data:foo() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L146)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L151)
 function data:get_buffer() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L155)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L160)
 function data:get_slice() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L181)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L186)
 function quiver.data.compress() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L200)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L205)
 function quiver.data.decompress() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L221)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L226)
 function quiver.data.encode() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L240)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L245)
 function quiver.data.decode() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L268)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L273)
 function quiver.data.hash() end
 
 ---Serialize a given Lua value as another format, in the form of a string.
@@ -1522,7 +1920,7 @@ function quiver.data.hash() end
 ---@return string value # The value, in string form.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L330)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L335)
 function quiver.data.serialize(text,kind) end
 
 ---Deserialize a given format string as a Lua value.
@@ -1531,37 +1929,63 @@ function quiver.data.serialize(text,kind) end
 ---@return any value # The value, in Lua value form.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L371)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L383)
 function quiver.data.deserialize(text,kind) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L412)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L432)
 function quiver.data.to_data() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L436)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L456)
 function quiver.data.from_data() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L463)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L483)
 function quiver.data.get_embed_file() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L481)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L502)
 function quiver.data.get_embed_list() end
+
+---The discord API.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/discord.rs#L62)
+---@class quiver.discord
+quiver.discord = {}
+
+---An unique handle to a Discord client.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/discord.rs#L76)
+---@class discord
+discord = {}
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/discord.rs#L126)
+function discord:update_activity() end
+
+---Create a new Discord client.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/discord.rs#L229)
+function quiver.discord.new() end
 
 ---The file API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L64)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L63)
 ---@class quiver.file
 quiver.file = {}
 
@@ -1570,7 +1994,7 @@ quiver.file = {}
 ---@return string data # File data.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L100)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L113)
 function quiver.file.get(path) end
 
 ---Set the data of a file.
@@ -1578,7 +2002,7 @@ function quiver.file.get(path) end
 ---@param data string # Data to copy.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L127)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L140)
 function quiver.file.set(path,data) end
 
 ---Check if a file does exist.
@@ -1586,7 +2010,7 @@ function quiver.file.set(path,data) end
 ---@return boolean exist # True if file does exist, false otherwise.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L155)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L168)
 function quiver.file.get_file_exist(path) end
 
 ---Check if a path does exist.
@@ -1594,7 +2018,7 @@ function quiver.file.get_file_exist(path) end
 ---@return boolean exist # True if path does exist, false otherwise.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L175)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L187)
 function quiver.file.get_path_exist(path) end
 
 ---Check if a file's extension is the same as a given one.
@@ -1603,7 +2027,7 @@ function quiver.file.get_path_exist(path) end
 ---@return boolean check # True if file extension is the same as the given one, false otherwise.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L196)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L207)
 function quiver.file.get_file_extension_check(path,extension) end
 
 ---Get the size of a file.
@@ -1611,7 +2035,7 @@ function quiver.file.get_file_extension_check(path,extension) end
 ---@return number size # File size.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L217)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L228)
 function quiver.file.get_file_size(path) end
 
 ---Get the extension of a file.
@@ -1619,7 +2043,7 @@ function quiver.file.get_file_size(path) end
 ---@return string extension # File extension.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L237)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L247)
 function quiver.file.get_file_extension(path) end
 
 ---Get the name of a file.
@@ -1628,21 +2052,21 @@ function quiver.file.get_file_extension(path) end
 ---@return string name # File name.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L264)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L270)
 function quiver.file.get_file_name(path,extension) end
 
 ---Get the current work path.
 ---@return string path # Work path.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L295)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L294)
 function quiver.file.get_work_directory() end
 
 ---Get the current application path.
 ---@return string path # Application path.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L315)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L311)
 function quiver.file.get_application_directory() end
 
 ---Scan a path.
@@ -1653,115 +2077,139 @@ function quiver.file.get_application_directory() end
 ---@return table list # File list.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L341)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L334)
 function quiver.file.scan_path(path,filter,recursive,absolute) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L398)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L387)
 function quiver.file.get_path_escape() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L409)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L398)
 function quiver.file.set_path_escape() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L409)
+function quiver.file.move() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L425)
+function quiver.file.copy() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L441)
+function quiver.file.remove_file() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/file.rs#L456)
+function quiver.file.remove_path() end
 
 ---The general API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L61)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L63)
 ---@class quiver.general
 quiver.general = {}
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L92)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L97)
 function quiver.general.load_base() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L110)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L116)
 function quiver.general.set_log_level() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L124)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L130)
 function quiver.general.open_link() end
 
 ---Load the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L134)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L140)
 function quiver.general.load() end
 
 ---Exit the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L138)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L144)
 function quiver.general.exit() end
 
 ---Set a key to exit Quiver.
 ---@param key input_board # Key to exit Quiver with.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L148)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L154)
 function quiver.general.set_exit_key(key) end
 
 ---Get the current time. Will count up since the initialization of the window.
 ---@return number time # Current time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L164)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L170)
 function quiver.general.get_time() end
 
 ---Get the current frame time.
 ---@return number frame_time # Current frame time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L177)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L183)
 function quiver.general.get_frame_time() end
 
 ---Get the current frame rate.
 ---@return number frame_rate # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L190)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L196)
 function quiver.general.get_frame_rate() end
 
 ---Set the current frame rate.
 ---@param frame_rate number # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L203)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L209)
 function quiver.general.set_frame_rate(frame_rate) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L217)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L223)
 function quiver.general.get_argument() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L230)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L236)
 function quiver.general.get_system() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L244)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L251)
 function quiver.general.get_memory() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L255)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L262)
 function quiver.general.get_info() end
 
 ---The shader API.

@@ -74,8 +74,13 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     data.set("deserialize",    lua.create_function(self::deserialize)?)?;
     data.set("to_data",        lua.create_function(self::to_data)?)?;
     data.set("from_data",      lua.create_function(self::from_data)?)?;
+
+    #[cfg(feature = "embed")]
     data.set("get_embed_file", lua.create_function(self::get_embed_file)?)?;
+
+    #[cfg(feature = "embed")]
     data.set("get_embed_list", lua.create_function(self::get_embed_list)?)?;
+
     data.set("new",            lua.create_function(self::Data::<u8>::new)?)?;
 
     table.set("data", data)?;
@@ -327,6 +332,7 @@ impl FormatKind {
     ]
 }
 */
+#[cfg(feature = "serialization")]
 fn serialize(lua: &Lua, (text, kind): (LuaValue, Option<i32>)) -> mlua::Result<String> {
     let kind = kind.unwrap_or_default();
 
@@ -354,6 +360,12 @@ fn serialize(lua: &Lua, (text, kind): (LuaValue, Option<i32>)) -> mlua::Result<S
     }
 }
 
+#[cfg(not(feature = "serialization"))]
+fn serialize(lua: &Lua, (text, _): (LuaValue, Option<i32>)) -> mlua::Result<String> {
+    let text: serde_json::Value = lua.from_value(text)?;
+    serde_json::to_string(&text).map_err(|e| mlua::Error::runtime(e.to_string()))
+}
+
 /* entry
 {
     "version": "1.0.0",
@@ -368,6 +380,7 @@ fn serialize(lua: &Lua, (text, kind): (LuaValue, Option<i32>)) -> mlua::Result<S
     ]
 }
 */
+#[cfg(feature = "serialization")]
 fn deserialize(lua: &Lua, (text, kind): (String, Option<i32>)) -> mlua::Result<LuaValue> {
     let kind = kind.unwrap_or_default();
 
@@ -398,6 +411,13 @@ fn deserialize(lua: &Lua, (text, kind): (String, Option<i32>)) -> mlua::Result<L
             lua.to_value(&text)
         }
     }
+}
+
+#[cfg(not(feature = "serialization"))]
+fn deserialize(lua: &Lua, (text, _): (String, Option<i32>)) -> mlua::Result<LuaValue> {
+    let text: serde_json::Value =
+        serde_json::from_str(&text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    lua.to_value(&text)
 }
 
 //================================================================
@@ -460,6 +480,7 @@ fn from_data(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<LuaValue>
     "info": "TO-DO"
 }
 */
+#[cfg(feature = "embed")]
 fn get_embed_file(lua: &Lua, path: String) -> mlua::Result<LuaValue> {
     if let Some(asset) = crate::status::Asset::get(&path) {
         let data = crate::system::data::Data::new(lua, asset.data.to_vec())?;
@@ -478,6 +499,7 @@ fn get_embed_file(lua: &Lua, path: String) -> mlua::Result<LuaValue> {
     "info": "TO-DO"
 }
 */
+#[cfg(feature = "embed")]
 fn get_embed_list(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     let list: Vec<String> = crate::status::Asset::iter()
         .map(|i| i.to_string())

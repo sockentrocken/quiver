@@ -51,6 +51,8 @@
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "system_info")]
 use sysinfo::System;
 
 //================================================================
@@ -71,7 +73,10 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     general.set("get_frame_rate",  lua.create_function(self::get_frame_rate)?)?;
     general.set("set_frame_rate",  lua.create_function(self::set_frame_rate)?)?;
     general.set("get_argument",    lua.create_function(self::get_argument)?)?;
+
+    #[cfg(feature = "system_info")]
     general.set("get_system",      lua.create_function(self::get_system)?)?;
+
     general.set("get_memory",      lua.create_function(self::get_memory)?)?;
     general.set("get_info",        lua.create_function(self::get_info)?)?;
 
@@ -92,7 +97,8 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
     // TO-DO only for debug. do not re-load from disk on release.
     for base in crate::script::Script::FILE_BASE {
-        let data = std::fs::read_to_string(&format!("src/asset/{}", base.name)).unwrap();
+        //let data = std::fs::read_to_string(&format!("src/asset/{}", base.name)).unwrap();
+        let data = base.data;
 
         lua.load(data).exec()?;
     }
@@ -227,6 +233,7 @@ fn get_argument(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     "info": "TO-DO"
 }
 */
+#[cfg(feature = "system_info")]
 fn get_system(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     let mut system = System::new_all();
     system.refresh_all();

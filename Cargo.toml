@@ -3,26 +3,52 @@ name    = "quiver"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = [
+	"serialization",
+	"system_info",
+	"file_notify",
+	"rapier3d",
+	"rapier2d",
+	"zip",
+	"request",
+	"steam",
+	"discord",
+	"embed",
+	"video"
+]
+serialization = ["dep:serde_yaml", "dep:toml", "dep:serde-xml-rs", "dep:serde_ini"]
+system_info   = ["dep:sysinfo"]
+file_notify   = ["dep:notify"]
+rapier3d      = ["dep:rapier3d"]
+rapier2d      = ["dep:rapier2d"]
+zip 	      = ["dep:zip"]
+request       = ["dep:reqwest"]
+steam         = ["dep:steamworks"]
+discord       = ["dep:discord-sdk"]
+embed         = ["dep:rust-embed"]
+video         = []
+
 [dependencies]
 raylib       = { git = "https://github.com/raylib-rs/raylib-rs.git", features = ["with_serde"] }
 mlua         = { version = "0.10.3", features = ["luajit52", "vendored", "serialize", "send", "async", "anyhow"] }
 tokio        = { version = "1",      features = ["full"]   }
-sysinfo      = { version = "0.33.1", features = ["serde"]  }
 serde  	     = { version = "1.0",    features = ["derive"] }
 serde_json   = { version = "1.0"    }
-serde_yaml   = { version = "0.9.34" }
-toml 	     = { version = "0.8.20" }
-serde-xml-rs = { version = "0.6.0"  }
-serde_ini  	 = { version = "0.2.0"  }
 rfd	         = { version = "0.15.1" }
-notify       = { version = "8.0.0",  features = ["serde"] }
-rapier3d     = { version = "0.22.0", features = ["simd-stable", "serde-serialize", "debug-render"] }
-rapier2d     = { version = "0.22.0", features = ["simd-stable", "serde-serialize", "debug-render"] }
-zip          = { version = "2.2.2"  }
-reqwest      = { version = "0.12"   }
-steamworks   = { version = "0.11.0" }
-discord-sdk  = { version = "0.4.0"  }
-rust-embed   = { version = "8.5.0"  }
+serde_yaml   = { optional = true, version = "0.9.34" }
+toml 	     = { optional = true, version = "0.8.20" }
+serde-xml-rs = { optional = true, version = "0.6.0"  }
+serde_ini  	 = { optional = true, version = "0.2.0"  }
+sysinfo      = { optional = true, version = "0.33.1", features = ["serde"]  }
+notify       = { optional = true, version = "8.0.0",  features = ["serde"] }
+rapier3d     = { optional = true, version = "0.22.0", features = ["simd-stable", "serde-serialize", "debug-render"] }
+rapier2d     = { optional = true, version = "0.22.0", features = ["simd-stable", "serde-serialize", "debug-render"] }
+zip          = { optional = true, version = "2.2.2"  }
+reqwest      = { optional = true, version = "0.12"   }
+steamworks   = { optional = true, version = "0.11.0" }
+discord-sdk  = { optional = true, version = "0.4.0"  }
+rust-embed   = { optional = true, version = "8.5.0"  }
 
 [build-dependencies]
 serde  	    = { version = "1.0", features = ["derive"] }
