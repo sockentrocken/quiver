@@ -49,6 +49,7 @@
 */
 
 use crate::script::*;
+use crate::status::*;
 
 //================================================================
 
@@ -65,7 +66,11 @@ use std::{
 { "version": "1.0.0", "name": "quiver.window", "info": "The window API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    if !info.head {
+        return Ok(());
+    }
+    
     let window = lua.create_table()?;
 
     // WindowShouldClose

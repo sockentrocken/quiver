@@ -113,6 +113,7 @@ impl Script {
         let lua = Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())?;
 
         let info = Info {
+            head: true,
             safe: true,
             path: "test/asset".to_string(),
         };
@@ -224,6 +225,7 @@ impl Script {
 
         // dump info_quiver.json.
         Info {
+            head: true,
             safe: true,
             path: path.to_string(),
         }
@@ -234,6 +236,7 @@ impl Script {
     pub fn load_project(path: &str) {
         // dump info_quiver.json.
         Info {
+            head: true,
             safe: true,
             path: path.to_string(),
         }
@@ -294,37 +297,37 @@ impl Script {
         let quiver = lua.create_table()?;
 
         // set the standard Quiver library.
-        general::set_global(lua, &quiver)?;
-        window::set_global(lua, &quiver)?;
-        draw::set_global(lua, &quiver)?;
-        input::set_global(lua, &quiver)?;
-        model::set_global(lua, &quiver)?;
-        texture::set_global(lua, &quiver)?;
-        image::set_global(lua, &quiver)?;
-        sound::set_global(lua, &quiver)?;
-        music::set_global(lua, &quiver)?;
-        font::set_global(lua, &quiver)?;
-        shader::set_global(lua, &quiver)?;
-        file::set_global(lua, &quiver)?;
-        data::set_global(lua, &quiver)?;
+        general::set_global(lua, info, &quiver)?;
+        window::set_global(lua, info, &quiver)?;
+        draw::set_global(lua, info, &quiver)?;
+        input::set_global(lua, info, &quiver)?;
+        model::set_global(lua, info, &quiver)?;
+        texture::set_global(lua, info, &quiver)?;
+        image::set_global(lua, info, &quiver)?;
+        sound::set_global(lua, info, &quiver)?;
+        music::set_global(lua, info, &quiver)?;
+        font::set_global(lua, info, &quiver)?;
+        shader::set_global(lua, info, &quiver)?;
+        file::set_global(lua, info, &quiver)?;
+        data::set_global(lua, info, &quiver)?;
 
         #[cfg(feature = "rapier3d")]
-        rapier::set_global(lua, &quiver)?;
+        rapier::set_global(lua, info, &quiver)?;
 
         #[cfg(feature = "zip")]
-        zip::set_global(lua, &quiver)?;
+        zip::set_global(lua, info, &quiver)?;
 
         #[cfg(feature = "request")]
-        request::set_global(lua, &quiver)?;
+        request::set_global(lua, info, &quiver)?;
 
         #[cfg(feature = "steam")]
-        steam::set_global(lua, &quiver)?;
+        steam::set_global(lua, info, &quiver)?;
 
         #[cfg(feature = "discord")]
-        discord::set_global(lua, &quiver)?;
+        discord::set_global(lua, info, &quiver)?;
 
         #[cfg(feature = "video")]
-        video::set_global(lua, &quiver)?;
+        video::set_global(lua, info, &quiver)?;
 
         // set the quiver table as a global value.
         global.set("quiver", quiver)?;

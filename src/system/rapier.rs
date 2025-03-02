@@ -48,10 +48,12 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-use rapier3d::control::CharacterLength;
-use std::sync::{Arc, Mutex};
+use crate::status::*;
+
+//================================================================
 
 use mlua::prelude::*;
+use rapier3d::control::CharacterLength;
 use rapier3d::{
     control::{CharacterAutostep, KinematicCharacterController},
     parry,
@@ -59,6 +61,7 @@ use rapier3d::{
 };
 use raylib::prelude::*;
 use serde::Serialize;
+use std::sync::{Arc, Mutex};
 
 //================================================================
 
@@ -66,7 +69,7 @@ use serde::Serialize;
 { "version": "1.0.0", "name": "quiver.rapier", "info": "The Rapier API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
     let rapier = lua.create_table()?;
 
     rapier.set("new", lua.create_function(self::Rapier::new)?)?;

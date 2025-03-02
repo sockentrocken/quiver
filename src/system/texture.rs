@@ -49,6 +49,7 @@
 */
 
 use crate::script::*;
+use crate::status::*;
 use crate::system::*;
 
 //================================================================
@@ -68,7 +69,11 @@ type RLRenderTexture = ffi::RenderTexture2D;
 { "version": "1.0.0", "name": "quiver.texture", "info": "The texture API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    if !info.head {
+        return Ok(());
+    }
+    
     let texture = lua.create_table()?;
 
     texture.set("new",             lua.create_function(self::Texture::new)?)?;

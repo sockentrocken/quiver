@@ -48,6 +48,10 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::status::*;
+
+//================================================================
+
 use mlua::prelude::*;
 use raylib::prelude::*;
 
@@ -57,7 +61,7 @@ use raylib::prelude::*;
 { "version": "1.0.0", "name": "quiver.data", "info": "The data API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
     let data = lua.create_table()?;
 
     // CompressData
@@ -478,6 +482,7 @@ fn from_data(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<LuaValue>
 /* entry
 {
     "version": "1.0.0",
+    "feature": "embed",
     "name": "quiver.data.get_embed_file",
     "info": "TO-DO"
 }
@@ -497,6 +502,7 @@ fn get_embed_file(lua: &Lua, path: String) -> mlua::Result<LuaValue> {
 /* entry
 {
     "version": "1.0.0",
+    "feature": "embed",
     "name": "quiver.data.get_embed_list",
     "info": "TO-DO"
 }

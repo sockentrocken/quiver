@@ -58,48 +58,7 @@ use std::path::PathBuf;
 
 const PATH_SYSTEM: &str = "src/system/";
 
-#[allow(dead_code)]
-fn compile_external_dependency() {
-    // Tell cargo to look for shared libraries in the specified directory
-    //println!("cargo:rustc-link-search=/path/to/lib");
-
-    // The bindgen::Builder is the main entry point
-    // to bindgen, and lets you build up options for
-    // the resulting bindings.
-    let bindings = bindgen::Builder::default()
-        // The input header we would like to generate
-        // bindings for.
-        .header("src/system/external/raymedia.h")
-        // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-        // Finish the builder and generate the bindings.
-        .generate()
-        // Unwrap the Result and panic on failure.
-        .expect("Unable to generate bindings");
-
-    // Write the bindings to the $OUT_DIR/bindings.rs file.
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
-
-    cc::Build::new()
-        .file("src/system/external/rmedia.c")
-        .include("src/system/external")
-        .compile("rmedia");
-
-    // Tell cargo to tell rustc to link the system bzip2
-    // shared library.
-    println!("cargo:rustc-link-lib=avcodec");
-    println!("cargo:rustc-link-lib=avformat");
-    println!("cargo:rustc-link-lib=avutil");
-    println!("cargo:rustc-link-lib=swresample");
-    println!("cargo:rustc-link-lib=swscale");
-}
-
-// this function is responsible for parsing the src/system/ folder and finding every special comment in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
-fn main() {
+fn write_documentation() {
     // create parser object.
     let mut parser = Parser::new();
 
@@ -142,18 +101,59 @@ fn main() {
         // for each line in the file...
         for (i, line) in file.map_while(Result::ok).enumerate() {
             parser.parse(path, name, &line, i);
-            //wiki.parse(path, name, &line, i);
         }
     }
+}
 
-    //================================================================
+#[allow(dead_code)]
+fn compile_external_dependency() {
+    // Tell cargo to look for shared libraries in the specified directory
+    //println!("cargo:rustc-link-search=/path/to/lib");
+
+    // The bindgen::Builder is the main entry point
+    // to bindgen, and lets you build up options for
+    // the resulting bindings.
+    let bindings = bindgen::Builder::default()
+        // The input header we would like to generate
+        // bindings for.
+        .header("src/system/external/raymedia.h")
+        // Tell cargo to invalidate the built crate whenever any of the
+        // included header files changed.
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        // Finish the builder and generate the bindings.
+        .generate()
+        // Unwrap the Result and panic on failure.
+        .expect("Unable to generate bindings");
+
+    // Write the bindings to the $OUT_DIR/bindings.rs file.
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("Couldn't write bindings!");
+
+    cc::Build::new()
+        .file("src/system/external/rmedia.c")
+        .include("src/system/external")
+        .compile("rmedia");
+
+    // Tell cargo to tell rustc to link the system bzip2
+    // shared library.
+    println!("cargo:rustc-link-lib=avcodec");
+    println!("cargo:rustc-link-lib=avformat");
+    println!("cargo:rustc-link-lib=avutil");
+    println!("cargo:rustc-link-lib=swresample");
+    println!("cargo:rustc-link-lib=swscale");
+}
+
+// this function is responsible for parsing the src/system/ folder and finding every special comment in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
+fn main() {
+    #[cfg(feature = "documentation")]
+    write_documentation();
 
     #[cfg(feature = "video")]
-    {
-        compile_external_dependency();
-    }
+    compile_external_dependency();
 
-    // must use this to make the binary link to libsteam.
+    // where to search for for library linking.
     #[cfg(target_os = "linux")]
     println!("cargo:rustc-link-arg=-Wl,-rpath,$ORIGIN");
 }
@@ -191,7 +191,7 @@ quiver = {}
     const META_CLASS_HEADER: &'static str =
 r#"---{info}
 ---
---- ---
+--- ---{feature}
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/{path}#L{line})
 "#;
 
@@ -219,7 +219,7 @@ r#"---{info}
         #[rustfmt::skip]
     const META_ENTRY_FOOTER: &'static str =
 r#"---
---- ---
+--- ---{feature}
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/{path}#L{line})
 function {name}({member}) end
 
@@ -239,7 +239,7 @@ r#"---@return {kind} {name} # {info}
     #[rustfmt::skip]
     const WIKI_CLASS_HEADER: &'static str =
 r#"## {name}
-*Available since version: {version}*
+*Available since version: {version}.*{feature}
 
 ```lua
 {code}
@@ -264,7 +264,7 @@ r#"* Field: `{name}` – {info}
     #[rustfmt::skip]
     const WIKI_ENTRY_HEADER: &'static str =
 r#"## {name}
-*Available since version: {version}*
+*Available since version: {version}.*{feature}
 
 ```lua
 {code}
@@ -372,9 +372,10 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{line}", &format!("{}", line + 2));
 
         if let Some(test) = class.test {
-            let test = std::fs::read_to_string(&format!("test/system/{test}")).expect(&format!(
-                "Meta::write_meta_class(): Could not read file {test}."
-            ));
+            let test =
+                std::fs::read_to_string(format!("test/system/{test}")).unwrap_or_else(|_| {
+                    panic!("Meta::write_meta_class(): Could not read file {test}.")
+                });
 
             data.push_str("---```lua\n");
 
@@ -403,6 +404,16 @@ r#"* Return: `{name}` – {info}
         data.push_str(Self::META_CLASS_FOOTER);
         data = data.replace("{name}", &class.name);
 
+        let feature = {
+            if let Some(feature) = class.feature {
+                &format!("\n---*Available with compile feature: `{feature}`.*\n---")
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{feature}", feature);
+
         self.meta_file
             .write_all(data.as_bytes())
             .expect("Meta::write_meta_class(): Could not write to file.");
@@ -417,9 +428,10 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{info}", &entry.info);
 
         if let Some(test) = entry.test {
-            let test = std::fs::read_to_string(&format!("test/system/{test}")).expect(&format!(
-                "Meta::write_meta_entry(): Could not read file {test}."
-            ));
+            let test =
+                std::fs::read_to_string(format!("test/system/{test}")).unwrap_or_else(|_| {
+                    panic!("Meta::write_meta_entry(): Could not read file {test}.")
+                });
 
             data.push_str("---```lua\n");
 
@@ -471,6 +483,16 @@ r#"* Return: `{name}` – {info}
 
         data = data.replace("{member}", &data_member);
 
+        let feature = {
+            if let Some(feature) = entry.feature {
+                &format!("\n---*Available with compile feature: `{feature}`.*\n---")
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{feature}", feature);
+
         self.meta_file
             .write_all(data.as_bytes())
             .expect("Meta::write_meta_entry(): Could not write to file.");
@@ -486,13 +508,24 @@ r#"* Return: `{name}` – {info}
         let mut data = Self::WIKI_CLASS_HEADER.to_string();
         data = data.replace("{name}", &class.name);
         data = data.replace("{version}", &class.version);
+
+        let feature = {
+            if let Some(feature) = class.feature {
+                &format!(" *Available with compile feature: `{feature}`.*")
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{feature}", feature);
         data = data.replace("{code}", &format!("{} = {{}}", class.name));
         data = data.replace("{info}", &class.info);
 
         if let Some(test) = class.test {
-            let test = std::fs::read_to_string(&format!("test/system/{test}")).expect(&format!(
-                "Meta::write_wiki_class(): Could not read file {test}."
-            ));
+            let test =
+                std::fs::read_to_string(format!("test/system/{test}")).unwrap_or_else(|_| {
+                    panic!("Meta::write_wiki_class(): Could not read file {test}.")
+                });
 
             data.push_str("```lua\n");
             data.push_str(&test);
@@ -526,6 +559,17 @@ r#"* Return: `{name}` – {info}
 
         let mut data = Self::WIKI_ENTRY_HEADER.to_string();
         data = data.replace("{version}", &entry.version);
+
+        let feature = {
+            if let Some(feature) = entry.feature {
+                &format!(" *Available with compile feature: `{feature}`.*")
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{feature}", feature);
+
         data = data.replace("{info}", &entry.info);
 
         let mut data_member = String::new();
@@ -556,9 +600,10 @@ r#"* Return: `{name}` – {info}
         );
 
         if let Some(test) = entry.test {
-            let test = std::fs::read_to_string(&format!("test/system/{test}")).expect(&format!(
-                "Meta::write_wiki_entry(): Could not read file {test}."
-            ));
+            let test =
+                std::fs::read_to_string(format!("test/system/{test}")).unwrap_or_else(|_| {
+                    panic!("Meta::write_wiki_entry(): Could not read file {test}.")
+                });
 
             data.push_str("```lua\n");
             data.push_str(&test);
@@ -602,6 +647,7 @@ r#"* Return: `{name}` – {info}
 #[derive(Deserialize, Serialize)]
 struct Class {
     pub version: String,
+    pub feature: Option<String>,
     pub name: String,
     pub info: String,
     pub test: Option<String>,
@@ -612,6 +658,7 @@ struct Class {
 #[derive(Deserialize, Serialize)]
 struct Entry {
     pub version: String,
+    pub feature: Option<String>,
     pub name: String,
     pub info: String,
     pub test: Option<String>,

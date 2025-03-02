@@ -135,73 +135,75 @@ impl Window {
     }
 
     // draw missing window layout.
-    pub fn missing(&mut self, handle: &mut RaylibHandle, thread: &RaylibThread) -> Option<Status> {
-        let draw_shape = Vector2::new(
-            handle.get_screen_width() as f32,
-            handle.get_screen_height() as f32,
-        );
-        let logo_shape = Vector2::new(self.logo.width as f32, self.logo.height as f32);
-        let logo_point = Vector2::new(
-            (draw_shape.x * 0.5) - (logo_shape.x * 0.5),
-            (draw_shape.y * 0.5) - (logo_shape.y * 0.5) - (Self::LOGO_SHAPE * 0.5),
-        );
-        let card_shape = Rectangle::new(0.0, 0.0, draw_shape.x, draw_shape.y - Self::LOGO_SHAPE);
+    pub fn missing(
+        &mut self,
+        handle: &mut RaylibHandle,
+        thread: &RaylibThread,
+    ) -> Option<(Option<Info>, Status)> {
+        while !handle.window_should_close() {
+            let draw_shape = Vector2::new(
+                handle.get_screen_width() as f32,
+                handle.get_screen_height() as f32,
+            );
+            let logo_shape = Vector2::new(self.logo.width as f32, self.logo.height as f32);
+            let logo_point = Vector2::new(
+                (draw_shape.x * 0.5) - (logo_shape.x * 0.5),
+                (draw_shape.y * 0.5) - (logo_shape.y * 0.5) - (Self::LOGO_SHAPE * 0.5),
+            );
+            let card_shape =
+                Rectangle::new(0.0, 0.0, draw_shape.x, draw_shape.y - Self::LOGO_SHAPE);
 
-        // begin drawing, clear screen, begin window frame.
-        let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::WHITE);
-        self.begin();
+            // begin drawing, clear screen, begin window frame.
+            let mut draw = handle.begin_drawing(thread);
+            draw.clear_background(Color::WHITE);
+            self.begin();
 
-        // card header.
-        self.card_sharp(&mut draw, card_shape, Window::COLOR_PRIMARY_MAIN);
-        draw.draw_texture_v(&self.logo, logo_point, Color::WHITE);
+            // card header.
+            self.card_sharp(&mut draw, card_shape, Window::COLOR_PRIMARY_MAIN);
+            draw.draw_texture_v(&self.logo, logo_point, Color::WHITE);
 
-        // button footer.
-        self.point(Vector2::new(20.0, draw_shape.y - Self::LOGO_SHAPE + 24.0));
+            // button footer.
+            self.point(Vector2::new(20.0, draw_shape.y - Self::LOGO_SHAPE + 24.0));
 
-        // create a new info file for a project, which doesn't exist yet.
-        if self.button(&mut draw, "New Project") {
-            let path = std::env::current_dir()
-                .map_err(|e| Status::panic(&e.to_string()))
-                .unwrap();
+            // create a new info file for a project, which doesn't exist yet.
+            if self.button(&mut draw, "New Project") {
+                let path = std::env::current_dir()
+                    .map_err(|e| Status::panic(&e.to_string()))
+                    .unwrap();
 
-            let project = rfd::FileDialog::new().set_directory(path).pick_folder();
+                let project = rfd::FileDialog::new().set_directory(path).pick_folder();
 
-            if let Some(project) = project {
-                Script::new_project(&project.display().to_string());
+                if let Some(project) = project {
+                    Script::new_project(&project.display().to_string());
 
-                drop(draw);
-                return Some(Status::new(handle, thread));
+                    drop(draw);
+                    return Some(Status::new());
+                }
+            }
+
+            // create a new info file for a project.
+            if self.button(&mut draw, "Load Project") {
+                let path = std::env::current_dir()
+                    .map_err(|e| Status::panic(&e.to_string()))
+                    .unwrap();
+
+                let project = rfd::FileDialog::new().set_directory(path).pick_folder();
+
+                if let Some(project) = project {
+                    Script::load_project(&project.display().to_string());
+
+                    drop(draw);
+                    return Some(Status::new());
+                }
+            }
+
+            // exit Quiver.
+            if self.button(&mut draw, "Exit Quiver") {
+                return Some((None, Status::Closure));
             }
         }
 
-        // create a new info file for a project.
-        if self.button(&mut draw, "Load Project") {
-            let path = std::env::current_dir()
-                .map_err(|e| Status::panic(&e.to_string()))
-                .unwrap();
-
-            let project = rfd::FileDialog::new().set_directory(path).pick_folder();
-
-            if let Some(project) = project {
-                Script::load_project(&project.display().to_string());
-
-                drop(draw);
-                return Some(Status::new(handle, thread));
-            }
-        }
-
-        // exit Quiver.
-        if self.button(&mut draw, "Exit Quiver") {
-            return Some(Status::Closure);
-        }
-
-        // if window should close, exit Quiver.
-        if draw.window_should_close() {
-            Some(Status::Closure)
-        } else {
-            None
-        }
+        Some((None, Status::Closure))
     }
 
     // draw failure window layout.
@@ -210,60 +212,57 @@ impl Window {
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         text: &str,
-    ) -> Option<Status> {
-        let draw_shape = Vector2::new(
-            handle.get_screen_width() as f32,
-            handle.get_screen_height() as f32,
-        );
-        let card_shape = Rectangle::new(0.0, 0.0, draw_shape.x, 48.0);
+    ) -> Option<(Option<Info>, Status)> {
+        while !handle.window_should_close() {
+            let draw_shape = Vector2::new(
+                handle.get_screen_width() as f32,
+                handle.get_screen_height() as f32,
+            );
+            let card_shape = Rectangle::new(0.0, 0.0, draw_shape.x, 48.0);
 
-        // begin drawing, clear screen, begin window frame.
-        let mut draw = handle.begin_drawing(thread);
-        draw.clear_background(Color::WHITE);
-        self.begin();
+            // begin drawing, clear screen, begin window frame.
+            let mut draw = handle.begin_drawing(thread);
+            draw.clear_background(Color::WHITE);
+            self.begin();
 
-        // card header.
-        self.card_sharp(&mut draw, card_shape, Window::COLOR_PRIMARY_MAIN);
-        self.font(
-            &mut draw,
-            "Fatal Error",
-            Vector2::new(20.0, 12.0),
-            Self::COLOR_TEXT_WHITE,
-        );
-        self.font(
-            &mut draw,
-            text,
-            Vector2::new(20.0, 72.0),
-            Self::COLOR_TEXT_BLACK,
-        );
+            // card header.
+            self.card_sharp(&mut draw, card_shape, Window::COLOR_PRIMARY_MAIN);
+            self.font(
+                &mut draw,
+                "Fatal Error",
+                Vector2::new(20.0, 12.0),
+                Self::COLOR_TEXT_WHITE,
+            );
+            self.font(
+                &mut draw,
+                text,
+                Vector2::new(20.0, 72.0),
+                Self::COLOR_TEXT_BLACK,
+            );
 
-        // button footer.
-        self.point(Vector2::new(20.0, draw_shape.y - 136.0));
+            // button footer.
+            self.point(Vector2::new(20.0, draw_shape.y - 136.0));
 
-        // reload Quiver.
-        if self.button(&mut draw, "Load Project") {
-            drop(draw);
-            return Some(Status::new(handle, thread));
+            // reload Quiver.
+            if self.button(&mut draw, "Load Project") {
+                drop(draw);
+                return Some(Status::new());
+            }
+
+            // copy report to clipboard.
+            if self.button(&mut draw, "Copy Report") {
+                draw.set_clipboard_text(text)
+                    .map_err(|e| Status::panic(&e.to_string()))
+                    .unwrap();
+            }
+
+            // exit Quiver.
+            if self.button(&mut draw, "Exit Quiver") {
+                return Some((None, Status::Closure));
+            }
         }
 
-        // copy report to clipboard.
-        if self.button(&mut draw, "Copy Report") {
-            draw.set_clipboard_text(text)
-                .map_err(|e| Status::panic(&e.to_string()))
-                .unwrap();
-        }
-
-        // exit Quiver.
-        if self.button(&mut draw, "Exit Quiver") {
-            return Some(Status::Closure);
-        }
-
-        // if window should close, exit Quiver.
-        if draw.window_should_close() {
-            Some(Status::Closure)
-        } else {
-            None
-        }
+        Some((None, Status::Closure))
     }
 
     //================================================================

@@ -49,6 +49,7 @@
 */
 
 use crate::script::*;
+use crate::status::*;
 
 //================================================================
 
@@ -62,7 +63,11 @@ use std::ffi::CString;
 { "version": "1.0.0", "name": "quiver.shader", "info": "The shader API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    if !info.head {
+        return Ok(());
+    }
+    
     let shader = lua.create_table()?;
 
     shader.set("new",             lua.create_function(self::Shader::new)?)?;
@@ -101,7 +106,7 @@ impl Shader {
         unsafe {
             let v_path = match v_path {
                 Some(name) => {
-                    let pointer = CString::new(ScriptData::get_path(&lua, &name)?)
+                    let pointer = CString::new(ScriptData::get_path(lua, &name)?)
                         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
                     pointer.into_raw()
@@ -111,7 +116,7 @@ impl Shader {
 
             let f_path = match f_path {
                 Some(name) => {
-                    let pointer = CString::new(ScriptData::get_path(&lua, &name)?)
+                    let pointer = CString::new(ScriptData::get_path(lua, &name)?)
                         .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
                     pointer.into_raw()

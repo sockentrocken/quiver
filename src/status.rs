@@ -65,12 +65,13 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "embed")]
 #[derive(Embed)]
 #[folder = "embed"]
+#[allow_missing = true]
 pub struct Asset;
 
 pub enum Status {
-    Missing(Window),
+    Missing,
     Success(Script),
-    Failure(Window, Option<Script>, String),
+    Failure(Option<Script>, String),
     Closure,
 }
 
@@ -82,7 +83,7 @@ impl Status {
 
     // get a new status instance.
     #[rustfmt::skip]
-    pub fn new(handle: &mut RaylibHandle, thread: &RaylibThread) -> Self {
+    pub fn new() -> (Option<Info>, Self) {
         let info = Info::new();
 
         match info {
@@ -134,22 +135,28 @@ impl Status {
 
                     println!("//================================================================");
 
-                    Self::Success(script)
+                    (Some(info), Self::Success(script))
                 },
                 // script is  not OK, go-to failure state.
-                Err(script) => Self::Failure(Window::new(handle, thread), None, script.to_string()),
+                Err(script) => (Some(info), Self::Failure(None, script.to_string())),
             },
             Err(info) => match info {
                 // info does exist, but there was an error parsing.
-                InfoResult::Failure(info) => Self::Failure(Window::new(handle, thread), None, info.to_string()),
+                InfoResult::Failure(info) => (None, Self::Failure(None, info.to_string())),
                 // info does not exist.
-                InfoResult::Missing => Self::Missing(Window::new(handle, thread)),
+                InfoResult::Missing => (None, Self::Missing),
             },
         }
     }
 
     // create a RL context.
-    pub fn window() -> (RaylibHandle, RaylibThread, RaylibAudio) {
+    pub fn window(info: &Option<Info>) -> Option<(RaylibHandle, RaylibThread, RaylibAudio)> {
+        if let Some(info) = info {
+            if !info.head {
+                return None;
+            }
+        }
+
         // create RL window, thread.
         let (mut handle, thread) = raylib::init().title("Quiver").size(1024, 768).build();
 
@@ -167,7 +174,7 @@ impl Status {
             .unwrap();
         handle.set_window_icon(icon);
 
-        (handle, thread, audio)
+        Some((handle, thread, audio))
     }
 
     // missing state, info_quiver.json does not exist.
@@ -175,50 +182,52 @@ impl Status {
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         window: &mut Window,
-    ) -> Option<Status> {
+    ) -> Option<(Option<Info>, Status)> {
         window.missing(handle, thread)
     }
 
     // success state.
     pub async fn success(
-        handle: &mut RaylibHandle,
-        thread: &RaylibThread,
+        context: &Option<(RaylibHandle, RaylibThread, RaylibAudio)>,
         script: &Script,
-    ) -> Option<Status> {
+    ) -> Option<(Option<Info>, Status)> {
         match script.main().await {
             Ok(result) => {
                 if result {
-                    // need to do this, otherwise MAY cause an infinite hang.
-                    unsafe {
-                        ffi::PollInputEvents();
+                    if context.is_some() {
+                        // need to do this, otherwise MAY cause an infinite hang.
+                        unsafe {
+                            ffi::PollInputEvents();
+                        }
                     }
 
                     // return true, reload Quiver.
-                    Some(Status::new(handle, thread))
+                    Some(Status::new())
                 } else {
                     // return false, close Quiver.
-                    Some(Status::Closure)
+                    Some((None, Status::Closure))
                 }
             }
             // error, go to failure state.
             Err(result) => {
-                handle.enable_cursor();
-                unsafe {
-                    ffi::EndMode3D();
-                    ffi::EndMode2D();
-                    ffi::EndTextureMode();
-                    ffi::EndShaderMode();
-                    ffi::EndBlendMode();
-                    ffi::EndScissorMode();
-                    ffi::EndDrawing();
-                    ffi::SetMouseOffset(0, 0);
-                    ffi::SetMouseScale(1.0, 1.0);
+                if context.is_some() {
+                    unsafe {
+                        ffi::EnableCursor();
+                        ffi::EndMode3D();
+                        ffi::EndMode2D();
+                        ffi::EndTextureMode();
+                        ffi::EndShaderMode();
+                        ffi::EndBlendMode();
+                        ffi::EndScissorMode();
+                        ffi::EndDrawing();
+                        ffi::SetMouseOffset(0, 0);
+                        ffi::SetMouseScale(1.0, 1.0);
+                    }
                 }
 
-                Some(Status::Failure(
-                    Window::new(handle, thread),
-                    Some(script.clone()),
-                    result.to_string(),
+                Some((
+                    None,
+                    Status::Failure(Some(script.clone()), result.to_string()),
                 ))
             }
         }
@@ -231,7 +240,7 @@ impl Status {
         window: &mut Window,
         script: &Option<Script>,
         text: &str,
-    ) -> Option<Status> {
+    ) -> Option<(Option<Info>, Status)> {
         // a script instance is available, and a crash-handler was set in Lua.
         if let Some(script) = script {
             if script.fail.is_some() {
@@ -244,10 +253,10 @@ impl Status {
                             }
 
                             // return true, reload Quiver.
-                            return Some(Status::new(handle, thread));
+                            return Some(Status::new());
                         } else {
                             // return false, close Quiver.
-                            return Some(Status::Closure);
+                            return Some((None, Status::Closure));
                         }
                     }
                     // an error in the crash-handler...just panic to avoid causing an infinite loop.
@@ -285,6 +294,7 @@ pub enum InfoResult {
 
 #[derive(Default, Clone, Deserialize, Serialize)]
 pub struct Info {
+    pub head: bool,
     pub safe: bool,
     pub path: String,
 }
@@ -304,6 +314,7 @@ impl Info {
 
         if main_file.is_file() {
             result = Some(Self {
+                head: true,
                 safe: true,
                 path: ".".to_string(),
             });
@@ -315,6 +326,7 @@ impl Info {
 
         if main_path.is_dir() {
             result = Some(Self {
+                head: true,
                 safe: true,
                 path: Self::MAIN_PATH.to_string(),
             });
@@ -328,6 +340,7 @@ impl Info {
 
             if embed_file.is_some() {
                 result = Some(Self {
+                    head: true,
                     safe: true,
                     path: ".".to_string(),
                 });
@@ -356,26 +369,25 @@ impl Info {
         //================================================================
 
         let mut argument_pick = false;
-        let mut argument_info = Info::default();
-        let mut argument_list = std::env::args();
+        let mut argument_info = Info {
+            safe: true,
+            head: true,
+            path: ".".to_string(),
+        };
+        let mut argument_list = std::env::args().enumerate();
 
-        while let Some(argument) = argument_list.next() {
+        while let Some((i, argument)) = argument_list.next() {
             match &*argument {
-                "--safe" => {
-                    if let Some(next) = argument_list.next() {
-                        if next == "true" {
-                            argument_info.safe = true;
-                        } else {
-                            argument_info.safe = false;
-                        }
-
-                        argument_pick = true;
-                    } else {
-                        eprintln!("ERROR: Was expecting argument for --safe. (true, false)")
-                    }
+                "--no-safe" => {
+                    argument_info.safe = false;
+                    argument_pick = true;
+                }
+                "--no-head" => {
+                    argument_info.head = false;
+                    argument_pick = true;
                 }
                 "--path" => {
-                    if let Some(next) = argument_list.next() {
+                    if let Some((_, next)) = argument_list.next() {
                         argument_info.path = next;
                     } else {
                         eprintln!("ERROR: Was expecting argument for --path.")
@@ -383,7 +395,22 @@ impl Info {
 
                     argument_pick = true;
                 }
-                _ => {}
+                any => {
+                    // first argument might be the path to the executable which will trigger a false alarm...this might not be correct.
+                    if i > 0 {
+                        eprintln!("Unknown argument: {any}.");
+                        eprintln!("Argument list:");
+                        eprintln!(
+                        "--no-safe: Disable safe mode. Quiver will start in safe mode otherwise."
+                    );
+                        eprintln!(
+                        "--no-head: Disable head mode. Quiver will start in head mode otherwise."
+                    );
+                        eprintln!(
+                            "--path {{path}}: Path to folder, or file, with a main.lua file."
+                        );
+                    }
+                }
             }
         }
 

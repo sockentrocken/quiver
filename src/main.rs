@@ -64,29 +64,42 @@ use crate::status::*;
 #[rustfmt::skip]
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // create the RL context.
-    let (mut handle, thread, _audio) = Status::window();
     // create the Quiver state.
-    let mut status = Status::new(&mut handle, &thread);
+    let (info, mut status) = Status::new();
+
+    // create the RL context.
+    let mut context = Status::window(&info);
 
     loop {
         match status {
             // missing status: no info_quiver.json file is present.
-            Status::Missing(ref mut window) => {
-                if let Some(state) = Status::missing(&mut handle, &thread, window) {
-                    status = state;
+            Status::Missing => {
+                if let Some((ref mut handle, ref thread, ref _audio)) = context {
+                    let mut window = window::Window::new(handle, thread);
+
+                    if let Some((_, state)) = Status::missing(handle, thread, &mut window) {
+                        status = state;
+                    }   
+                } else {
+                    panic!("main(): Missing info manifest data. Refer to the wiki on how to launch Quiver in head-less mode.")
                 }
             }
             // success status: standard state.
             Status::Success(ref mut script) => {
-                if let Some(state) = Status::success(&mut handle, &thread, script).await {
+                if let Some((_, state)) = Status::success(&context, script).await {
                     status = state;
                 }
             }
             // failure status: an error has been thrown from Lua, show crash-handler.
-            Status::Failure(ref mut window, ref mut script, ref error) => {
-                if let Some(state) = Status::failure(&mut handle, &thread, window, script, error) {
-                    status = state;
+            Status::Failure(ref mut script, ref error) => {
+                if let Some((ref mut handle, ref thread, ref _audio)) = context {
+                    let mut window = window::Window::new(handle, thread);
+                    
+                    if let Some((_, state)) = Status::failure(handle, thread, &mut window, script, error) {
+                        status = state;
+                    }
+                } else {
+                    panic!("{error:?}")
                 }
             }
             // closure status: break the infinite loop and close.
@@ -95,5 +108,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
-
 }

@@ -48,6 +48,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::status::*;
+
 //================================================================
 
 use mlua::prelude::*;
@@ -60,7 +62,7 @@ use serde::Deserialize;
 { "version": "1.0.0", "name": "quiver.discord", "info": "The discord API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
     let discord = lua.create_table()?;
 
     discord.set("new", lua.create_async_function(self::Discord::new)?)?;
@@ -226,8 +228,8 @@ impl Discord {
         "info": "Create a new Discord client."
     }
     */
-    async fn new(lua: Lua, _: ()) -> mlua::Result<Self> {
-        let (wheel, handler) = discord_sdk::wheel::Wheel::new(Box::new(|err| {
+    async fn new(_lua: Lua, _: ()) -> mlua::Result<Self> {
+        let (wheel, handler) = discord_sdk::wheel::Wheel::new(Box::new(|_err| {
             println!("encountered an error");
         }));
 

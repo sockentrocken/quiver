@@ -48,6 +48,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::status::*;
 use crate::script::*;
 
 //================================================================
@@ -61,7 +62,7 @@ use raylib::prelude::*;
 { "version": "1.0.0", "name": "quiver.file", "info": "The file API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
     let file = lua.create_table()?;
 
     file.set("get",                       lua.create_function(self::get)?)?;

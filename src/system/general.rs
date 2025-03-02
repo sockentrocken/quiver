@@ -48,6 +48,10 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::status::*;
+
+//================================================================
+
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -61,17 +65,24 @@ use sysinfo::System;
 { "version": "1.0.0", "name": "quiver.general", "info": "The general API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
     let general = lua.create_table()?;
 
     general.set("load_base",       lua.create_function(self::load_base)?)?;
     general.set("set_log_level",   lua.create_function(self::set_log_level)?)?;
     general.set("open_link",       lua.create_function(self::open_link)?)?;
-    general.set("set_exit_key",    lua.create_function(self::set_exit_key)?)?;
+
+    general.set("standard_input",       lua.create_function(self::standard_input)?)?;
+
+
+    if info.head {
+        general.set("set_exit_key",    lua.create_function(self::set_exit_key)?)?;
+        general.set("get_frame_time",  lua.create_function(self::get_frame_time)?)?;
+        general.set("get_frame_rate",  lua.create_function(self::get_frame_rate)?)?;
+        general.set("set_frame_rate",  lua.create_function(self::set_frame_rate)?)?;
+    }
+    
     general.set("get_time",        lua.create_function(self::get_time)?)?;
-    general.set("get_frame_time",  lua.create_function(self::get_frame_time)?)?;
-    general.set("get_frame_rate",  lua.create_function(self::get_frame_rate)?)?;
-    general.set("set_frame_rate",  lua.create_function(self::set_frame_rate)?)?;
     general.set("get_argument",    lua.create_function(self::get_argument)?)?;
 
     #[cfg(feature = "system_info")]
@@ -86,6 +97,22 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
 }
 
 //================================================================
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.standard_input",
+    "info": "TO-DO"
+}
+*/
+fn standard_input(_: &Lua, _: ()) -> mlua::Result<String> {
+    let mut buffer = String::new();
+    std::io::stdin()
+        .read_line(&mut buffer)
+        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+    Ok(buffer.trim().to_string())
+}
 
 /* entry
 {
@@ -229,6 +256,7 @@ fn get_argument(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
 /* entry
 {
     "version": "1.0.0",
+    "feature": "system_info",
     "name": "quiver.general.get_system",
     "info": "TO-DO"
 }
@@ -275,13 +303,13 @@ pub struct Camera2D {
     pub zoom: f32,
 }
 
-impl Into<ffi::Camera2D> for Camera2D {
-    fn into(self) -> ffi::Camera2D {
+impl From<Camera2D> for ffi::Camera2D {
+    fn from(val: Camera2D) -> Self {
         ffi::Camera2D {
-            offset: self.shift.into(),
-            target: self.focus.into(),
-            rotation: self.angle,
-            zoom: self.zoom,
+            offset: val.shift.into(),
+            target: val.focus.into(),
+            rotation: val.angle,
+            zoom: val.zoom,
         }
     }
 }
@@ -295,14 +323,14 @@ pub struct Camera3D {
     pub kind: i32,
 }
 
-impl Into<ffi::Camera3D> for Camera3D {
-    fn into(self) -> ffi::Camera3D {
+impl From<Camera3D> for ffi::Camera3D {
+    fn from(val: Camera3D) -> Self {
         ffi::Camera3D {
-            position: self.point.into(),
-            target: self.focus.into(),
-            up: self.angle.into(),
-            fovy: self.zoom,
-            projection: self.kind,
+            position: val.point.into(),
+            target: val.focus.into(),
+            up: val.angle.into(),
+            fovy: val.zoom,
+            projection: val.kind,
         }
     }
 }

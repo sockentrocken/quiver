@@ -49,6 +49,7 @@
 */
 
 use crate::script::*;
+use crate::status::*;
 
 //================================================================
 
@@ -62,7 +63,11 @@ use std::ffi::CString;
 { "version": "1.0.0", "name": "quiver.font", "info": "The font API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    if !info.head {
+        return Ok(());
+    }
+    
     let font = lua.create_table()?;
 
     font.set("new",                 lua.create_function(self::Font::new)?)?;
@@ -189,7 +194,7 @@ impl Font {
     */
     fn new(lua: &Lua, (path, size): (String, i32)) -> mlua::Result<Self> {
         unsafe {
-            let name = CString::new(ScriptData::get_path(&lua, &path)?)
+            let name = CString::new(ScriptData::get_path(lua, &path)?)
                 .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
             let data = ffi::LoadFontEx(name.as_ptr(), size, std::ptr::null_mut(), 0);

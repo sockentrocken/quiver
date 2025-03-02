@@ -49,6 +49,7 @@
 */
 
 use crate::script::*;
+use crate::status::*;
 
 //================================================================
 
@@ -62,7 +63,11 @@ use std::ffi::CString;
 { "version": "1.0.0", "name": "quiver.sound", "info": "The sound API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    if !info.head {
+        return Ok(());
+    }
+    
     let sound = lua.create_table()?;
 
     sound.set("new",             lua.create_async_function(self::Sound::new)?)?;

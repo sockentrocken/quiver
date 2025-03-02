@@ -48,6 +48,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::status::*;
 use crate::system::*;
 
 //================================================================
@@ -58,10 +59,14 @@ use std::ffi::CString;
 
 //================================================================
 
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
-    draw_general::set_global(lua, table)?;
-    draw_3d::set_global(lua, table)?;
-    draw_2d::set_global(lua, table)?;
+pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    if !info.head {
+        return Ok(());
+    }
+
+    draw_general::set_global(lua, info, table)?;
+    draw_3d::set_global(lua, info, table)?;
+    draw_2d::set_global(lua, info, table)?;
 
     Ok(())
 }
@@ -73,7 +78,7 @@ mod draw_general {
     { "version": "1.0.0", "name": "quiver.draw", "info": "The drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
         let draw = lua.create_table()?;
 
         // BeginDrawing/EndDrawing
@@ -188,7 +193,7 @@ mod draw_3d {
     { "version": "1.0.0", "name": "quiver.draw_3d", "info": "The 3D drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
         let draw_3d = lua.create_table()?;
 
         draw_3d.set("begin",                 lua.create_function(self::begin)?)?;
@@ -650,7 +655,7 @@ mod draw_2d {
     { "version": "1.0.0", "name": "quiver.draw_2d", "info": "The 2D drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
         let draw_2d = lua.create_table()?;
 
         draw_2d.set("begin",                 lua.create_function(self::begin)?)?;

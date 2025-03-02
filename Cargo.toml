@@ -12,10 +12,12 @@ default = [
 	"rapier2d",
 	"zip",
 	"request",
-	"steam",
+	#"steam",
 	"discord",
 	"embed",
-	"video"
+	"video",
+	# Only enable this if you want to write documentation out to "../quiver.wiki".
+	"documentation"
 ]
 serialization = ["dep:serde_yaml", "dep:toml", "dep:serde-xml-rs", "dep:serde_ini"]
 system_info   = ["dep:sysinfo"]
@@ -28,6 +30,7 @@ steam         = ["dep:steamworks"]
 discord       = ["dep:discord-sdk"]
 embed         = ["dep:rust-embed"]
 video         = []
+documentation = []
 
 [dependencies]
 raylib       = { git = "https://github.com/raylib-rs/raylib-rs.git", features = ["with_serde"] }
@@ -36,7 +39,6 @@ tokio        = { version = "1",      features = ["full"]   }
 serde  	     = { version = "1.0",    features = ["derive"] }
 serde_json   = { version = "1.0"    }
 rfd	         = { version = "0.15.1" }
-walkdir      = { version = "2"      }
 serde_yaml   = { optional = true, version = "0.9.34" }
 toml 	     = { optional = true, version = "0.8.20" }
 serde-xml-rs = { optional = true, version = "0.6.0"  }

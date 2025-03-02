@@ -52,23 +52,50 @@
 mod test_main {
     use crate::script::*;
     use crate::status::*;
-    use walkdir::WalkDir;
+
+    async fn test_folder(path: &str) {
+        let path_list = std::fs::read_dir(format!("test/system/{path}")).unwrap();
+
+        for entry in path_list {
+            let entry = entry.unwrap().path().display().to_string();
+
+            if let Err(error) = Script::new_test(&entry).await {
+                println!("Assertion fail or panic in entry: \"{entry}\"");
+                panic!("{error:?}");
+            }
+        }
+    }
 
     #[tokio::test]
     async fn main() {
-        let (_handle, _thread, _audio) = Status::window();
+        let (_handle, _thread, _audio) = Status::window(&None).unwrap();
 
-        for entry in WalkDir::new("test/system") {
-            let entry = entry.unwrap();
+        test_folder("data").await;
+        test_folder("file").await;
+        test_folder("input").await;
 
-            if entry.file_type().is_file() {
-                let entry = entry.path().display().to_string();
+        /*
+        #[cfg(feature = "rapier3d")]
+        test_folder("rapier3d").await;
 
-                if let Err(error) = Script::new_test(&entry).await {
-                    println!("Assertion fail or panic in entry: \"{entry}\"");
-                    panic!("{error:?}");
-                }
-            }
-        }
+        #[cfg(feature = "zip")]
+        test_folder("zip").await;
+        */
+
+        #[cfg(feature = "request")]
+        test_folder("request").await;
+
+        /*
+        // NOTE: you MUST have Steam running for this test.
+        #[cfg(feature = "steam")]
+        test_folder("steam").await;
+
+        // NOTE: you MUST have Discord running for this test.
+        #[cfg(feature = "discord")]
+        test_folder("discord").await;
+
+        #[cfg(feature = "video")]
+        test_folder("video").await;
+        */
     }
 }

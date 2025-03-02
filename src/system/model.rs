@@ -49,13 +49,14 @@
 */
 
 use crate::script::*;
-use std::collections::HashMap;
+use crate::status::*;
 
 //================================================================
 
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 
 //================================================================
@@ -64,7 +65,11 @@ use std::ffi::{CStr, CString};
 { "version": "1.0.0", "name": "quiver.model", "info": "The model API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    if !info.head {
+        return Ok(());
+    }
+    
     let model = lua.create_table()?;
 
     model.set("new", lua.create_function(self::Model::new)?)?;
