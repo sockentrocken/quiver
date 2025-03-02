@@ -60,7 +60,7 @@ use std::ffi::CString;
 //================================================================
 
 /* class
-{ "version": "1.0.0", "name": "quiver.font", "info": "The font API." }
+{ "version": "1.0.0", "name": "quiver.font", "info": "The font API.", "head": true }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {

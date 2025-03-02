@@ -66,7 +66,7 @@ type RLRenderTexture = ffi::RenderTexture2D;
 //================================================================
 
 /* class
-{ "version": "1.0.0", "name": "quiver.texture", "info": "The texture API." }
+{ "version": "1.0.0", "name": "quiver.texture", "info": "The texture API.", "head": true }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {

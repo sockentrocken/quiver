@@ -62,7 +62,7 @@ use std::ffi::{CStr, CString};
 //================================================================
 
 /* class
-{ "version": "1.0.0", "name": "quiver.model", "info": "The model API." }
+{ "version": "1.0.0", "name": "quiver.model", "info": "The model API.", "head": true }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
@@ -571,11 +571,11 @@ impl mlua::UserData for ModelAnimation {
         /* entry
         {
             "version": "1.0.0",
-            "name": "model_animation:get_bone_info",
+            "name": "model_animation:get_bone_",
             "info": "TO-DO"
         }
         */
-        method.add_method("get_bone_info", |_, this, index: usize| {
+        method.add_method("get_bone_", |_, this, index: usize| {
             let bone = &this.0.bones()[index];
             unsafe {
                 let name = CStr::from_ptr(bone.name.as_ptr())
@@ -589,7 +589,7 @@ impl mlua::UserData for ModelAnimation {
         /* entry
         {
             "version": "1.0.0",
-            "name": "model_animation:get_bone_info",
+            "name": "model_animation:get_bone_",
             "info": "TO-DO"
         }
         */

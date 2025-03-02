@@ -108,6 +108,7 @@ impl Script {
 
     //================================================================
 
+    #[allow(dead_code)]
     pub async fn new_test(path: &str) -> mlua::Result<()> {
         // initialize lua VM, depending on what safe flag is set.
         let lua = Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())?;

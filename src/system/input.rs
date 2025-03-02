@@ -59,7 +59,7 @@ use std::ffi::{CStr, CString};
 //================================================================
 
 /* class
-{ "version": "1.0.0", "name": "quiver.input", "info": "The input API." }
+{ "version": "1.0.0", "name": "quiver.input", "info": "The input API.", "head": true }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {

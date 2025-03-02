@@ -89,7 +89,7 @@ pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<(
     general.set("get_system",      lua.create_function(self::get_system)?)?;
 
     general.set("get_memory",      lua.create_function(self::get_memory)?)?;
-    general.set("get_info",        lua.create_function(self::get_info)?)?;
+    general.set("get_",        lua.create_function(self::get_)?)?;
 
     table.set("general", general)?;
 
@@ -283,11 +283,11 @@ fn get_memory(lua: &Lua, _: ()) -> mlua::Result<usize> {
 /* entry
 {
     "version": "1.0.0",
-    "name": "quiver.general.get_info",
+    "name": "quiver.general.get_",
     "info": "TO-DO"
 }
 */
-fn get_info(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+fn get_(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     let script_data = lua.app_data_ref::<crate::script::ScriptData>().unwrap();
 
     lua.to_value(&*script_data)

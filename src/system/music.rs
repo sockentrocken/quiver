@@ -60,7 +60,7 @@ use std::ffi::CString;
 //================================================================
 
 /* class
-{ "version": "1.0.0", "name": "quiver.music", "info": "The music API." }
+{ "version": "1.0.0", "name": "quiver.music", "info": "The music API.", "head": true }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
@@ -83,6 +83,7 @@ type RLMusic = ffi::Music;
 /* class
 { "version": "1.0.0", "name": "music", "info": "An unique handle for music in memory." }
 */
+#[allow(dead_code)]
 struct Music(RLMusic, Option<Vec<u8>>);
 
 unsafe impl Send for Music {}

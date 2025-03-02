@@ -61,7 +61,7 @@ use raylib::prelude::*;
 { "version": "1.0.0", "name": "quiver.data", "info": "The data API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
     let data = lua.create_table()?;
 
     // CompressData

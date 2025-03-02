@@ -13,6 +13,8 @@ quiver = {}
 ---The sound API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/sound.rs#L65)
 ---@class quiver.sound
 quiver.sound = {}
@@ -112,6 +114,8 @@ function sound:set_pan(pan) end
 ---The input API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/input.rs#L64)
 ---@class quiver.input
 quiver.input = {}
@@ -977,7 +981,7 @@ function steam:get_achievement_name() end
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L937)
-function steam:get_achievement_info() end
+function steam:get_achievement_() end
 
 ---TO-DO
 ---
@@ -1084,6 +1088,8 @@ function quiver.steam.new() end
 ---The video API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/video.rs#L72)
 ---@class quiver.video
 quiver.video = {}
@@ -1155,6 +1161,8 @@ function quiver.request.get() end
 ---The texture API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/texture.rs#L71)
 ---@class quiver.texture
 quiver.texture = {}
@@ -1353,6 +1361,8 @@ function quiver.zip.new(path) end
 ---The model API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L67)
 ---@class quiver.model
 quiver.model = {}
@@ -1509,13 +1519,13 @@ function quiver.model_animation.new(path) end
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L578)
-function model_animation:get_bone_info() end
+function model_animation:get_bone_() end
 
 ---TO-DO
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/model.rs#L596)
-function model_animation:get_bone_info() end
+function model_animation:get_bone_() end
 
 ---Update model with new model animation data.
 ---@param model model # TO-DO
@@ -1528,6 +1538,8 @@ function model_animation:update(model,frame) end
 ---The drawing API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/draw.rs#L80)
 ---@class quiver.draw
 quiver.draw = {}
@@ -2346,11 +2358,13 @@ function quiver.general.get_memory() end
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L290)
-function quiver.general.get_info() end
+function quiver.general.get_() end
 
 ---The shader API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/shader.rs#L65)
 ---@class quiver.shader
 quiver.shader = {}
@@ -2487,6 +2501,8 @@ function quiver.image.new_from_memory() end
 ---The font API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L65)
 ---@class quiver.font
 quiver.font = {}
@@ -2552,6 +2568,8 @@ function quiver.font.new_default() end
 ---The window API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/window.rs#L68)
 ---@class quiver.window
 quiver.window = {}
@@ -2821,6 +2839,8 @@ function quiver.window.get_screen_shot() end
 ---The music API.
 ---
 --- ---
+---*Not available in head-less mode.*
+---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L65)
 ---@class quiver.music
 quiver.music = {}
@@ -2837,91 +2857,91 @@ music = {}
 ---@return music music # Music resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L104)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L105)
 function quiver.music.new(path) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L130)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L131)
 function quiver.music.new_from_memory() end
 
 ---Play the music.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L169)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L170)
 function music:play() end
 
 ---Check if music is currently playing.
 ---@return boolean state # State of the music.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L184)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L185)
 function music:get_playing() end
 
 ---Stop the music.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L191)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L192)
 function music:stop() end
 
 ---Pause the music.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L199)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L200)
 function music:pause() end
 
 ---Resume the music.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L207)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L208)
 function music:resume() end
 
 ---Set volume for the music. (range: 0.0 - 1.0)
 ---@param volume number # Current volume.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L222)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L223)
 function music:set_volume(volume) end
 
 ---Set pitch for the music.
 ---@param pitch number # Current pitch.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L237)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L238)
 function music:set_pitch(pitch) end
 
 ---Set pan for the music. (range: 0.0 - 1.0; 0.5 is center)
 ---@param pan number # Current pan.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L252)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L253)
 function music:set_pan(pan) end
 
 ---Update the music.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L260)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L261)
 function music:update() end
 
 ---Set position for the music.
 ---@param position number # Current position.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L275)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L276)
 function music:set_position(position) end
 
 ---Get time length for the music.
 ---@return number length # Time length.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L290)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L291)
 function music:get_length() end
 
 ---Get time played for the music.
 ---@return number played # Time played.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L304)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/music.rs#L305)
 function music:get_played() end
 

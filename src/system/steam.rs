@@ -386,7 +386,7 @@ impl mlua::UserData for Steam {
         */
         method.add_method_mut("get_name", |_: &Lua, this, _: ()| Ok(this.friend.name()));
 
-        // get_friends, get_coplay_friends, get_friend, request_user_information
+        // get_friends, get_coplay_friends, get_friend, request_user_rmation
 
         /* entry
         {
@@ -930,18 +930,18 @@ impl mlua::UserData for Steam {
         /* entry
         {
             "version": "1.0.0",
-            "name": "steam:get_achievement_info",
+            "name": "steam:get_achievement_",
             "info": "TO-DO"
         }
         */
-        method.add_method_mut("get_achievement_info", |_: &Lua, this, name: String| {
+        method.add_method_mut("get_achievement_", |_: &Lua, this, name: String| {
             let achievement = this.user_statistic.achievement(&name);
 
             if let Ok(result) = achievement.get_achievement_display_attribute("desc") {
                 Ok(result.to_string())
             } else {
                 Err(mlua::Error::runtime(
-                    "Steam::get_achievement_info(): Error getting achievement.",
+                    "Steam::get_achievement_(): Error getting achievement.",
                 ))
             }
         });

@@ -75,10 +75,10 @@ mod draw_general {
     use super::*;
 
     /* class
-    { "version": "1.0.0", "name": "quiver.draw", "info": "The drawing API." }
+    { "version": "1.0.0", "name": "quiver.draw", "info": "The drawing API.", "head": true }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
         let draw = lua.create_table()?;
 
         // BeginDrawing/EndDrawing
@@ -193,7 +193,7 @@ mod draw_3d {
     { "version": "1.0.0", "name": "quiver.draw_3d", "info": "The 3D drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
         let draw_3d = lua.create_table()?;
 
         draw_3d.set("begin",                 lua.create_function(self::begin)?)?;
@@ -655,7 +655,7 @@ mod draw_2d {
     { "version": "1.0.0", "name": "quiver.draw_2d", "info": "The 2D drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
         let draw_2d = lua.create_table()?;
 
         draw_2d.set("begin",                 lua.create_function(self::begin)?)?;

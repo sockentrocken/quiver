@@ -300,7 +300,7 @@ pub struct Info {
 }
 
 impl Info {
-    pub const FILE_INFO: &'static str = "info_quiver.json";
+    pub const FILE_: &'static str = "info_quiver.json";
     pub const MAIN_PATH: &'static str = "main";
     pub const MAIN_FILE: &'static str = "main.lua";
 
@@ -350,7 +350,7 @@ impl Info {
         //================================================================
 
         // get the path to the info file.
-        let data = std::path::Path::new(Self::FILE_INFO);
+        let data = std::path::Path::new(Self::FILE_);
 
         // file does exist, read it.
         if data.is_file() {
@@ -369,7 +369,7 @@ impl Info {
         //================================================================
 
         let mut argument_pick = false;
-        let mut argument_info = Info {
+        let mut argument_ = Info {
             safe: true,
             head: true,
             path: ".".to_string(),
@@ -379,16 +379,16 @@ impl Info {
         while let Some((i, argument)) = argument_list.next() {
             match &*argument {
                 "--no-safe" => {
-                    argument_info.safe = false;
+                    argument_.safe = false;
                     argument_pick = true;
                 }
                 "--no-head" => {
-                    argument_info.head = false;
+                    argument_.head = false;
                     argument_pick = true;
                 }
                 "--path" => {
                     if let Some((_, next)) = argument_list.next() {
-                        argument_info.path = next;
+                        argument_.path = next;
                     } else {
                         eprintln!("ERROR: Was expecting argument for --path.")
                     }
@@ -415,7 +415,7 @@ impl Info {
         }
 
         if argument_pick {
-            result = Some(argument_info);
+            result = Some(argument_);
         }
 
         //================================================================
@@ -431,7 +431,7 @@ impl Info {
     pub fn dump(&self) {
         // write the info file out as a .json.
         std::fs::write(
-            Self::FILE_INFO,
+            Self::FILE_,
             serde_json::to_string_pretty(self)
                 .map_err(|e| Status::panic(&e.to_string()))
                 .unwrap(),

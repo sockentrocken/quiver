@@ -133,6 +133,7 @@ fn compile_external_dependency() {
 
     cc::Build::new()
         .file("src/system/external/rmedia.c")
+        .cargo_warnings(false)
         .include("src/system/external")
         .compile("rmedia");
 
@@ -191,7 +192,7 @@ quiver = {}
     const META_CLASS_HEADER: &'static str =
 r#"---{info}
 ---
---- ---{feature}
+--- ---{feature}{head}
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/{path}#L{line})
 "#;
 
@@ -219,7 +220,7 @@ r#"---{info}
         #[rustfmt::skip]
     const META_ENTRY_FOOTER: &'static str =
 r#"---
---- ---{feature}
+--- ---{feature}{head}
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/{path}#L{line})
 function {name}({member}) end
 
@@ -239,7 +240,7 @@ r#"---@return {kind} {name} # {info}
     #[rustfmt::skip]
     const WIKI_CLASS_HEADER: &'static str =
 r#"## {name}
-*Available since version: {version}.*{feature}
+*Available since version: {version}.*{feature}{head}
 
 ```lua
 {code}
@@ -264,7 +265,7 @@ r#"* Field: `{name}` – {info}
     #[rustfmt::skip]
     const WIKI_ENTRY_HEADER: &'static str =
 r#"## {name}
-*Available since version: {version}.*{feature}
+*Available since version: {version}.*{feature}{head}
 
 ```lua
 {code}
@@ -414,6 +415,20 @@ r#"* Return: `{name}` – {info}
 
         data = data.replace("{feature}", feature);
 
+        let head = {
+            if let Some(head) = class.head {
+                if head {
+                    "\n---*Not available in head-less mode.*\n---"
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{head}", head);
+
         self.meta_file
             .write_all(data.as_bytes())
             .expect("Meta::write_meta_class(): Could not write to file.");
@@ -493,6 +508,20 @@ r#"* Return: `{name}` – {info}
 
         data = data.replace("{feature}", feature);
 
+        let head = {
+            if let Some(head) = entry.head {
+                if head {
+                    "\n---*Not available in head-less mode.*\n---"
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{head}", head);
+
         self.meta_file
             .write_all(data.as_bytes())
             .expect("Meta::write_meta_entry(): Could not write to file.");
@@ -518,6 +547,20 @@ r#"* Return: `{name}` – {info}
         };
 
         data = data.replace("{feature}", feature);
+
+        let head = {
+            if let Some(head) = class.head {
+                if head {
+                    " *Not available in head-less mode.*"
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{head}", head);
         data = data.replace("{code}", &format!("{} = {{}}", class.name));
         data = data.replace("{info}", &class.info);
 
@@ -570,6 +613,19 @@ r#"* Return: `{name}` – {info}
 
         data = data.replace("{feature}", feature);
 
+        let head = {
+            if let Some(head) = entry.head {
+                if head {
+                    " *Not available in head-less mode.*"
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{head}", head);
         data = data.replace("{info}", &entry.info);
 
         let mut data_member = String::new();
@@ -651,6 +707,7 @@ struct Class {
     pub name: String,
     pub info: String,
     pub test: Option<String>,
+    pub head: Option<bool>,
     pub member: Option<Vec<Variable>>,
 }
 
@@ -662,6 +719,7 @@ struct Entry {
     pub name: String,
     pub info: String,
     pub test: Option<String>,
+    pub head: Option<bool>,
     pub member: Option<Vec<Variable>>,
     pub result: Option<Vec<Variable>>,
 }

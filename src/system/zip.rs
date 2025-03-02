@@ -62,7 +62,7 @@ use std::io::Read;
 { "version": "1.0.0", "name": "quiver.zip", "info": "The ZIP API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, _info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
     let zip = lua.create_table()?;
 
     zip.set("new", lua.create_function(self::Zip::new)?)?;

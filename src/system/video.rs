@@ -67,7 +67,7 @@ use raylib::prelude::*;
 //================================================================
 
 /* class
-{ "version": "1.0.0", "name": "quiver.video", "info": "The video API." }
+{ "version": "1.0.0", "name": "quiver.video", "info": "The video API.", "head": true }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {

@@ -63,7 +63,7 @@ use std::{
 //================================================================
 
 /* class
-{ "version": "1.0.0", "name": "quiver.window", "info": "The window API." }
+{ "version": "1.0.0", "name": "quiver.window", "info": "The window API.", "head": true }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
