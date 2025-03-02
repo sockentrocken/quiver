@@ -108,6 +108,31 @@ impl Script {
 
     //================================================================
 
+    pub async fn new_test(path: &str) -> mlua::Result<()> {
+        // initialize lua VM, depending on what safe flag is set.
+        let lua = Lua::new_with(LuaStdLib::ALL_SAFE, LuaOptions::new())?;
+
+        let info = Info {
+            safe: true,
+            path: "test/asset".to_string(),
+        };
+
+        // set script data.
+        lua.set_app_data(ScriptData::new(info.clone()));
+
+        // set the standard Quiver library.
+        Self::system(&lua, &info)?;
+
+        let main_data = std::fs::read(path)
+            .unwrap_or_else(|_| panic!("Script::new_test(): Could not read file \"{path}\""));
+
+        lua.load("quiver.general.load_base()").exec()?;
+
+        lua.load(main_data).exec_async().await?;
+
+        Ok(())
+    }
+
     // get a new script instance.
     pub fn new(info: &Info) -> mlua::Result<Self> {
         // initialize lua VM, depending on what safe flag is set.

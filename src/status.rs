@@ -75,7 +75,7 @@ pub enum Status {
 }
 
 impl Status {
-    pub const VERSION: [i32; 3] = [1, 0, 0];
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
     pub const FONT: &'static [u8] = include_bytes!("asset/font.ttf");
     pub const LOGO: &'static [u8] = include_bytes!("asset/logo.png");
     pub const ICON: &'static [u8] = include_bytes!("asset/icon.png");
@@ -91,7 +91,7 @@ impl Status {
                 // script is OK, run Quiver normally.
                 Ok(script)  => {
                     println!("//================================================================");
-                    println!("// Quiver {}.{}.{}", Self::VERSION[0], Self::VERSION[1], Self::VERSION[2]);
+                    println!("// Quiver ({})", Self::VERSION);
                     println!("//");
                     println!("// -> Info manifest:");
                     println!("//   * Safe: {}", info.safe);

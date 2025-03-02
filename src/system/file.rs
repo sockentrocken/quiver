@@ -92,6 +92,8 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     file.set("remove_file",               lua.create_function(self::remove_file)?)?;
     file.set("remove_path",               lua.create_function(self::remove_path)?)?;
 
+    // TO-DO add mkdir
+
     table.set("file", file)?;
 
     Ok(())
@@ -102,6 +104,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     "version": "1.0.0",
     "name": "quiver.file.get",
     "info": "Get the data of a file, in string format.",
+    "test": "file/get_set.lua",
     "member": [
         { "name": "path", "info": "Path to file.", "kind": "string" }
     ],
@@ -131,6 +134,7 @@ fn get(lua: &Lua, (path, binary): (String, bool)) -> mlua::Result<LuaValue> {
     "version": "1.0.0",
     "name": "quiver.file.set",
     "info": "Set the data of a file.",
+    "test": "file/get_set.lua",
     "member": [
         { "name": "path", "info": "Path to file.", "kind": "string" },
         { "name": "data", "info": "Data to copy.", "kind": "string" }
@@ -157,6 +161,7 @@ fn set(lua: &Lua, (path, data, binary): (String, LuaValue, bool)) -> mlua::Resul
     "version": "1.0.0",
     "name": "quiver.file.get_file_exist",
     "info": "Check if a file does exist.",
+    "test": "file/get_file_exist.lua",
     "member": [
         { "name": "path", "info": "Path to file.", "kind": "string" }
     ],
@@ -176,6 +181,7 @@ fn get_file_exist(lua: &Lua, path: String) -> mlua::Result<bool> {
     "version": "1.0.0",
     "name": "quiver.file.get_path_exist",
     "info": "Check if a path does exist.",
+    "test": "file/get_path_exist.lua",
     "member": [
         { "name": "path", "info": "Path.", "kind": "string" }
     ],

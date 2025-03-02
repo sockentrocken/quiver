@@ -153,7 +153,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table) -> mlua::Result<()> {
     "version": "1.0.0",
     "name": "quiver.input.board.set_clipboard_text",
     "info": "Set the clipboard text.",
-    "test": "input/set_clipboard_text.lua",
+    "test": "input/clipboard_text.lua",
     "member": [
         { "name": "text", "info": "Clipboard text.", "kind": "string" }
     ]
@@ -173,6 +173,7 @@ fn set_clipboard_text(_: &Lua, text: String) -> mlua::Result<()> {
     "version": "1.0.0",
     "name": "quiver.input.board.get_clipboard_text",
     "info": "Get the clipboard text.",
+    "test": "input/clipboard_text.lua",
     "result": [
         { "name": "text", "info": "Clipboard text.", "kind": "string" }
     ]
@@ -221,6 +222,7 @@ fn get_board_uni_code_queue(_: &Lua, _: ()) -> mlua::Result<i32> {
     "version": "1.0.0",
     "name": "quiver.input.board.get_name",
     "info": "Get the name of a given key.",
+    "test": "input/get_name.lua",
     "member": [
         { "name": "board", "info": "The board button to get a name for.", "kind": "input_board" }
     ],
@@ -232,10 +234,15 @@ fn get_board_uni_code_queue(_: &Lua, _: ()) -> mlua::Result<i32> {
 fn get_board_name(_: &Lua, value: i32) -> mlua::Result<String> {
     unsafe {
         let name = ffi::GetKeyName(value);
-        Ok(CStr::from_ptr(name)
-            .to_str()
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?
-            .to_string())
+
+        if name.is_null() {
+            Err(mlua::Error::runtime("get_board_name(): Unknown key code."))
+        } else {
+            Ok(CStr::from_ptr(name)
+                .to_str()
+                .map_err(|e| mlua::Error::runtime(e.to_string()))?
+                .to_string())
+        }
     }
 }
 

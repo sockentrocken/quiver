@@ -180,7 +180,8 @@ impl<T: Clone + IntoLua + Send + 'static> mlua::UserData for Data<T> {
 {
     "version": "1.0.0",
     "name": "quiver.data.compress",
-    "info": "TO-DO"
+    "info": "TO-DO",
+    "test": "data/compress_decompress.lua"
 }
 */
 fn compress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
@@ -199,7 +200,8 @@ fn compress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
 {
     "version": "1.0.0",
     "name": "quiver.data.decompress",
-    "info": "TO-DO"
+    "info": "TO-DO",
+    "test": "data/compress_decompress.lua"
 }
 */
 fn decompress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {

@@ -100,15 +100,6 @@ fn compile_external_dependency() {
 
 // this function is responsible for parsing the src/system/ folder and finding every special comment in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
 fn main() {
-    #[cfg(feature = "video")]
-    compile_external_dependency();
-
-    // must use this to make the binary link to libsteam.
-    #[cfg(target_os = "linux")]
-    println!("cargo:rustc-link-arg=-Wl,-rpath,$ORIGIN");
-
-    //================================================================
-
     // create parser object.
     let mut parser = Parser::new();
 
@@ -154,6 +145,17 @@ fn main() {
             //wiki.parse(path, name, &line, i);
         }
     }
+
+    //================================================================
+
+    #[cfg(feature = "video")]
+    {
+        compile_external_dependency();
+    }
+
+    // must use this to make the binary link to libsteam.
+    #[cfg(target_os = "linux")]
+    println!("cargo:rustc-link-arg=-Wl,-rpath,$ORIGIN");
 }
 
 //================================================================
@@ -370,7 +372,7 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{line}", &format!("{}", line + 2));
 
         if let Some(test) = class.test {
-            let test = std::fs::read_to_string(&format!("test/{test}")).expect(&format!(
+            let test = std::fs::read_to_string(&format!("test/system/{test}")).expect(&format!(
                 "Meta::write_meta_class(): Could not read file {test}."
             ));
 
@@ -379,9 +381,7 @@ r#"* Return: `{name}` – {info}
             let split: Vec<&str> = test.split("\n").collect();
 
             for text in split {
-                if !text.is_empty() {
-                    data.push_str(&format!("---{text}\n"));
-                }
+                data.push_str(&format!("---{text}\n"));
             }
 
             data.push_str("---```\n");
@@ -417,7 +417,7 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{info}", &entry.info);
 
         if let Some(test) = entry.test {
-            let test = std::fs::read_to_string(&format!("test/{test}")).expect(&format!(
+            let test = std::fs::read_to_string(&format!("test/system/{test}")).expect(&format!(
                 "Meta::write_meta_entry(): Could not read file {test}."
             ));
 
@@ -426,9 +426,7 @@ r#"* Return: `{name}` – {info}
             let split: Vec<&str> = test.split("\n").collect();
 
             for text in split {
-                if !text.is_empty() {
-                    data.push_str(&format!("---{text}\n"));
-                }
+                data.push_str(&format!("---{text}\n"));
             }
 
             data.push_str("---```\n");
@@ -492,13 +490,13 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{info}", &class.info);
 
         if let Some(test) = class.test {
-            let test = std::fs::read_to_string(&format!("test/{test}")).expect(&format!(
+            let test = std::fs::read_to_string(&format!("test/system/{test}")).expect(&format!(
                 "Meta::write_wiki_class(): Could not read file {test}."
             ));
 
-            data.push_str("---```lua\n");
+            data.push_str("```lua\n");
             data.push_str(&test);
-            data.push_str("---```\n");
+            data.push_str("```\n");
         }
 
         if let Some(class_member) = class.member {
@@ -558,13 +556,13 @@ r#"* Return: `{name}` – {info}
         );
 
         if let Some(test) = entry.test {
-            let test = std::fs::read_to_string(&format!("test/{test}")).expect(&format!(
+            let test = std::fs::read_to_string(&format!("test/system/{test}")).expect(&format!(
                 "Meta::write_wiki_entry(): Could not read file {test}."
             ));
 
-            data.push_str("---```lua\n");
+            data.push_str("```lua\n");
             data.push_str(&test);
-            data.push_str("---```\n");
+            data.push_str("```\n");
         }
 
         if let Some(entry_member) = &entry.member {

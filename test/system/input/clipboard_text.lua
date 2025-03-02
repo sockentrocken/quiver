@@ -1,3 +1,3 @@
 quiver.input.set_clipboard_text("hello, world!")
 local text = quiver.input.get_clipboard_text()
-assert(text == "hello, world!", "set_clipboard_text(): Text is not equal.")
+assert(text == "hello, world!")

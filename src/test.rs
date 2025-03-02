@@ -48,52 +48,27 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-mod script;
-mod status;
-mod system;
-mod test;
-mod window;
+#[cfg(test)]
+mod test_main {
+    use crate::script::*;
+    use crate::status::*;
+    use walkdir::WalkDir;
 
-//================================================================
+    #[tokio::test]
+    async fn main() {
+        let (_handle, _thread, _audio) = Status::window();
 
-use crate::status::*;
+        for entry in WalkDir::new("test/system") {
+            let entry = entry.unwrap();
 
-//================================================================
+            if entry.file_type().is_file() {
+                let entry = entry.path().display().to_string();
 
-// the main entry-point.
-#[rustfmt::skip]
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // create the RL context.
-    let (mut handle, thread, _audio) = Status::window();
-    // create the Quiver state.
-    let mut status = Status::new(&mut handle, &thread);
-
-    loop {
-        match status {
-            // missing status: no info_quiver.json file is present.
-            Status::Missing(ref mut window) => {
-                if let Some(state) = Status::missing(&mut handle, &thread, window) {
-                    status = state;
+                if let Err(error) = Script::new_test(&entry).await {
+                    println!("Assertion fail or panic in entry: \"{entry}\"");
+                    panic!("{error:?}");
                 }
             }
-            // success status: standard state.
-            Status::Success(ref mut script) => {
-                if let Some(state) = Status::success(&mut handle, &thread, script).await {
-                    status = state;
-                }
-            }
-            // failure status: an error has been thrown from Lua, show crash-handler.
-            Status::Failure(ref mut window, ref mut script, ref error) => {
-                if let Some(state) = Status::failure(&mut handle, &thread, window, script, error) {
-                    status = state;
-                }
-            }
-            // closure status: break the infinite loop and close.
-            Status::Closure => break,
         }
     }
-
-    Ok(())
-
 }
