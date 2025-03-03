@@ -48,6 +48,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use std::num::ParseIntError;
+
 use crate::status::*;
 
 //================================================================
@@ -479,7 +481,7 @@ impl mlua::UserData for Steam {
         }
         */
         method.add_method_mut("get_steam_ID", |_: &Lua, this, _: ()| {
-            Ok(this.user.steam_id().raw())
+            Ok(this.user.steam_id().raw().to_string())
         });
 
         /* entry
@@ -518,7 +520,7 @@ impl mlua::UserData for Steam {
             |_: &Lua, this, (name, function): (String, mlua::Function)| {
                 this.user_statistic.find_leaderboard(&name, move |call| {
                     if let Ok(Some(call)) = call {
-                        if function.call::<()>(call.raw()).is_err() {}
+                        if function.call::<()>(call.raw().to_string()).is_err() {}
                     }
                 });
 
@@ -551,7 +553,7 @@ impl mlua::UserData for Steam {
 
                 this.user_statistic.find_or_create_leaderboard(&name, sort_kind, show_kind, move |call| {
                     if let Ok(Some(call)) = call {
-                        if function.call::<()>(call.raw()).is_err() {}
+                        if function.call::<()>(call.raw().to_string()).is_err() {}
                     }
                 });
 
@@ -1074,8 +1076,12 @@ impl mlua::UserData for Steam {
         */
         method.add_method_mut(
             "invite_session",
-            |_: &Lua, this, (id, steam_id): (u32, u64)| {
+            |_: &Lua, this, (id, steam_id): (u32, String)| {
                 let session = this.remote_play.session(RemotePlaySessionId::from_raw(id));
+
+                let steam_id = steam_id
+                    .parse()
+                    .map_err(|x: ParseIntError| mlua::Error::runtime(x.to_string()))?;
 
                 Ok(session.invite(SteamId::from_raw(steam_id)))
             },

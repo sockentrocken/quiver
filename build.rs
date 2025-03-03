@@ -149,7 +149,69 @@ fn compile_external_dependency() {
 // this function is responsible for parsing the src/system/ folder and finding every special comment in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
 fn main() {
     #[cfg(feature = "documentation")]
-    write_documentation();
+    {
+        write_documentation();
+
+        // read every file in the API directory.
+        for file in std::fs::read_dir("src/asset/base").unwrap() {
+            // convert to string.
+            let file = file.expect("build.rs: Could not unwrap file.");
+
+            let kind = file.file_type().unwrap();
+
+            if kind.is_dir() {
+                continue;
+            }
+
+            // get file path.
+            let path = file.path();
+            let path = path
+                .to_str()
+                .expect("build.rs: Could not convert file path to string.");
+
+            // get file name.
+            let name = file.file_name();
+            let name = name
+                .to_str()
+                .expect("build.rs: Could not convert file name to string.");
+
+            // open file.
+            let file = File::open(path)
+                .unwrap_or_else(|_| panic!("build.rs: Could not open file \"{path}\"."));
+            let file = BufReader::new(file).lines();
+
+            let mut buffer = String::new();
+
+            // for each line in the file...
+            for line in file.map_while(Result::ok) {
+                if line.starts_with("---@example") {
+                    let line = &line["---@example".len()..line.len()];
+                    let line = &format!("test/system/{}", line.trim());
+
+                    // open file.
+                    let file = File::open(line)
+                        .unwrap_or_else(|_| panic!("build.rs: Could not open file \"{line}\"."));
+                    let file = BufReader::new(file).lines();
+
+                    buffer.push_str("---```lua\n");
+
+                    for line in file.map_while(Result::ok) {
+                        buffer.push_str(&format!("---{line}"));
+                        buffer.push('\n');
+                    }
+
+                    buffer.push_str("---```\n");
+                } else {
+                    buffer.push_str(&line);
+                    buffer.push('\n');
+                }
+            }
+
+            let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+            std::fs::write(out_path.join(name), buffer)
+                .expect("build.rs: Could not write ---@example file.");
+        }
+    }
 
     #[cfg(feature = "video")]
     compile_external_dependency();

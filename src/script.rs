@@ -87,16 +87,17 @@ pub struct Script {
 impl Script {
     const FILE_MAIN: &'static str = include_str!("asset/main.lua");
     #[rustfmt::skip]
-    pub const FILE_BASE: [BaseFile; 9] = [
-        BaseFile::new("base/constant.lua",    include_str!("asset/base/constant.lua")),
-        BaseFile::new("base/extension.lua",   include_str!("asset/base/extension.lua")),
-        BaseFile::new("base/allocator.lua",   include_str!("asset/base/allocator.lua")),
-        BaseFile::new("base/primitive.lua",   include_str!("asset/base/primitive.lua")),
-        BaseFile::new("base/action.lua",      include_str!("asset/base/action.lua")),
-        BaseFile::new("base/window.lua",      include_str!("asset/base/window.lua")),
-        BaseFile::new("base/logger.lua",      include_str!("asset/base/logger.lua")),
-        BaseFile::new("base/system.lua",      include_str!("asset/base/system.lua")),
-        BaseFile::new("base/scene.lua",       include_str!("asset/base/scene.lua")),
+    pub const FILE_BASE: [BaseFile; 10] = [
+        BaseFile::new("base/constant.lua",    include_str!(concat!(env!("OUT_DIR"), "/constant.lua"))),
+        BaseFile::new("base/extension.lua",   include_str!(concat!(env!("OUT_DIR"), "/extension.lua"))),
+        BaseFile::new("base/allocator.lua",   include_str!(concat!(env!("OUT_DIR"), "/allocator.lua"))),
+        BaseFile::new("base/primitive.lua",   include_str!(concat!(env!("OUT_DIR"), "/primitive.lua"))),
+        BaseFile::new("base/scheduler.lua",   include_str!(concat!(env!("OUT_DIR"), "/scheduler.lua"))),
+        BaseFile::new("base/action.lua",      include_str!(concat!(env!("OUT_DIR"), "/action.lua"))),
+        BaseFile::new("base/window.lua",      include_str!(concat!(env!("OUT_DIR"), "/window.lua"))),
+        BaseFile::new("base/logger.lua",      include_str!(concat!(env!("OUT_DIR"), "/logger.lua"))),
+        BaseFile::new("base/system.lua",      include_str!(concat!(env!("OUT_DIR"), "/system.lua"))),
+        BaseFile::new("base/scene.lua",       include_str!(concat!(env!("OUT_DIR"), "/scene.lua"))),
     ];
     const FILE_BASE_MAIN: BaseFile =
         BaseFile::new("base/main.lua", include_str!("asset/base/main.lua"));

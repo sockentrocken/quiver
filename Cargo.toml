@@ -5,17 +5,17 @@ edition = "2021"
 
 [features]
 default = [
-	"serialization",
-	"system_info",
-	"file_notify",
-	"rapier3d",
-	"rapier2d",
-	"zip",
+	#"serialization",
+	#"system_info",
+	#"file_notify",
+	#"rapier3d",
+	#"rapier2d",
+	#"zip",
 	"request",
 	#"steam",
 	"discord",
-	"embed",
-	"video",
+	#"embed",
+	#"video",
 	# Only enable this if you want to write documentation out to "../quiver.wiki".
 	"documentation"
 ]

@@ -48,13 +48,74 @@
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-require "base/constant"
-require "base/extension"
-require "base/allocator"
-require "base/primitive"
-require "base/scheduler"
-require "base/action"
-require "base/window"
-require "base/logger"
-require "base/system"
-require "base/scene"
+---@class scheduler
+---@field routine table
+scheduler = {
+    __meta = {}
+}
+
+---Create a new scheduler.
+---@example lua/scheduler.lua
+---@return scheduler value # The scheduler.
+function scheduler:new()
+    local i = {}
+    setmetatable(i, self.__meta)
+    getmetatable(i).__index = self
+
+    --[[]]
+
+    i.__type = "scheduler"
+    i.routine = {}
+
+    return i
+end
+
+---Insert a new co-routine in the scheduler.
+---@param call        function # The function to convert into a co-routine.
+---@param name?       string   # OPTIONAL: A name for the co-routine.
+---@param over_write? boolean  # OPTIONAL: Whether or not to over-write an already existing co-routine by the same name.
+function scheduler:insert(call, name, over_write)
+    -- if we want to store this co-routine with a name...
+    if name then
+        -- do not over-write an existing co-routine in process.
+        if self.routine[name] and not over_write then
+            return
+        end
+
+        -- insert co-routine into the routine list.
+        self.routine[name] = coroutine.create(call)
+    else
+        -- insert co-routine into the routine list.
+        table.insert(self.routine, coroutine.create(call))
+    end
+end
+
+---Resume every co-routine in the scheduler.
+function scheduler:resume()
+    -- for every co-routine in our routine list...
+    for i, routine in pairs(self.routine) do
+        local result, error_message = nil, nil
+
+        -- check if the co-routine isn't dead and resume it.
+        if not (coroutine.status(routine) == "dead") then
+            result, error_message = coroutine.resume(routine)
+        end
+
+        -- check if the co-routine is dead.
+        if coroutine.status(routine) == "dead" then
+            -- throw an error message, if there were any.
+            if error_message then
+                error(error_message)
+            end
+
+            -- if the co-routine is a routine with a name...
+            if type(i) == "string" then
+                -- remove co-routine.
+                self.routine[i] = nil
+            else
+                -- remove co-routine.
+                table.remove(self.routine, i)
+            end
+        end
+    end
+end

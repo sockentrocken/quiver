@@ -48,6 +48,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use crate::status::*;
 
 //================================================================
@@ -82,14 +84,15 @@ pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<(
         general.set("set_frame_rate",  lua.create_function(self::set_frame_rate)?)?;
     }
     
-    general.set("get_time",        lua.create_function(self::get_time)?)?;
-    general.set("get_argument",    lua.create_function(self::get_argument)?)?;
+    general.set("get_time",      lua.create_function(self::get_time)?)?;
+    general.set("get_time_unix", lua.create_function(self::get_time_unix)?)?;
+    general.set("get_argument",  lua.create_function(self::get_argument)?)?;
 
     #[cfg(feature = "system_info")]
     general.set("get_system",      lua.create_function(self::get_system)?)?;
 
     general.set("get_memory",      lua.create_function(self::get_memory)?)?;
-    general.set("get_",        lua.create_function(self::get_)?)?;
+    general.set("get_info",        lua.create_function(self::get_info)?)?;
 
     table.set("general", general)?;
 
@@ -124,8 +127,11 @@ fn standard_input(_: &Lua, _: ()) -> mlua::Result<String> {
 fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
     // TO-DO only for debug. do not re-load from disk on release.
     for base in crate::script::Script::FILE_BASE {
-        //let data = std::fs::read_to_string(&format!("src/asset/{}", base.name)).unwrap();
-        let data = base.data;
+        let data = if cfg!(debug_assertions) {
+            &std::fs::read_to_string(format!("src/asset/{}", base.name)).unwrap()
+        } else {
+            base.data
+        };
 
         lua.load(data).exec()?;
     }
@@ -196,6 +202,20 @@ fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
 */
 fn get_time(_: &Lua, _: ()) -> mlua::Result<f64> {
     unsafe { Ok(ffi::GetTime()) }
+}
+
+/* entry
+{
+    "version": "1.0.0", "name": "quiver.general.get_time_unix",
+    "info": "TO-DO"
+}
+*/
+fn get_time_unix(_: &Lua, add: Option<i64>) -> mlua::Result<String> {
+    let time = SystemTime::now();
+    let time = time.duration_since(UNIX_EPOCH).unwrap();
+    let time = time.as_secs() + (add.unwrap_or_default() as u64);
+
+    Ok(time.to_string())
 }
 
 /* entry
@@ -283,11 +303,11 @@ fn get_memory(lua: &Lua, _: ()) -> mlua::Result<usize> {
 /* entry
 {
     "version": "1.0.0",
-    "name": "quiver.general.get_",
+    "name": "quiver.general.get_info",
     "info": "TO-DO"
 }
 */
-fn get_(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
+fn get_info(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     let script_data = lua.app_data_ref::<crate::script::ScriptData>().unwrap();
 
     lua.to_value(&*script_data)

@@ -48,10 +48,20 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use std::num::ParseIntError;
+
 use crate::status::*;
 
 //================================================================
 
+use discord_sdk::{
+    activity::{ActivityActionKind, IntoTimestamp, Secrets},
+    overlay::Visibility,
+    registration::{Application, BinArg},
+    user::UserId,
+    wheel::ActivitySpoke,
+    Snowflake,
+};
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::Deserialize;
@@ -79,6 +89,7 @@ struct Discord {
     discord: discord_sdk::Discord,
     user: discord_sdk::user::User,
     wheel: discord_sdk::wheel::Wheel,
+    activity: ActivitySpoke,
 }
 
 #[derive(Deserialize)]
@@ -95,17 +106,19 @@ struct ActivityTable {
     party_size_current: Option<u32>,
     party_size_maximum: Option<u32>,
     party_public: Option<bool>,
+    secret_join: Option<String>,
+    secret_view: Option<String>,
     button_a_name: Option<String>,
     button_a_link: Option<String>,
     button_b_name: Option<String>,
     button_b_link: Option<String>,
-    stamp_a: Option<i64>,
-    stamp_b: Option<i64>,
+    stamp_a: Option<String>,
+    stamp_b: Option<String>,
 }
 
 impl mlua::UserData for Discord {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
-        field.add_field_method_get("user_ID", |_: &Lua, this| Ok(this.user.id.0));
+        field.add_field_method_get("user_ID", |_: &Lua, this| Ok(this.user.id.0.to_string()));
         field.add_field_method_get("user_name", |_: &Lua, this| Ok(this.user.username.clone()));
         field.add_field_method_get("user_discriminator", |_: &Lua, this| {
             if let Some(discriminator) = this.user.discriminator {
@@ -121,12 +134,12 @@ impl mlua::UserData for Discord {
         /* entry
         {
             "version": "1.0.0",
-            "name": "discord:update_activity",
+            "name": "discord:set_rich_presence",
             "info": "TO-DO"
         }
         */
         method.add_async_method_mut(
-            "update_activity",
+            "set_rich_presence",
             |lua: Lua, this, activity: LuaValue| async move {
                 let activity: ActivityTable = lua.from_value(activity)?;
 
@@ -186,6 +199,12 @@ impl mlua::UserData for Discord {
                     }
                 }
 
+                rp = rp.secrets(Secrets {
+                    r#match: None,
+                    join: activity.secret_join,
+                    spectate: activity.secret_view,
+                });
+
                 if let Some(button_a_name) = activity.button_a_name {
                     if let Some(button_a_link) = activity.button_a_link {
                         rp = rp.button(discord_sdk::activity::Button {
@@ -204,15 +223,58 @@ impl mlua::UserData for Discord {
                     }
                 }
 
-                /*
-                TO-DO
                 rp = rp.timestamps(
-                    activity.stamp_a.map(|x| x.into()),
-                    activity.stamp_b.map(|x| x.into()),
+                    activity.stamp_a.map(|x| {
+                        let x = x.parse::<i64>().unwrap_or_default().into_timestamp();
+                        x
+                    }),
+                    activity.stamp_b.map(|x| {
+                        let x = x.parse::<i64>().unwrap_or_default().into_timestamp();
+                        x
+                    }),
                 );
-                */
 
                 this.discord.update_activity(rp).await.unwrap();
+
+                Ok(())
+            },
+        );
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "discord:clear_rich_presence",
+            "info": "TO-DO"
+        }
+        */
+        method.add_async_method_mut("clear_rich_presence", |_: Lua, this, _: ()| async move {
+            this.discord.clear_activity().await.unwrap();
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "discord:update",
+            "info": "TO-DO"
+        }
+        */
+        method.add_async_method_mut(
+            "update",
+            |_: Lua, mut this, function: mlua::Function| async move {
+                while let Ok(activity) = this.activity.0.try_recv() {
+                    println!("got activity: {activity:?}");
+
+                    match activity {
+                        discord_sdk::activity::events::ActivityEvent::Join(event) => {
+                            if function.call_async::<()>((0, event.secret)).await.is_err() {}
+                        }
+                        discord_sdk::activity::events::ActivityEvent::Spectate(event) => {
+                            if function.call_async::<()>((1, event.secret)).await.is_err() {}
+                        }
+                        _ => {}
+                    }
+                }
 
                 Ok(())
             },
@@ -228,47 +290,93 @@ impl Discord {
         "info": "Create a new Discord client."
     }
     */
-    async fn new(_lua: Lua, _: ()) -> mlua::Result<Self> {
-        let (wheel, handler) = discord_sdk::wheel::Wheel::new(Box::new(|_err| {
-            println!("encountered an error");
+    async fn new(
+        _: Lua,
+        (id, name, command): (String, Option<String>, Option<LuaValue>),
+    ) -> mlua::Result<Self> {
+        let (wheel, handler) = discord_sdk::wheel::Wheel::new(Box::new(|error| {
+            eprintln!("Discord API error: {error:?}")
         }));
 
-        let mut user = wheel.user();
+        let id: i64 = id
+            .parse()
+            .map_err(|x: ParseIntError| mlua::Error::runtime(x.to_string()))?;
 
-        let discord = discord_sdk::Discord::new(
-            discord_sdk::DiscordApp::PlainId(310270644849737729),
-            discord_sdk::Subscriptions::ACTIVITY,
-            Box::new(handler),
-        )
-        .expect("unable to create discord client");
+        let discord = {
+            if let Some(command) = command {
+                let command = match command {
+                    LuaValue::Integer(value) => {
+                        discord_sdk::registration::LaunchCommand::Steam(value as u32)
+                    }
+                    LuaValue::Number(value) => {
+                        discord_sdk::registration::LaunchCommand::Steam(value as u32)
+                    }
+                    LuaValue::String(value) => discord_sdk::registration::LaunchCommand::Url(
+                        discord_sdk::registration::Url::parse(&value.to_string_lossy()).unwrap(),
+                    ),
+                    LuaValue::Table(value) => {
+                        let path: String = value.get("path")?;
+                        let argument_list: Vec<String> = value.get("argument_list")?;
+                        let argument_list: Vec<BinArg> = argument_list
+                            .iter()
+                            .map(|x| {
+                                if x.is_empty() {
+                                    BinArg::Url
+                                } else {
+                                    BinArg::Arg(x.clone())
+                                }
+                            })
+                            .collect();
 
-        user.0.changed().await.unwrap();
+                        discord_sdk::registration::LaunchCommand::Bin {
+                            path: path.into(),
+                            args: argument_list,
+                        }
+                    }
+                    _ => {
+                        panic!()
+                    }
+                };
 
-        let user = match &*user.0.borrow() {
-            discord_sdk::wheel::UserState::Connected(user) => user.clone(),
-            discord_sdk::wheel::UserState::Disconnected(err) => {
-                panic!("failed to connect to Discord: {}", err)
+                discord_sdk::Discord::new(
+                    discord_sdk::DiscordApp::Register(Application { id, name, command }),
+                    discord_sdk::Subscriptions::ACTIVITY,
+                    Box::new(handler),
+                )
+                .map_err(|x| mlua::Error::runtime(x.to_string()))?
+            } else {
+                discord_sdk::Discord::new(
+                    discord_sdk::DiscordApp::PlainId(id),
+                    discord_sdk::Subscriptions::ACTIVITY,
+                    Box::new(handler),
+                )
+                .map_err(|x| mlua::Error::runtime(x.to_string()))?
             }
         };
 
-        println!("connected to Discord, local user is {:#?}", user);
+        let mut user = wheel.user();
 
-        let mut activity_events = wheel.activity();
+        user.0
+            .changed()
+            .await
+            .map_err(|x| mlua::Error::runtime(x.to_string()))?;
 
-        tokio::task::spawn(async move {
-            while let Ok(ae) = activity_events.0.recv().await {
-                println!("received activity event: {ae:?}");
+        let user = match &*user.0.borrow() {
+            discord_sdk::wheel::UserState::Connected(user) => user.clone(),
+            discord_sdk::wheel::UserState::Disconnected(error) => {
+                { Err(mlua::Error::runtime(error.to_string())) }?
             }
-        });
+        };
 
-        // client.discord.clear_activity().await
+        println!("enter user: {user:?}");
 
-        // client.discord.disconnect().await;
+        let activity = wheel.activity();
 
         Ok(Self {
             discord,
             user,
             wheel,
+            activity,
         })
     }
 }
