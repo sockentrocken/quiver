@@ -85,10 +85,13 @@ struct Steam {
     user_statistic: UserStats<ClientManager>,
     remote_play: RemotePlay<ClientManager>,
     remote_storage: RemoteStorage<ClientManager>,
+    network_message: NetworkingMessages<ClientManager>,
 }
 
 unsafe impl Send for Steam {}
 
+use networking_messages::NetworkingMessages;
+use networking_types::{NetworkingIdentity, SendFlags};
 use steamworks::*;
 
 impl mlua::UserData for Steam {
@@ -214,8 +217,50 @@ impl mlua::UserData for Steam {
         //================================================================
 
         //================================================================
-        // networking.
+        // networking. (NetworkingMessages)
         //================================================================
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "steam:set_message",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("set_message", |_: &Lua, this, _: ()| {
+            for friend in this.friend.get_friends(FriendFlags::IMMEDIATE) {
+                let identity = NetworkingIdentity::new_steam_id(friend.id());
+
+                let data = [0, 1, 2, 3, 4, 5, 6, 7];
+
+                let _ = this.network_message.send_message_to_user(
+                    identity,
+                    SendFlags::UNRELIABLE_NO_DELAY,
+                    &data,
+                    0,
+                );
+            }
+
+            Ok(())
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
+            "name": "steam:get_message",
+            "info": "TO-DO"
+        }
+        */
+        method.add_method_mut("get_message", |_: &Lua, this, _: ()| {
+            for message in this.network_message.receive_messages_on_channel(0, 100) {
+                let peer = message.identity_peer();
+                let data = message.data();
+
+                println!("{peer:?} : {data:?}");
+            }
+
+            Ok(())
+        });
 
         //================================================================
         // app.
@@ -1237,6 +1282,19 @@ impl Steam {
         let user_statistic = client.user_stats();
         let remote_play = client.remote_play();
         let remote_storage = client.remote_storage();
+        let network_message = client.networking_messages();
+
+        // Even though NetworkingMessages appears as ad-hoc API, it's internally session based. We must accept any incoming
+        // messages before communicating with the peer.
+        network_message.session_request_callback(move |req| {
+            println!("Accepting session request from {:?}", req.remote());
+            req.accept();
+        });
+
+        // Install a callback to debug print failed peer connections
+        network_message.session_failed_callback(|info| {
+            eprintln!("Session failed: {info:#?}");
+        });
 
         Ok(Self {
             client,
@@ -1248,6 +1306,7 @@ impl Steam {
             user_statistic,
             remote_play,
             remote_storage,
+            network_message,
         })
     }
 }

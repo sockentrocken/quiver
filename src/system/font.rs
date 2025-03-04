@@ -245,17 +245,29 @@ impl Font {
     {
         "version": "1.0.0",
         "name": "quiver.font.new_default",
-        "info": "Create a new font resource (default font).",
-        "result": [
-            { "name": "font", "info": "Font resource.", "kind": "font" }
-        ]
+        "info": "TO-DO"
     }
     */
-    fn new_default(_: &Lua, _: ()) -> mlua::Result<Self> {
-        unsafe {
-            let data = ffi::GetFontDefault();
+    fn new_default(_: &Lua, size: i32) -> mlua::Result<Self> {
+        let data = Status::FONT;
 
-            Ok(Self(RLFont::from_raw(data)))
+        unsafe {
+            let data = ffi::LoadFontFromMemory(
+                Script::rust_to_c_string(".ttf")?.as_ptr(),
+                data.as_ptr(),
+                data.len() as i32,
+                size,
+                std::ptr::null_mut(),
+                0,
+            );
+
+            if ffi::IsFontValid(data) {
+                Ok(Self(RLFont::from_raw(data)))
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "Font::new_from_default(): Could not load file.".to_string(),
+                ))
+            }
         }
     }
 }

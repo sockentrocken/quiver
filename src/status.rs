@@ -374,9 +374,9 @@ impl Info {
             head: true,
             path: ".".to_string(),
         };
-        let mut argument_list = std::env::args().enumerate();
+        let mut argument_list = std::env::args();
 
-        while let Some((i, argument)) = argument_list.next() {
+        while let Some(argument) = argument_list.next() {
             match &*argument {
                 "--no-safe" => {
                     argument_.safe = false;
@@ -387,7 +387,7 @@ impl Info {
                     argument_pick = true;
                 }
                 "--path" => {
-                    if let Some((_, next)) = argument_list.next() {
+                    if let Some(next) = argument_list.next() {
                         argument_.path = next;
                     } else {
                         eprintln!("ERROR: Was expecting argument for --path.")
@@ -395,22 +395,7 @@ impl Info {
 
                     argument_pick = true;
                 }
-                any => {
-                    // first argument might be the path to the executable which will trigger a false alarm...this might not be correct.
-                    if i > 0 {
-                        eprintln!("Unknown argument: {any}.");
-                        eprintln!("Argument list:");
-                        eprintln!(
-                        "--no-safe: Disable safe mode. Quiver will start in safe mode otherwise."
-                    );
-                        eprintln!(
-                        "--no-head: Disable head mode. Quiver will start in head mode otherwise."
-                    );
-                        eprintln!(
-                            "--path {{path}}: Path to folder, or file, with a main.lua file."
-                        );
-                    }
-                }
+                _ => {}
             }
         }
 

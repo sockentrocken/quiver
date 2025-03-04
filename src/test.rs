@@ -73,6 +73,7 @@ mod test_main {
         test_folder("data").await;
         test_folder("file").await;
         test_folder("input").await;
+        test_folder("lua").await;
 
         /*
         #[cfg(feature = "rapier3d")]

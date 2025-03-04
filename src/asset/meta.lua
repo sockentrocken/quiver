@@ -704,385 +704,397 @@ steam = {}
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L133)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L136)
 function steam:update() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L149)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L152)
 function steam:get_app_ID() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L160)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L163)
 function steam:get_IP_country() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L171)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L174)
 function steam:get_UI_language() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L182)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L185)
 function steam:get_server_time() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L193)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L196)
 function steam:set_overlay_position() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L231)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L230)
+function steam:set_message() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L254)
+function steam:get_message() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L276)
 function steam:get_app_install() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L242)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L287)
 function steam:get_DLC_install() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L253)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L298)
 function steam:get_app_subscribe() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L264)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L309)
 function steam:get_VAC_ban() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L275)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L320)
 function steam:get_cyber_cafe() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L286)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L331)
 function steam:get_low_violence() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L297)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L342)
 function steam:get_subscribe() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L308)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L353)
 function steam:get_app_build_ID() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L319)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L364)
 function steam:get_app_install_directory() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L330)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L375)
 function steam:get_app_owner() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L341)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L386)
 function steam:get_game_language_list() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L352)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L397)
 function steam:get_game_language() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L363)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L408)
 function steam:get_beta_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L374)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L419)
 function steam:get_launch_command_line() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L389)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L434)
 function steam:get_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L400)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L445)
 function steam:activate_overlay() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L412)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L457)
 function steam:activate_overlay_link() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L424)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L469)
 function steam:activate_overlay_store() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L445)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L490)
 function steam:activate_overlay_user() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L461)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L506)
 function steam:activate_invite_dialog() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L483)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L528)
 function steam:get_steam_ID() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L494)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L539)
 function steam:get_level() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L503)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L548)
 function steam:get_log_on() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L518)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L563)
 function steam:get_leader_board() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L538)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L583)
 function steam:get_or_create_leader_board() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L571)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L616)
 function steam:upload_leader_board_score() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L630)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L675)
 function steam:get_leader_board_show_kind() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L662)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L707)
 function steam:get_leader_board_sort_kind() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L693)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L738)
 function steam:get_leader_board_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L720)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L765)
 function steam:get_leader_board_entry_count() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L747)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L792)
 function steam:pull_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L760)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L805)
 function steam:push_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L773)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L818)
 function steam:reset_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L793)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L838)
 function steam:get_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L815)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L860)
 function steam:set_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L839)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L884)
 function steam:get_achievement() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L858)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L903)
 function steam:get_achievement_list() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L875)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L920)
 function steam:set_achievement() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L901)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L946)
 function steam:get_achievement_percent() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L920)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L965)
 function steam:get_achievement_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L939)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L984)
 function steam:get_achievement_() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L958)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1003)
 function steam:get_achievement_hidden() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L977)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1022)
 function steam:get_achievement_icon() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1006)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1051)
 function steam:get_session_user() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1019)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1064)
 function steam:get_session_client_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1032)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1077)
 function steam:get_session_client_form_factor() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1057)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1102)
 function steam:get_session_client_resolution() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1077)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1122)
 function steam:invite_session() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1101)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1146)
 function steam:set_cloud_app() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1113)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1158)
 function steam:get_cloud_app() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1124)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1169)
 function steam:get_cloud_account() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1135)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1180)
 function steam:get_file_list() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1155)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1200)
 function steam:file_delete() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1168)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1213)
 function steam:file_forget() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1181)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1226)
 function steam:file_exist() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1194)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1239)
 function steam:get_file_persist() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1207)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1252)
 function steam:get_file_time_stamp() end
 
 ---Create a new Steam client.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1229)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/steam.rs#L1274)
 function quiver.steam.new() end
 
 ---The video API.
@@ -2576,11 +2588,10 @@ function quiver.font.new(path,size) end
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L219)
 function quiver.font.new_from_memory() end
 
----Create a new font resource (default font).
----@return font font # Font resource.
+---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L254)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L251)
 function quiver.font.new_default() end
 
 ---The window API.

@@ -94,8 +94,8 @@ impl Script {
         BaseFile::new("base/primitive.lua",   include_str!(concat!(env!("OUT_DIR"), "/primitive.lua"))),
         BaseFile::new("base/scheduler.lua",   include_str!(concat!(env!("OUT_DIR"), "/scheduler.lua"))),
         BaseFile::new("base/action.lua",      include_str!(concat!(env!("OUT_DIR"), "/action.lua"))),
-        BaseFile::new("base/window.lua",      include_str!(concat!(env!("OUT_DIR"), "/window.lua"))),
         BaseFile::new("base/logger.lua",      include_str!(concat!(env!("OUT_DIR"), "/logger.lua"))),
+        BaseFile::new("base/window.lua",      include_str!(concat!(env!("OUT_DIR"), "/window.lua"))),
         BaseFile::new("base/system.lua",      include_str!(concat!(env!("OUT_DIR"), "/system.lua"))),
         BaseFile::new("base/scene.lua",       include_str!(concat!(env!("OUT_DIR"), "/scene.lua"))),
     ];
