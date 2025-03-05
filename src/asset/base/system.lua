@@ -113,7 +113,6 @@ function system:new(search)
 
 	i:scan(search)
 
-
 	return i
 end
 

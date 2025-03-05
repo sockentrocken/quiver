@@ -1,13 +1,12 @@
--- Create a new file-system.
+-- Create a new file-system. It will scan every path in the table to create an asset look-up table.
 local i = system:new({
-	"game_folder_1", -- image.png, sound.wav, model.obj
-	"game_folder_2", -- image.png
-	"game_folder_3" -- sound.wav
+	"game_folder_1", -- Has the file "card.png".
+	"game_folder_2", -- Has the file "font.ttf".
+	"game_folder_3", -- Has the file "card.png".
 })
 
--- Scan "g_f_1", "g_f_2", "g_f_3" to update the asset look-up table.
-i:scan()
+-- Try locating font.ttf.
+assert(i:find("font.ttf"), "game_folder_2/font.ttf")
 
-i:find("image.png") -- "game_folder_2/image.png"
-i:find("sound.wav") -- "game_folder_3/sound.wav"
-i:find("model.obj") -- "game_folder_1/model.obj"
+-- Because "game_folder_3" was last, its data ("card.png") will override the data of "game_folder_1".
+assert(i:find("card.png"), "game_folder_3/card.png")

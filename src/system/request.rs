@@ -109,7 +109,7 @@ async fn get(lua: Lua, (link, binary): (String, bool)) -> mlua::Result<LuaValue>
     "version": "1.0.0",
     "name": "quiver.request.post",
     "info": "TO-DO",
-    "test": "request/get.lua"
+    "test": "request/post.lua"
 }
 */
 async fn post(

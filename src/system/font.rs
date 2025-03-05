@@ -249,8 +249,6 @@ impl Font {
     }
     */
     fn new_default(_: &Lua, size: i32) -> mlua::Result<Self> {
-        println!("calling default!");
-
         let data = Status::FONT;
 
         unsafe {
