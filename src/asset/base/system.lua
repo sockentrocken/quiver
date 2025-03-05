@@ -119,7 +119,7 @@ end
 
 ---Scan every directory in the asset's search table, to update the asset look-up table.
 function system:scan(search)
-	local embed_list = quiver.data.get_embed_list()
+	local embed_list = quiver.general.get_info().feature.embed and quiver.data.get_embed_list()
 
 	-- for each search path in the search table...
 	for _, search_path in ipairs(search) do
@@ -142,12 +142,14 @@ function system:scan(search)
 					self.locate[search_file] = file_entry:new(pack, FILE_KIND.PACK)
 				end
 			else
-				for _, search_file in ipairs(embed_list) do
-					local token = string.tokenize(search_file, "/")
+				if embed_list then
+					for _, search_file in ipairs(embed_list) do
+						local token = string.tokenize(search_file, "/")
 
-					if token[2] then
-						if token[1] == search_path then
-							self.locate[token[2]] = file_entry:new(search_file, FILE_KIND.EMBED)
+						if token[2] then
+							if token[1] == search_path then
+								self.locate[token[2]] = file_entry:new(search_file, FILE_KIND.EMBED)
+							end
 						end
 					end
 				end

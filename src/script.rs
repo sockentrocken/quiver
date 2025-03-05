@@ -383,8 +383,43 @@ impl Script {
 //================================================================
 
 #[derive(Serialize)]
+pub struct Feature {
+    serialization: bool,
+    system_info: bool,
+    file_notify: bool,
+    rapier3d: bool,
+    rapier2d: bool,
+    zip: bool,
+    request: bool,
+    steam: bool,
+    discord: bool,
+    embed: bool,
+    video: bool,
+}
+
+impl Feature {
+    pub fn new() -> Self {
+        Self {
+            serialization: cfg!(feature = "serialization"),
+            system_info: cfg!(feature = "system_info"),
+            file_notify: cfg!(feature = "file_notify"),
+            rapier3d: cfg!(feature = "rapier3d"),
+            rapier2d: cfg!(feature = "rapier2d"),
+            zip: cfg!(feature = "zip"),
+            request: cfg!(feature = "request"),
+            steam: cfg!(feature = "steam"),
+            discord: cfg!(feature = "discord"),
+            embed: cfg!(feature = "embed"),
+            video: cfg!(feature = "video"),
+        }
+    }
+}
+
+#[derive(Serialize)]
 pub struct ScriptData {
     pub info: Info,
+    pub version: String,
+    pub feature: Feature,
     pub path_escape: bool,
 }
 
@@ -392,6 +427,8 @@ impl ScriptData {
     pub fn new(info: Info) -> Self {
         Self {
             info,
+            version: Status::VERSION.to_string(),
+            feature: Feature::new(),
             path_escape: false,
         }
     }

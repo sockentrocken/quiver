@@ -178,7 +178,7 @@ local function window_glyph(self, board_label, mouse_label, pad_label)
 	local label = board_label
 
 	-- draw border.
-	quiver.draw_2d.draw_box_2_border(box_2:old(point.x, point.y, x - 16.0, 32.0), false)
+	--quiver.draw_2d.draw_box_2_border(box_2:old(point.x, point.y, x - 16.0, 32.0), false)
 
 	-- if active device is the mouse...
 	if self.device == INPUT_DEVICE.MOUSE then
@@ -241,23 +241,6 @@ local function window_border(self, shape, hover, index, focus, label, move)
 		color:old(0, 0, 0, 99),
 		color:old(0, 0, 0, 0))
 	quiver.draw_2d.draw_box_2_round(shape, WINDOW_CARD_ROUND_SHAPE, WINDOW_CARD_ROUND_COUNT, color)
-
-	-- if we are not the focus gizmo...
-	if not self.focus then
-		-- if we have board/pad hover OR mouse hover...
-		if index or hover then
-			quiver.draw_2d.draw_box_2_dot(shape:old(shape.x + WINDOW_DOT.x, shape.y + WINDOW_DOT.y,
-				shape.width - WINDOW_DOT.x * 2.0,
-				shape.height - WINDOW_DOT.y * 2.0))
-		end
-	else
-		-- if we have board/pad hover OR we are the focus gizmo...
-		if index or focus then
-			quiver.draw_2d.draw_box_2_dot(shape:old(shape.x + WINDOW_DOT.x, shape.y + WINDOW_DOT.y,
-				shape.width - WINDOW_DOT.x * 2.0,
-				shape.height - WINDOW_DOT.y * 2.0))
-		end
-	end
 
 	-- if label isn't nil...
 	if label then

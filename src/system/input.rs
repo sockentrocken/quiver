@@ -110,6 +110,7 @@ pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<(
     mouse.set("set_scale",   lua.create_function(self::set_mouse_scale)?)?;
     mouse.set("set_cursor",  lua.create_function(self::set_mouse_cursor)?)?;
     mouse.set("get_wheel",   lua.create_function(self::get_mouse_wheel)?)?;
+    mouse.set("get_queue",   lua.create_function(self::get_mouse_queue)?)?;
     mouse.set("get_up",      lua.create_function(self::get_mouse_up)?)?;
     mouse.set("get_down",    lua.create_function(self::get_mouse_down)?)?;
     mouse.set("get_press",   lua.create_function(self::get_mouse_press)?)?;
@@ -519,6 +520,27 @@ fn get_mouse_wheel(_: &Lua, _: ()) -> mlua::Result<(f32, f32)> {
         let value = ffi::GetMouseWheelMoveV();
         Ok((value.x, value.y))
     }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.input.mouse.get_mouse_queue",
+    "info": "TO-DO"
+}
+*/
+fn get_mouse_queue(_: &Lua, _: ()) -> mlua::Result<bool> {
+    unsafe {
+        for x in 0..7 {
+            let value = ffi::IsMouseButtonPressed(x);
+
+            if value {
+                return Ok(value);
+            }
+        }
+    }
+
+    Ok(false)
 }
 
 /* entry

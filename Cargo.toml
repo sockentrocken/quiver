@@ -13,7 +13,7 @@ default = [
 	#"zip",
 	"request",
 	#"steam",
-	"discord",
+	#"discord",
 	#"embed",
 	#"video",
 	# Only enable this if you want to write documentation out to "../quiver.wiki".
@@ -48,7 +48,7 @@ notify       = { optional = true, version = "8.0.0",  features = ["serde"] }
 rapier3d     = { optional = true, version = "0.22.0", features = ["simd-stable", "serde-serialize", "debug-render"] }
 rapier2d     = { optional = true, version = "0.22.0", features = ["simd-stable", "serde-serialize", "debug-render"] }
 zip          = { optional = true, version = "2.2.2"  }
-reqwest      = { optional = true, version = "0.12"   }
+reqwest      = { optional = true, version = "0.12", features = ["json"] }
 steamworks   = { optional = true, version = "0.11.0" }
 discord-sdk  = { optional = true, version = "0.4.0"  }
 rust-embed   = { optional = true, version = "8.6.0"  }

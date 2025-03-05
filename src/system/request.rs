@@ -64,6 +64,7 @@ pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> 
     let request = lua.create_table()?;
 
     request.set("get",  lua.create_async_function(self::get)?)?;
+    request.set("post", lua.create_async_function(self::post)?)?;
 
     table.set("request", request)?;
 
@@ -96,6 +97,81 @@ async fn get(lua: Lua, (link, binary): (String, bool)) -> mlua::Result<LuaValue>
             &reqwest::get(link)
                 .await
                 .map_err(|e| mlua::Error::runtime(e.to_string()))?
+                .text()
+                .await
+                .map_err(|e| mlua::Error::runtime(e.to_string()))?,
+        )
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.request.post",
+    "info": "TO-DO",
+    "test": "request/get.lua"
+}
+*/
+async fn post(
+    lua: Lua,
+    (link, data, form, json, binary): (
+        String,
+        Option<LuaValue>,
+        Option<mlua::Table>,
+        Option<mlua::Table>,
+        bool,
+    ),
+) -> mlua::Result<LuaValue> {
+    let client = reqwest::Client::new();
+    let result = client.post(link);
+
+    let result = if let Some(data) = data {
+        match data {
+            LuaValue::String(data) => Ok(result.body(data.to_string_lossy())),
+            LuaValue::UserData(data) => {
+                let data = crate::system::data::Data::get_buffer(mlua::Value::UserData(data))?;
+                let data = data.0.clone();
+                Ok(result.body(data))
+            }
+            _ => Err(mlua::Error::runtime(
+                "quiver.request.post(): Unknown type for \"data\" argument.",
+            )),
+        }
+    } else {
+        Ok(result)
+    }?;
+
+    let result = if let Some(form) = form {
+        result.form(&form)
+    } else {
+        result
+    };
+
+    let result = if let Some(json) = json {
+        result.json(&json)
+    } else {
+        result
+    };
+
+    let result = result
+        .send()
+        .await
+        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+
+    if binary {
+        let data = result
+            .bytes()
+            .await
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?
+            .to_vec();
+
+        let data = crate::system::data::Data::new(&lua, data)?;
+        let data = lua.create_userdata(data)?;
+
+        Ok(mlua::Value::UserData(data))
+    } else {
+        lua.to_value(
+            &result
                 .text()
                 .await
                 .map_err(|e| mlua::Error::runtime(e.to_string()))?,

@@ -133,7 +133,7 @@ fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
             base.data
         };
 
-        lua.load(data).exec()?;
+        lua.load(data).set_name(format!("@{}", base.name)).exec()?;
     }
 
     Ok(())
