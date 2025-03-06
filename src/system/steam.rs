@@ -62,7 +62,7 @@ use mlua::prelude::*;
 { "version": "1.0.0", "feature": "steam", "name": "quiver.steam", "info": "The Steam API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, status_info: &StatusInfo, script_info: Option<&ScriptInfo>) -> mlua::Result<()> {
     let steam = lua.create_table()?;
 
     steam.set("new", lua.create_function(self::Steam::new)?)?;

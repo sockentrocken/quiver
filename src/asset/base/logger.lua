@@ -79,7 +79,8 @@ end
 
 LOGGER_FONT_SCALE     = 24.0
 LOGGER_FONT_SPACE     = 2.0
-LOGGER_FONT           = quiver.general.get_info().info.head and quiver.font.new_default(LOGGER_FONT_SCALE)
+--LOGGER_FONT           = quiver.general.get_info().info.head and quiver.font.new_default(LOGGER_FONT_SCALE)
+LOGGER_FONT           = quiver.font.new_default(LOGGER_FONT_SCALE)
 local LOGGER_LINE_CAP = 64.0
 
 ---@class logger

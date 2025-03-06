@@ -65,19 +65,19 @@ use crate::status::*;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // create the Quiver state.
-    let (info, mut status) = Status::new();
+    let mut status = Status::new().await;
 
     // create the RL context.
-    let mut context = Status::window(&info);
+    let mut context = status.window().await;
 
     loop {
         match status {
-            // missing status: no info_quiver.json file is present.
+            // missing status: no info.json file is present.
             Status::Missing => {
                 if let Some((ref mut handle, ref thread, ref _audio)) = context {
                     let mut window = window::Window::new(handle, thread);
 
-                    if let Some((_, state)) = Status::missing(handle, thread, &mut window) {
+                    if let Some(state) = Status::missing(handle, thread, &mut window).await {
                         status = state;
                     }   
                 } else {
@@ -86,7 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             // success status: standard state.
             Status::Success(ref mut script) => {
-                if let Some((_, state)) = Status::success(&context, script).await {
+                if let Some(state) = Status::success(&context, script).await {
                     status = state;
                 }
             }
@@ -95,7 +95,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if let Some((ref mut handle, ref thread, ref _audio)) = context {
                     let mut window = window::Window::new(handle, thread);
                     
-                    if let Some((_, state)) = Status::failure(handle, thread, &mut window, script, error) {
+                    if let Some(state) = Status::failure(handle, thread, &mut window, script, error).await {
                         status = state;
                     }
                 } else {

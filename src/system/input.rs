@@ -48,6 +48,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::script::*;
 use crate::status::*;
 
 //================================================================
@@ -62,11 +63,7 @@ use std::ffi::{CStr, CString};
 { "version": "1.0.0", "name": "quiver.input", "info": "The input API.", "head": true }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
-    if !info.head {
-        return Ok(());
-    }
-    
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let input = lua.create_table()?;
 
     // SetClipboardText

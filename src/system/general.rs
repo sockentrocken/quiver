@@ -50,6 +50,7 @@
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use crate::script::*;
 use crate::status::*;
 
 //================================================================
@@ -67,8 +68,9 @@ use sysinfo::System;
 { "version": "1.0.0", "name": "quiver.general", "info": "The general API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let general = lua.create_table()?;
+
 
     general.set("load_base",       lua.create_function(self::load_base)?)?;
     general.set("set_log_level",   lua.create_function(self::set_log_level)?)?;
@@ -76,13 +78,10 @@ pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<(
 
     general.set("standard_input",       lua.create_function(self::standard_input)?)?;
 
-
-    if info.head {
-        general.set("set_exit_key",    lua.create_function(self::set_exit_key)?)?;
-        general.set("get_frame_time",  lua.create_function(self::get_frame_time)?)?;
-        general.set("get_frame_rate",  lua.create_function(self::get_frame_rate)?)?;
-        general.set("set_frame_rate",  lua.create_function(self::set_frame_rate)?)?;
-    }
+    general.set("set_exit_key",    lua.create_function(self::set_exit_key)?)?;
+    general.set("get_frame_time",  lua.create_function(self::get_frame_time)?)?;
+    general.set("get_frame_rate",  lua.create_function(self::get_frame_rate)?)?;
+    general.set("set_frame_rate",  lua.create_function(self::set_frame_rate)?)?;
     
     general.set("get_time",      lua.create_function(self::get_time)?)?;
     general.set("get_time_unix", lua.create_function(self::get_time_unix)?)?;

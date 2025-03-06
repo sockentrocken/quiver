@@ -63,11 +63,7 @@ use std::ffi::CString;
 { "version": "1.0.0", "name": "quiver.font", "info": "The font API.", "head": true }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
-    if !info.head {
-        return Ok(());
-    }
-    
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let font = lua.create_table()?;
 
     font.set("new",                 lua.create_function(self::Font::new)?)?;
@@ -249,6 +245,8 @@ impl Font {
     }
     */
     fn new_default(_: &Lua, size: i32) -> mlua::Result<Self> {
+        println!("foo");
+
         let data = Status::FONT;
 
         unsafe {

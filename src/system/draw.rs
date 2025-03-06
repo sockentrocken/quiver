@@ -48,6 +48,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::script::*;
 use crate::status::*;
 use crate::system::*;
 
@@ -59,14 +60,15 @@ use std::ffi::CString;
 
 //================================================================
 
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
-    if !info.head {
-        return Ok(());
-    }
-
-    draw_general::set_global(lua, info, table)?;
-    draw_3d::set_global(lua, info, table)?;
-    draw_2d::set_global(lua, info, table)?;
+pub fn set_global(
+    lua: &Lua,
+    table: &mlua::Table,
+    status_info: &StatusInfo,
+    script_info: Option<&ScriptInfo>,
+) -> mlua::Result<()> {
+    draw_general::set_global(lua, table, status_info, script_info)?;
+    draw_3d::set_global(lua, table, status_info, script_info)?;
+    draw_2d::set_global(lua, table, status_info, script_info)?;
 
     Ok(())
 }
@@ -78,7 +80,7 @@ mod draw_general {
     { "version": "1.0.0", "name": "quiver.draw", "info": "The drawing API.", "head": true }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
         let draw = lua.create_table()?;
 
         // BeginDrawing/EndDrawing
@@ -193,11 +195,10 @@ mod draw_3d {
     { "version": "1.0.0", "name": "quiver.draw_3d", "info": "The 3D drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
         let draw_3d = lua.create_table()?;
 
         draw_3d.set("begin",                 lua.create_function(self::begin)?)?;
-        draw_3d.set("update_camera_pro",     lua.create_function(self::update_camera_pro)?)?;
         draw_3d.set("get_matrix_projection", lua.create_function(self::get_matrix_projection)?)?;
         draw_3d.set("get_matrix_model_view", lua.create_function(self::get_matrix_model_view)?)?;
         draw_3d.set("get_screen_to_world",   lua.create_function(self::get_screen_to_world)?)?;
@@ -256,48 +257,6 @@ mod draw_3d {
                 value.m4,  value.m5,  value.m6,  value.m7,
                 value.m8,  value.m9,  value.m10, value.m11,
                 value.m12, value.m13, value.m14, value.m15 
-            ))
-        }
-    }
-
-    /* entry
-    {
-        "version": "1.0.0",
-        "name": "quiver.draw_3d.update_camera_pro",
-        "info": "Update the 3D camera (pro).",
-        "member": [
-            { "name": "camera",   "info": "The camera to update.", "kind": "camera_3d" },
-            { "name": "position", "info": "TO-DO",                      "kind": "vector_3"  },
-            { "name": "rotation", "info": "TO-DO",                      "kind": "vector_3"  },
-            { "name": "zoom",     "info": "TO-DO",                      "kind": "number"    }
-        ]
-    }
-    */
-    fn update_camera_pro(
-        lua: &Lua,
-        (camera, position, rotation, zoom): (LuaValue, LuaValue, LuaValue, f32),
-    ) -> mlua::Result<(f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, i32)> {
-        let camera: general::Camera3D = lua.from_value(camera)?;
-        let position: Vector3 = lua.from_value(position)?;
-        let rotation: Vector3 = lua.from_value(rotation)?;
-
-        unsafe {
-            let mut camera: ffi::Camera3D = camera.into();
-
-            ffi::UpdateCameraPro(&mut camera, position.into(), rotation.into(), zoom);
-
-            Ok((
-                camera.position.x,
-                camera.position.y,
-                camera.position.z,
-                camera.target.x,
-                camera.target.y,
-                camera.target.z,
-                camera.up.x,
-                camera.up.y,
-                camera.up.z,
-                camera.fovy,
-                camera.projection,
             ))
         }
     }
@@ -655,7 +614,7 @@ mod draw_2d {
     { "version": "1.0.0", "name": "quiver.draw_2d", "info": "The 2D drawing API." }
     */
     #[rustfmt::skip]
-    pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
+    pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
         let draw_2d = lua.create_table()?;
 
         draw_2d.set("begin",                 lua.create_function(self::begin)?)?;

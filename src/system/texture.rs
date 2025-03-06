@@ -69,11 +69,7 @@ type RLRenderTexture = ffi::RenderTexture2D;
 { "version": "1.0.0", "name": "quiver.texture", "info": "The texture API.", "head": true }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
-    if !info.head {
-        return Ok(());
-    }
-    
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let texture = lua.create_table()?;
 
     texture.set("new",             lua.create_function(self::Texture::new)?)?;

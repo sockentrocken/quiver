@@ -51,7 +51,7 @@
 #[cfg(test)]
 mod test_main {
     use crate::script::*;
-    use crate::status::*;
+    use raylib::prelude::*;
 
     async fn test_folder(path: &str) {
         let path_list = std::fs::read_dir(format!("test/system/{path}")).unwrap();
@@ -68,7 +68,17 @@ mod test_main {
 
     #[tokio::test]
     async fn main() {
-        let (_handle, _thread, _audio) = Status::window(&None).unwrap();
+        // create RL window, thread.
+        let (mut handle, _) = raylib::init()
+            .title("Quiver - Test")
+            .size(1024, 768)
+            .build();
+
+        // cap frame-rate.
+        handle.set_target_fps(60);
+
+        // create RL audio context.
+        let _audio = RaylibAudio::init_audio_device().unwrap();
 
         test_folder("data").await;
         test_folder("file").await;

@@ -66,7 +66,7 @@ type RLImage = ffi::Image;
 { "version": "1.0.0", "name": "quiver.image", "info": "The image API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let image = lua.create_table()?;
 
     image.set("new",             lua.create_async_function(self::Image::new)?)?;

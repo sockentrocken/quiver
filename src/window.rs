@@ -68,7 +68,6 @@ pub struct Window {
 
 impl Window {
     const COLOR_PRIMARY_MAIN: Color = Color::new(255, 87, 34, 255);
-    const COLOR_PRIMARY_SIDE: Color = Color::new(255, 152, 0, 255);
     const COLOR_TEXT_WHITE: Color = Color::new(255, 255, 255, 255);
     const COLOR_TEXT_BLACK: Color = Color::new(33, 33, 33, 255);
 
@@ -135,11 +134,11 @@ impl Window {
     }
 
     // draw missing window layout.
-    pub fn missing(
+    pub async fn missing(
         &mut self,
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
-    ) -> Option<(Option<Info>, Status)> {
+    ) -> Option<Status> {
         while !handle.window_should_close() {
             let draw_shape = Vector2::new(
                 handle.get_screen_width() as f32,
@@ -177,7 +176,7 @@ impl Window {
                     Script::new_project(&project.display().to_string());
 
                     drop(draw);
-                    return Some(Status::new());
+                    return Some(Status::new().await);
                 }
             }
 
@@ -193,26 +192,26 @@ impl Window {
                     Script::load_project(&project.display().to_string());
 
                     drop(draw);
-                    return Some(Status::new());
+                    return Some(Status::new().await);
                 }
             }
 
             // exit Quiver.
             if self.button(&mut draw, "Exit Quiver") {
-                return Some((None, Status::Closure));
+                return Some(Status::Closure);
             }
         }
 
-        Some((None, Status::Closure))
+        Some(Status::Closure)
     }
 
     // draw failure window layout.
-    pub fn failure(
+    pub async fn failure(
         &mut self,
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         text: &str,
-    ) -> Option<(Option<Info>, Status)> {
+    ) -> Option<Status> {
         while !handle.window_should_close() {
             let draw_shape = Vector2::new(
                 handle.get_screen_width() as f32,
@@ -246,7 +245,7 @@ impl Window {
             // reload Quiver.
             if self.button(&mut draw, "Load Project") {
                 drop(draw);
-                return Some(Status::new());
+                return Some(Status::new().await);
             }
 
             // copy report to clipboard.
@@ -258,11 +257,11 @@ impl Window {
 
             // exit Quiver.
             if self.button(&mut draw, "Exit Quiver") {
-                return Some((None, Status::Closure));
+                return Some(Status::Closure);
             }
         }
 
-        Some((None, Status::Closure))
+        Some(Status::Closure)
     }
 
     //================================================================
@@ -338,7 +337,7 @@ impl Window {
         self.card_round(
             draw,
             data.get_shape(&rectangle),
-            data.get_color(&Window::COLOR_PRIMARY_SIDE),
+            data.get_color(&Window::COLOR_PRIMARY_MAIN),
         );
         self.font(
             draw,

@@ -28,7 +28,7 @@ As part of the Lua standard library:
 * User interface
 
 ## Usage
-Download the latest release from [here](https://github.com/sockentrocken/quiver/releases) and launch Quiver. If no `info_quiver.json`, `main.lua` or folder with the name of `main` is found, Quiver will automatically launch the quick start menu to create a new project. From there, simply create a new project and open the newly made `main.lua` file for further information.
+Download the latest release from [here](https://github.com/sockentrocken/quiver/releases) and launch Quiver. If no `info.json`, `main.lua` or folder with the name of `main` is found, Quiver will automatically launch the quick start menu to create a new project. From there, simply create a new project and open the newly made `main.lua` file for further information.
 
 ## Example
 

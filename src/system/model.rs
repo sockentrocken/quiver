@@ -65,11 +65,7 @@ use std::ffi::{CStr, CString};
 { "version": "1.0.0", "name": "quiver.model", "info": "The model API.", "head": true }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
-    if !info.head {
-        return Ok(());
-    }
-    
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let model = lua.create_table()?;
 
     model.set("new", lua.create_function(self::Model::new)?)?;

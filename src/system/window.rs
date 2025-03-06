@@ -66,11 +66,16 @@ use std::{
 { "version": "1.0.0", "name": "quiver.window", "info": "The window API.", "head": true }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
-    if !info.head {
-        return Ok(());
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, script_info: Option<&ScriptInfo>) -> mlua::Result<()> {
+    // part of head API. only run on head API pass, if we are running in head mode.
+    if let Some(info) = script_info {
+        if !info.head {
+            return Ok(())
+        }
+    } else {
+        return Ok(())
     }
-    
+
     let window = lua.create_table()?;
 
     // WindowShouldClose

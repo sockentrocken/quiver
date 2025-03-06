@@ -69,7 +69,7 @@ use std::sync::{Arc, Mutex};
 { "version": "1.0.0", "name": "quiver.rapier", "info": "The Rapier API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, status_info: &StatusInfo, script_info: Option<&ScriptInfo>) -> mlua::Result<()> {
     let rapier = lua.create_table()?;
 
     rapier.set("new", lua.create_function(self::Rapier::new)?)?;

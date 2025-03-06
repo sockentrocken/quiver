@@ -83,18 +83,18 @@ impl Status {
 
     // get a new status instance.
     #[rustfmt::skip]
-    pub fn new() -> (Option<Info>, Self) {
-        let info = Info::new();
+    pub async fn new() -> Self {
+        let info = StatusInfo::new();
 
         match info {
             // info does exist and did not fail to read, create script instance.
-            Ok(info) => match Script::new(&info) {
+            Ok(info) => match Script::new(&info).await {
                 // script is OK, run Quiver normally.
                 Ok(script)  => {
                     println!("//================================================================");
                     println!("// Quiver ({})", Self::VERSION);
                     println!("//");
-                    println!("// -> Info manifest:");
+                    println!("// -> StatusInfo manifest:");
                     println!("//   * Safe: {}", info.safe);
                     println!("//   * Path: {}", info.path);
                     println!("//");
@@ -135,33 +135,76 @@ impl Status {
 
                     println!("//================================================================");
 
-                    (Some(info), Self::Success(script))
+                    Self::Success(script)
                 },
                 // script is  not OK, go-to failure state.
-                Err(script) => (Some(info), Self::Failure(None, script.to_string())),
+                Err(script) => Self::Failure(None, script.to_string()),
             },
             Err(info) => match info {
                 // info does exist, but there was an error parsing.
-                InfoResult::Failure(info) => (None, Self::Failure(None, info.to_string())),
+                InfoResult::Failure(info) => Self::Failure(None, info.to_string()),
                 // info does not exist.
-                InfoResult::Missing => (None, Self::Missing),
+                InfoResult::Missing => Self::Missing,
             },
         }
     }
 
     // create a RL context.
-    pub fn window(info: &Option<Info>) -> Option<(RaylibHandle, RaylibThread, RaylibAudio)> {
-        if let Some(info) = info {
-            if !info.head {
-                return None;
-            }
+    pub async fn window(&self) -> Option<(RaylibHandle, RaylibThread, RaylibAudio)> {
+        let info = match self {
+            Self::Success(script) => &script.info,
+            _ => &ScriptInfo::default(),
+        };
+
+        let mut flag: u32 = 0;
+
+        if info.sync {
+            flag |= ffi::ConfigFlags::FLAG_VSYNC_HINT as u32;
+        }
+        if info.msaa {
+            flag |= ffi::ConfigFlags::FLAG_MSAA_4X_HINT as u32;
+        }
+        if info.scale {
+            flag |= ffi::ConfigFlags::FLAG_WINDOW_HIGHDPI as u32;
+        }
+
+        unsafe {
+            ffi::SetConfigFlags(flag);
         }
 
         // create RL window, thread.
-        let (mut handle, thread) = raylib::init().title("Quiver").size(1024, 768).build();
+        let (mut handle, thread) = raylib::init()
+            .title(&info.name)
+            .size(info.size.0, info.size.1)
+            .build();
+
+        let state = handle
+            .get_window_state()
+            .set_fullscreen_mode(info.full)
+            .set_window_resizable(info.resizable)
+            .set_window_undecorated(info.no_decor)
+            .set_window_hidden(info.hidden)
+            .set_window_minimized(info.minimize)
+            .set_window_maximized(info.maximize)
+            .set_window_unfocused(info.no_focus)
+            .set_window_topmost(info.always_top)
+            .set_window_always_run(info.always_run)
+            .set_window_transparent(info.alpha)
+            .set_interlaced_hint(info.interlace);
+
+        handle.set_window_state(state);
+
+        unsafe {
+            if info.no_border {
+                ffi::SetWindowState(ffi::ConfigFlags::FLAG_BORDERLESS_WINDOWED_MODE as u32);
+            }
+            if info.mouse_pass {
+                ffi::SetWindowState(ffi::ConfigFlags::FLAG_WINDOW_MOUSE_PASSTHROUGH as u32);
+            }
+        }
 
         // cap frame-rate.
-        handle.set_target_fps(60);
+        handle.set_target_fps(info.rate);
 
         // create RL audio context.
         let audio = RaylibAudio::init_audio_device()
@@ -177,20 +220,20 @@ impl Status {
         Some((handle, thread, audio))
     }
 
-    // missing state, info_quiver.json does not exist.
-    pub fn missing(
+    // missing state, info.json does not exist.
+    pub async fn missing(
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         window: &mut Window,
-    ) -> Option<(Option<Info>, Status)> {
-        window.missing(handle, thread)
+    ) -> Option<Status> {
+        window.missing(handle, thread).await
     }
 
     // success state.
     pub async fn success(
         context: &Option<(RaylibHandle, RaylibThread, RaylibAudio)>,
         script: &Script,
-    ) -> Option<(Option<Info>, Status)> {
+    ) -> Option<Status> {
         match script.main().await {
             Ok(result) => {
                 if result {
@@ -202,10 +245,10 @@ impl Status {
                     }
 
                     // return true, reload Quiver.
-                    Some(Status::new())
+                    Some(Status::new().await)
                 } else {
                     // return false, close Quiver.
-                    Some((None, Status::Closure))
+                    Some(Status::Closure)
                 }
             }
             // error, go to failure state.
@@ -225,26 +268,23 @@ impl Status {
                     }
                 }
 
-                Some((
-                    None,
-                    Status::Failure(Some(script.clone()), result.to_string()),
-                ))
+                Some(Status::Failure(Some(script.clone()), result.to_string()))
             }
         }
     }
 
     // failure state.
-    pub fn failure(
+    pub async fn failure(
         handle: &mut RaylibHandle,
         thread: &RaylibThread,
         window: &mut Window,
         script: &Option<Script>,
         text: &str,
-    ) -> Option<(Option<Info>, Status)> {
+    ) -> Option<Status> {
         // a script instance is available, and a crash-handler was set in Lua.
         if let Some(script) = script {
             if script.fail.is_some() {
-                match script.fail(text) {
+                match script.fail(text).await {
                     Ok(result) => {
                         if result {
                             // need to do this, otherwise MAY cause an infinite hang.
@@ -253,10 +293,10 @@ impl Status {
                             }
 
                             // return true, reload Quiver.
-                            return Some(Status::new());
+                            return Some(Status::new().await);
                         } else {
                             // return false, close Quiver.
-                            return Some((None, Status::Closure));
+                            return Some(Status::Closure);
                         }
                     }
                     // an error in the crash-handler...just panic to avoid causing an infinite loop.
@@ -269,7 +309,7 @@ impl Status {
         }
 
         // no script instance is available, or a custom crash-handler has not been set.
-        window.failure(handle, thread, text)
+        window.failure(handle, thread, text).await
     }
 
     // panic window, useful for when no RL context is available to display an error.
@@ -292,20 +332,19 @@ pub enum InfoResult {
     Missing,
 }
 
-#[derive(Default, Clone, Deserialize, Serialize)]
-pub struct Info {
-    pub head: bool,
+#[derive(Serialize, Deserialize, Default, Clone)]
+pub struct StatusInfo {
     pub safe: bool,
     pub path: String,
 }
 
-impl Info {
-    pub const FILE_: &'static str = "info_quiver.json";
+impl StatusInfo {
+    pub const FILE_: &'static str = "info.json";
     pub const MAIN_PATH: &'static str = "main";
     pub const MAIN_FILE: &'static str = "main.lua";
 
     pub fn new() -> Result<Self, InfoResult> {
-        let mut result: Option<Info> = None;
+        let mut result: Option<StatusInfo> = None;
 
         //================================================================
 
@@ -314,7 +353,6 @@ impl Info {
 
         if main_file.is_file() {
             result = Some(Self {
-                head: true,
                 safe: true,
                 path: ".".to_string(),
             });
@@ -326,7 +364,6 @@ impl Info {
 
         if main_path.is_dir() {
             result = Some(Self {
-                head: true,
                 safe: true,
                 path: Self::MAIN_PATH.to_string(),
             });
@@ -340,7 +377,6 @@ impl Info {
 
             if embed_file.is_some() {
                 result = Some(Self {
-                    head: true,
                     safe: true,
                     path: ".".to_string(),
                 });
@@ -355,11 +391,13 @@ impl Info {
         // file does exist, read it.
         if data.is_file() {
             // read file.
-            let file = std::fs::read_to_string(data)
-                .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))?;
+            let file = std::fs::read_to_string(data).map_err(|_| {
+                InfoResult::Failure("StatusInfo::new(): Error reading file.".to_string())
+            })?;
             // return.
-            let mut info: Self = serde_json::from_str(&file)
-                .map_err(|_| InfoResult::Failure("Info::new(): Error reading file.".to_string()))?;
+            let mut info: Self = serde_json::from_str(&file).map_err(|_| {
+                InfoResult::Failure("StatusInfo::new(): Error reading file.".to_string())
+            })?;
 
             info.path = info.path.to_string();
 
@@ -369,9 +407,8 @@ impl Info {
         //================================================================
 
         let mut argument_pick = false;
-        let mut argument_ = Info {
+        let mut argument_ = StatusInfo {
             safe: true,
-            head: true,
             path: ".".to_string(),
         };
         let mut argument_list = std::env::args();
@@ -380,10 +417,6 @@ impl Info {
             match &*argument {
                 "--no-safe" => {
                     argument_.safe = false;
-                    argument_pick = true;
-                }
-                "--no-head" => {
-                    argument_.head = false;
                     argument_pick = true;
                 }
                 "--path" => {

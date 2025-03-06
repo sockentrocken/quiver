@@ -48,6 +48,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::script::*;
 use crate::status::*;
 
 //================================================================
@@ -60,7 +61,7 @@ use mlua::prelude::*;
 { "version": "1.0.0", "name": "quiver.request", "info": "The request API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let request = lua.create_table()?;
 
     request.set("get",  lua.create_async_function(self::get)?)?;

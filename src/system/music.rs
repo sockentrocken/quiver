@@ -63,11 +63,7 @@ use std::ffi::CString;
 { "version": "1.0.0", "name": "quiver.music", "info": "The music API.", "head": true }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, info: &Info, table: &mlua::Table) -> mlua::Result<()> {
-    if !info.head {
-        return Ok(());
-    }
-    
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let music = lua.create_table()?;
 
     music.set("new",             lua.create_async_function(self::Music::new)?)?;

@@ -62,7 +62,7 @@ use raylib::prelude::*;
 { "version": "1.0.0", "name": "quiver.file", "info": "The file API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, _: &Info, table: &mlua::Table) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let file = lua.create_table()?;
 
     file.set("get",                       lua.create_function(self::get)?)?;
