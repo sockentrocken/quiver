@@ -63,6 +63,8 @@ pub mod sound;
 pub mod texture;
 pub mod window;
 
+pub mod socket;
+
 #[cfg(feature = "rapier3d")]
 pub mod rapier;
 

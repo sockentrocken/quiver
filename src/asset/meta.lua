@@ -2133,6 +2133,96 @@ function quiver.data.get_embed_file() end
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/data.rs#L513)
 function quiver.data.get_embed_list() end
 
+---The socket API.
+---
+--- ---
+---*Not available in head-less mode.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L64)
+---@class quiver.socket
+quiver.socket = {}
+
+---An unique handle to a TCP (stream) socket in memory.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L82)
+---@class socket_TCP_stream
+socket_TCP_stream = {}
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L97)
+function socket_TCP_stream:set() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L113)
+function quiver.socket.new_TCP_stream() end
+
+---An unique handle to a TCP (listen) socket in memory.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L125)
+---@class socket_TCP_listen
+socket_TCP_listen = {}
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L140)
+function socket_TCP:accept() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L156)
+function quiver.socket.new_TCP_listen() end
+
+---An unique handle to a UDP socket in memory.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L168)
+---@class socket_UDP
+socket_UDP = {}
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L183)
+function socket_UDP:connect() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L196)
+function socket_UDP:get() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L213)
+function socket_UDP:set() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L227)
+function socket_UDP:get_at() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L244)
+function socket_UDP:set_at() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L264)
+function quiver.socket.new_UDP() end
+
 ---The discord API.
 ---
 --- ---
@@ -2361,72 +2451,72 @@ function quiver.general.load_base() end
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L148)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L150)
 function quiver.general.set_log_level() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L162)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L164)
 function quiver.general.open_link() end
 
 ---Load the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L172)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L174)
 function quiver.general.load() end
 
 ---Exit the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L176)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L178)
 function quiver.general.exit() end
 
 ---Set a key to exit Quiver.
 ---@param key input_board # Key to exit Quiver with.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L186)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L188)
 function quiver.general.set_exit_key(key) end
 
 ---Get the current time. Will count up since the initialization of the window.
 ---@return number time # Current time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L202)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L204)
 function quiver.general.get_time() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L212)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L214)
 function quiver.general.get_time_unix() end
 
 ---Get the current frame time.
 ---@return number frame_time # Current frame time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L229)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L231)
 function quiver.general.get_frame_time() end
 
 ---Get the current frame rate.
 ---@return number frame_rate # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L242)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L244)
 function quiver.general.get_frame_rate() end
 
 ---Set the current frame rate.
 ---@param frame_rate number # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L255)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L257)
 function quiver.general.set_frame_rate(frame_rate) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L269)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L271)
 function quiver.general.get_argument() end
 
 ---TO-DO
@@ -2434,19 +2524,19 @@ function quiver.general.get_argument() end
 --- ---
 ---*Available with compile feature: `system_info`.*
 ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L283)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L285)
 function quiver.general.get_system() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L298)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L300)
 function quiver.general.get_memory() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L309)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L311)
 function quiver.general.get_info() end
 
 ---The shader API.

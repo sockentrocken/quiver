@@ -55,12 +55,12 @@ use crate::status::*;
 //================================================================
 
 use discord_sdk::{
+    Snowflake,
     activity::{ActivityActionKind, IntoTimestamp, Secrets},
     overlay::Visibility,
     registration::{Application, BinArg},
     user::UserId,
     wheel::ActivitySpoke,
-    Snowflake,
 };
 use mlua::prelude::*;
 use raylib::prelude::*;

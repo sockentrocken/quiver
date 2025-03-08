@@ -126,11 +126,13 @@ fn standard_input(_: &Lua, _: ()) -> mlua::Result<String> {
 fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
     // TO-DO only for debug. do not re-load from disk on release.
     for base in crate::script::Script::FILE_BASE {
-        let data = if cfg!(debug_assertions) {
-            &std::fs::read_to_string(format!("src/asset/{}", base.name)).unwrap()
-        } else {
-            base.data
-        };
+        //let data = if cfg!(debug_assertions) {
+        //    &std::fs::read_to_string(format!("src/asset/{}", base.name)).unwrap()
+        //} else {
+        //    base.data
+        //};
+
+        let data = base.data;
 
         lua.load(data).set_name(format!("@{}", base.name)).exec()?;
     }

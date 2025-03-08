@@ -262,6 +262,7 @@ impl Script {
         shader::set_global (lua, quiver, status_info, script_info)?;
         file::set_global   (lua, quiver, status_info, script_info)?;
         data::set_global   (lua, quiver, status_info, script_info)?;
+        socket::set_global (lua, quiver, status_info, script_info)?;
 
         #[cfg(feature = "rapier3d")] rapier::set_global (lua, quiver, status_info, script_info)?;
         #[cfg(feature = "zip")]      zip::set_global    (lua, quiver, status_info, script_info)?;
