@@ -11,11 +11,11 @@ default = [
 	#"rapier3d",
 	#"rapier2d",
 	#"zip",
-	"request",
+	#"request",
 	#"steam",
 	#"discord",
 	#"embed",
-	#"video",
+	"video",
 	# Only enable this if you want to write documentation out to "../quiver.wiki".
 	"documentation"
 ]
@@ -34,7 +34,7 @@ documentation = []
 
 [dependencies]
 raylib       = { git = "https://github.com/raylib-rs/raylib-rs.git", features = ["with_serde"] }
-mlua         = { version = "0.10.3", features = ["luajit52", "vendored", "serialize", "send", "async", "anyhow"] }
+mlua         = { version = "0.10.3", features = ["luajit52", "vendored", "serialize", "send", "async"] }
 tokio        = { version = "1",      features = ["full"]   }
 serde  	     = { version = "1.0",    features = ["derive"] }
 serde_json   = { version = "1.0"    }
@@ -52,7 +52,6 @@ reqwest      = { optional = true, version = "0.12", features = ["json"] }
 steamworks   = { optional = true, version = "0.11.0" }
 discord-sdk  = { optional = true, version = "0.4.0"  }
 rust-embed   = { optional = true, version = "8.6.0"  }
-anyhow = "1.0"
 
 [build-dependencies]
 serde  	    = { version = "1.0", features = ["derive"] }

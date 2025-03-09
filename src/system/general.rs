@@ -48,6 +48,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use std::ffi::{CStr, CString};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::script::*;
@@ -55,6 +56,7 @@ use crate::status::*;
 
 //================================================================
 
+use ffi::__va_list_tag;
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -70,7 +72,6 @@ use sysinfo::System;
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let general = lua.create_table()?;
-
 
     general.set("load_base",       lua.create_function(self::load_base)?)?;
     general.set("set_log_level",   lua.create_function(self::set_log_level)?)?;
@@ -92,6 +93,11 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 
     general.set("get_memory",      lua.create_function(self::get_memory)?)?;
     general.set("get_info",        lua.create_function(self::get_info)?)?;
+    
+    general.set("set_call_back_save_file", lua.create_function(self::set_call_back_save_file)?)?;
+    general.set("set_call_back_load_file", lua.create_function(self::set_call_back_load_file)?)?;
+    general.set("set_call_back_save_text", lua.create_function(self::set_call_back_save_text)?)?;
+    general.set("set_call_back_load_text", lua.create_function(self::set_call_back_load_text)?)?;
 
     table.set("general", general)?;
 
@@ -99,6 +105,189 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 }
 
 //================================================================
+
+unsafe extern "C" fn call_back_save_file(
+    file_name: *const i8,
+    data: *mut std::ffi::c_void,
+    size: i32,
+) -> bool {
+    unsafe {
+        let pointer = &raw const CALL_BACK_SAVE_FILE;
+
+        if let Some(Some(call)) = pointer.as_ref() {
+            let file_name = Script::c_to_rust_string(file_name)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            let data = data as *mut u8;
+            let data = Vec::from_raw_parts(data, size as usize, size as usize);
+
+            let value = call
+                .call::<bool>((file_name, data.clone()))
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            std::mem::forget(data);
+
+            return value;
+        }
+
+        false
+    }
+}
+
+unsafe extern "C" fn call_back_load_file(file_name: *const i8, data_size: *mut i32) -> *mut u8 {
+    unsafe {
+        let pointer = &raw const CALL_BACK_LOAD_FILE;
+
+        if let Some(Some(call)) = pointer.as_ref() {
+            let file_name = Script::c_to_rust_string(file_name)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            let value = call
+                .call::<LuaValue>(file_name)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            let data = crate::system::data::Data::<u8>::get_buffer(value)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            let mut data = data.0.clone();
+
+            let pointer = data.as_mut_ptr();
+            let length = data.len() as i32;
+
+            std::mem::forget(data);
+
+            *data_size = length;
+            return pointer;
+        }
+
+        *data_size = 0;
+
+        std::ptr::null_mut()
+    }
+}
+
+unsafe extern "C" fn call_back_save_text(file_name: *const i8, data: *mut i8) -> bool {
+    unsafe {
+        let pointer = &raw const CALL_BACK_SAVE_TEXT;
+
+        if let Some(Some(call)) = pointer.as_ref() {
+            let file_name = Script::c_to_rust_string(file_name)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            let data = Script::c_to_rust_string(data)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            let value = call
+                .call::<bool>((file_name, data))
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            return value;
+        }
+
+        false
+    }
+}
+
+unsafe extern "C" fn call_back_load_text(file_name: *const i8) -> *mut i8 {
+    unsafe {
+        let pointer = &raw const CALL_BACK_LOAD_TEXT;
+
+        if let Some(Some(call)) = pointer.as_ref() {
+            let file_name = Script::c_to_rust_string(file_name)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            let value = call
+                .call::<String>(file_name)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            let value = Script::rust_to_c_string(&value)
+                .map_err(|x| Status::panic(&x.to_string()))
+                .unwrap();
+
+            return value.into_raw();
+        }
+
+        std::ptr::null_mut()
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.set_call_back_save_file",
+    "info": "TO-DO"
+}
+*/
+fn set_call_back_save_file(_: &Lua, function: mlua::Function) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetSaveFileDataCallback(Some(call_back_save_file));
+
+        CALL_BACK_SAVE_FILE = Some(function);
+
+        Ok(())
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.set_call_back_load_file",
+    "info": "TO-DO"
+}
+*/
+fn set_call_back_load_file(_: &Lua, function: mlua::Function) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetLoadFileDataCallback(Some(call_back_load_file));
+
+        CALL_BACK_LOAD_FILE = Some(function);
+
+        Ok(())
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.set_call_back_save_text",
+    "info": "TO-DO"
+}
+*/
+fn set_call_back_save_text(_: &Lua, function: mlua::Function) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetSaveFileTextCallback(Some(call_back_save_text));
+
+        CALL_BACK_SAVE_TEXT = Some(function);
+
+        Ok(())
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.general.set_call_back_load_text",
+    "info": "TO-DO"
+}
+*/
+fn set_call_back_load_text(_: &Lua, function: mlua::Function) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetLoadFileTextCallback(Some(call_back_load_text));
+
+        CALL_BACK_LOAD_TEXT = Some(function);
+
+        Ok(())
+    }
+}
 
 /* entry
 {
@@ -109,9 +298,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 */
 fn standard_input(_: &Lua, _: ()) -> mlua::Result<String> {
     let mut buffer = String::new();
-    std::io::stdin()
-        .read_line(&mut buffer)
-        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    std::io::stdin().read_line(&mut buffer)?;
 
     Ok(buffer.trim().to_string())
 }
@@ -126,13 +313,13 @@ fn standard_input(_: &Lua, _: ()) -> mlua::Result<String> {
 fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
     // TO-DO only for debug. do not re-load from disk on release.
     for base in crate::script::Script::FILE_BASE {
-        //let data = if cfg!(debug_assertions) {
-        //    &std::fs::read_to_string(format!("src/asset/{}", base.name)).unwrap()
-        //} else {
-        //    base.data
-        //};
+        let data = if cfg!(debug_assertions) {
+            &std::fs::read_to_string(format!("../src/asset/{}", base.name)).unwrap()
+        } else {
+            base.data
+        };
 
-        let data = base.data;
+        //let data = base.data;
 
         lua.load(data).set_name(format!("@{}", base.name)).exec()?;
     }

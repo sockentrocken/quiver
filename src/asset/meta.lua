@@ -424,14 +424,14 @@ function quiver.input.pad.set_rumble(index,motor_a,motor_b,duration) end
 ---The Rapier API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L71)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L72)
 ---@class quiver.rapier
 quiver.rapier = {}
 
 ---An unique handle for a Rapier simulation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L85)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L86)
 ---@class rapier
 rapier = {}
 
@@ -439,7 +439,7 @@ rapier = {}
 ---@return rapier rapier # Rapier simulation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L113)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L114)
 function quiver.rapier.new() end
 
 ---Cast a ray.
@@ -450,7 +450,7 @@ function quiver.rapier.new() end
 ---@return table rigid_body # Rigid body handle.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L161)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L162)
 function rapier:cast_ray(ray,length,solid,exclude_rigid) end
 
 ---Cast a ray, and also get the normal information..
@@ -461,19 +461,19 @@ function rapier:cast_ray(ray,length,solid,exclude_rigid) end
 ---@return table rigid_body # Rigid body handle.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L219)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L220)
 function rapier:cast_ray_normal(ray,length,solid,exclude_rigid) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L273)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L274)
 function rapier:test_intersect_cuboid_cuboid() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L317)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L318)
 function rapier:test_intersect_cuboid() end
 
 ---Get the shape of a collider (cuboid).
@@ -483,7 +483,7 @@ function rapier:test_intersect_cuboid() end
 ---@return number half_shape_z # Half-shape of the cuboid. (Z).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L388)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L389)
 function rapier:get_collider_shape_cuboid(collider) end
 
 ---Set the shape of a collider (cuboid).
@@ -491,7 +491,7 @@ function rapier:get_collider_shape_cuboid(collider) end
 ---@param half_shape vector_3 # Half-shape of cuboid.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L424)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L425)
 function rapier:set_collider_shape_cuboid(collider,half_shape) end
 
 ---Get the parent of a collider.
@@ -499,7 +499,7 @@ function rapier:set_collider_shape_cuboid(collider,half_shape) end
 ---@return table rigid_body # Rigid body handle.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L465)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L466)
 function rapier:get_collider_parent(collider) end
 
 ---Get the position of a collider.
@@ -509,7 +509,7 @@ function rapier:get_collider_parent(collider) end
 ---@return number position_z # Collider position (Z).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L496)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L497)
 function rapier:get_collider_position(collider) end
 
 ---Set the position of a collider.
@@ -517,7 +517,7 @@ function rapier:get_collider_position(collider) end
 ---@param position vector_3 # Collider position.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L523)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L524)
 function rapier:set_collider_position(collider,position) end
 
 ---Set the rotation of a collider.
@@ -525,7 +525,7 @@ function rapier:set_collider_position(collider,position) end
 ---@param rotation vector_3 # Collider rotation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L551)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L552)
 function rapier:set_collider_rotation(collider,rotation) end
 
 ---Set the sensor state of a collider.
@@ -533,7 +533,7 @@ function rapier:set_collider_rotation(collider,rotation) end
 ---@param sensor boolean # Collider sensor state.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L580)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L581)
 function rapier:set_collider_sensor(collider,sensor) end
 
 ---Remove a collider.
@@ -541,7 +541,7 @@ function rapier:set_collider_sensor(collider,sensor) end
 ---@param wake_parent boolean # Whether or not to wake up the rigid body parent this collider is bound to.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L609)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L610)
 function rapier:collider_remove(collider,wake_parent) end
 
 ---Remove a rigid body.
@@ -549,38 +549,38 @@ function rapier:collider_remove(collider,wake_parent) end
 ---@param remove_collider boolean # Whether or not to remove every collider this rigid body is bound to.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L636)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L637)
 function rapier:rigid_body_remove(rigid_body,remove_collider) end
 
 ---Create a character controller.
 ---@return table character_controller # Character controller.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L664)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L665)
 function rapier:character_controller() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L675)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L676)
 function rapier:set_character_controller_up_vector() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L692)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L693)
 function rapier:set_character_controller_slope() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L709)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L710)
 function rapier:set_character_auto_step() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L756)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L757)
 function rapier:set_character_snap_ground() end
 
 ---Move a character controller.
@@ -595,7 +595,7 @@ function rapier:set_character_snap_ground() end
 ---@return boolean slope # Currently on slope.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L792)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L793)
 function rapier:character_controller_move(step,character,collider,translation) end
 
 ---Create a rigid body.
@@ -603,7 +603,7 @@ function rapier:character_controller_move(step,character,collider,translation) e
 ---@return table rigid_body # Rigid body handle.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L841)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L842)
 function rapier:rigid_body(kind) end
 
 ---Get the user data of a rigid_body.
@@ -611,7 +611,7 @@ function rapier:rigid_body(kind) end
 ---@return number user_data # Rigid body user data.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L865)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L866)
 function rapier:get_rigid_body_user_data(rigid_body) end
 
 ---Set the user data of a rigid_body.
@@ -619,7 +619,7 @@ function rapier:get_rigid_body_user_data(rigid_body) end
 ---@param user_data number # Rigid body user data.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L891)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L892)
 function rapier:set_rigid_body_user_data(rigid_body,user_data) end
 
 ---Set the position of a rigid_body.
@@ -627,7 +627,7 @@ function rapier:set_rigid_body_user_data(rigid_body,user_data) end
 ---@param position vector_3 # rigid_body position.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L918)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L919)
 function rapier:set_rigid_body_position(rigid_body,position) end
 
 ---Set the rotation of a rigid_body.
@@ -635,7 +635,7 @@ function rapier:set_rigid_body_position(rigid_body,position) end
 ---@param rotation vector_3 # rigid_body rotation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L947)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L948)
 function rapier:set_rigid_body_rotation(rigid_body,rotation) end
 
 ---Get the user data of a collider.
@@ -643,7 +643,7 @@ function rapier:set_rigid_body_rotation(rigid_body,rotation) end
 ---@return number user_data # Collider user data.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L982)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L983)
 function rapier:get_collider_user_data(collider) end
 
 ---Set the user data of a collider.
@@ -651,7 +651,7 @@ function rapier:get_collider_user_data(collider) end
 ---@param user_data number # Collider user data.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1005)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1006)
 function rapier:set_collider_user_data(collider,user_data) end
 
 ---Create a collider builder (cuboid).
@@ -659,7 +659,7 @@ function rapier:set_collider_user_data(collider,user_data) end
 ---@return table collider_builer # Collider builder.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1036)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1037)
 function rapier:collider_builder_cuboid(half_shape) end
 
 ---Create a collider builder (tri-mesh).
@@ -668,7 +668,7 @@ function rapier:collider_builder_cuboid(half_shape) end
 ---@return table collider_builer # Collider builder.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1063)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1064)
 function rapier:collider_builder_tri_mesh(point_table,index_table) end
 
 ---Create a collider builder (convex hull).
@@ -676,19 +676,19 @@ function rapier:collider_builder_tri_mesh(point_table,index_table) end
 ---@return table collider_builer # Collider builder.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1111)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1112)
 function rapier:collider_builder_convex_hull(vector_table) end
 
 ---Step the Rapier simulation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1136)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1137)
 function rapier:step() end
 
 ---Render the Rapier simulation.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1174)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/rapier.rs#L1175)
 function rapier:debug_render() end
 
 ---The Steam API.
@@ -2138,89 +2138,95 @@ function quiver.data.get_embed_list() end
 --- ---
 ---*Not available in head-less mode.*
 ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L64)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L65)
 ---@class quiver.socket
 quiver.socket = {}
 
 ---An unique handle to a TCP (stream) socket in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L82)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L83)
 ---@class socket_TCP_stream
 socket_TCP_stream = {}
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L97)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L98)
+function socket_TCP_stream:get() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L117)
 function socket_TCP_stream:set() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L113)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L134)
 function quiver.socket.new_TCP_stream() end
 
 ---An unique handle to a TCP (listen) socket in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L125)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L148)
 ---@class socket_TCP_listen
 socket_TCP_listen = {}
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L140)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L163)
 function socket_TCP:accept() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L156)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L181)
 function quiver.socket.new_TCP_listen() end
 
 ---An unique handle to a UDP socket in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L168)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L193)
 ---@class socket_UDP
 socket_UDP = {}
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L183)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L208)
 function socket_UDP:connect() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L196)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L221)
 function socket_UDP:get() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L213)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L240)
 function socket_UDP:set() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L227)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L254)
 function socket_UDP:get_at() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L244)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L273)
 function socket_UDP:set_at() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L264)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/socket.rs#L293)
 function quiver.socket.new_UDP() end
 
 ---The discord API.
@@ -2432,91 +2438,115 @@ function quiver.file.remove_path() end
 ---The general API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L70)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L72)
 ---@class quiver.general
 quiver.general = {}
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L110)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L231)
+function quiver.general.set_call_back_save_file() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L248)
+function quiver.general.set_call_back_load_file() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L265)
+function quiver.general.set_call_back_save_text() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L282)
+function quiver.general.set_call_back_load_text() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L299)
 function quiver.general.standard_input() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L126)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L313)
 function quiver.general.load_base() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L150)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L337)
 function quiver.general.set_log_level() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L164)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L351)
 function quiver.general.open_link() end
 
 ---Load the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L174)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L361)
 function quiver.general.load() end
 
 ---Exit the engine.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L178)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L365)
 function quiver.general.exit() end
 
 ---Set a key to exit Quiver.
 ---@param key input_board # Key to exit Quiver with.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L188)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L375)
 function quiver.general.set_exit_key(key) end
 
 ---Get the current time. Will count up since the initialization of the window.
 ---@return number time # Current time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L204)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L391)
 function quiver.general.get_time() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L214)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L401)
 function quiver.general.get_time_unix() end
 
 ---Get the current frame time.
 ---@return number frame_time # Current frame time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L231)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L418)
 function quiver.general.get_frame_time() end
 
 ---Get the current frame rate.
 ---@return number frame_rate # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L244)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L431)
 function quiver.general.get_frame_rate() end
 
 ---Set the current frame rate.
 ---@param frame_rate number # Current frame rate.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L257)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L444)
 function quiver.general.set_frame_rate(frame_rate) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L271)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L458)
 function quiver.general.get_argument() end
 
 ---TO-DO
@@ -2524,19 +2554,19 @@ function quiver.general.get_argument() end
 --- ---
 ---*Available with compile feature: `system_info`.*
 ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L285)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L472)
 function quiver.general.get_system() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L300)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L487)
 function quiver.general.get_memory() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L311)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/general.rs#L498)
 function quiver.general.get_info() end
 
 ---The shader API.
@@ -2708,7 +2738,7 @@ font = {}
 ---@param color color # Color of font to draw.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L124)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L132)
 function font:draw(label,point,scale,space,color) end
 
 ---Measure the size of a given text on screen, with a given font.
@@ -2719,7 +2749,7 @@ function font:draw(label,point,scale,space,color) end
 ---@return number size_y # Size of text (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L162)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L170)
 function font:measure_text(label,scale,space) end
 
 ---Create a new font resource.
@@ -2728,19 +2758,19 @@ function font:measure_text(label,scale,space) end
 ---@return font font # Font resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L191)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L199)
 function quiver.font.new(path,size) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L215)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L223)
 function quiver.font.new_from_memory() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L247)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L255)
 function quiver.font.new_default() end
 
 ---The window API.

@@ -66,6 +66,11 @@ use std::ffi::{CStr, CString};
 
 //================================================================
 
+pub static mut CALL_BACK_SAVE_FILE: Option<mlua::Function> = None;
+pub static mut CALL_BACK_LOAD_FILE: Option<mlua::Function> = None;
+pub static mut CALL_BACK_SAVE_TEXT: Option<mlua::Function> = None;
+pub static mut CALL_BACK_LOAD_TEXT: Option<mlua::Function> = None;
+
 pub struct BaseFile {
     pub name: &'static str,
     pub data: &'static str,
@@ -155,14 +160,19 @@ impl Script {
             }
         };
 
+        unsafe {
+            // this is causing lua to be unable to load main.lua initially...?
+            raylib::ffi::ChangeDirectory(Script::rust_to_c_string(&status_info.path)?.as_ptr());
+        }
+
         let quiver = Self::set_environment(&lua, status_info)?;
 
         // set the standard Quiver library.
         Self::system(&lua, &quiver, status_info, None)?;
 
-        lua.load(Self::get_main_data(status_info)).exec()?;
+        lua.load(Self::get_main_data(status_info)?).exec()?;
 
-        let script_info = Self::get_(&lua, &quiver).await?;
+        let script_info = Self::get_script_info(&lua, &quiver).await?;
 
         // set script data.
         lua.set_app_data(ScriptData::new(status_info.clone(), script_info.clone()));
@@ -320,15 +330,15 @@ impl Script {
         )?;
 
         // set the lua package loader to also consider the current game path.
-        let package = global.get::<mlua::Table>("package")?;
-        package.set(
-            "path",
-            format!(
-                "{:?};{}/?.lua",
-                package.get::<mlua::String>("path")?,
-                status_info.path
-            ),
-        )?;
+        //let package = global.get::<mlua::Table>("package")?;
+        //package.set(
+        //    "path",
+        //    format!(
+        //        "{:?};{}/?.lua",
+        //        package.get::<mlua::String>("path")?,
+        //        status_info.path
+        //    ),
+        //)?;
 
         #[cfg(feature = "embed")]
         {
@@ -361,14 +371,15 @@ impl Script {
     }
 
     #[allow(unused)]
-    fn get_main_data(status_info: &StatusInfo) -> String {
+    fn get_main_data(status_info: &StatusInfo) -> mlua::Result<String> {
         #[allow(unused_mut)]
         let mut main_data = format!("require \"{}\"", Self::CALL_MAIN);
 
         #[cfg(feature = "zip")]
         {
             // get the path to the main folder or file.
-            let main_path = format!("{}/{}", status_info.path, Self::CALL_MAIN);
+            //let main_path = format!("{}/{}", status_info.path, Self::CALL_MAIN);
+            let main_path = Self::CALL_MAIN;
             let main_path = std::path::Path::new(&main_path);
 
             if main_path.is_file() {
@@ -389,10 +400,10 @@ impl Script {
             main_data = String::from_utf8(embed_file.data.to_vec()).unwrap()
         }
 
-        main_data
+        Ok(main_data)
     }
 
-    async fn get_(lua: &Lua, quiver: &mlua::Table) -> mlua::Result<ScriptInfo> {
+    async fn get_script_info(lua: &Lua, quiver: &mlua::Table) -> mlua::Result<ScriptInfo> {
         // get the info function.
         let script_info: Option<mlua::Function> = quiver.get(Self::CALL_INFO).unwrap_or(None);
 
@@ -405,6 +416,17 @@ impl Script {
             lua.from_value(script_info)
         } else {
             Ok(ScriptInfo::default())
+        }
+    }
+}
+
+impl Drop for Script {
+    fn drop(&mut self) {
+        unsafe {
+            CALL_BACK_SAVE_FILE = None;
+            CALL_BACK_LOAD_FILE = None;
+            CALL_BACK_SAVE_TEXT = None;
+            CALL_BACK_LOAD_TEXT = None;
         }
     }
 }
@@ -469,7 +491,11 @@ impl ScriptData {
         let script_data = lua.app_data_ref::<ScriptData>().unwrap();
 
         if script_data.status_info.safe {
-            let path = format!("{}/{path}", script_data.status_info.path);
+            //let path = format!("{}/{path}", script_data.status_info.path);
+
+            println!("================");
+            println!("{path}");
+            println!("================");
 
             // always disallow going up the directory in safe mode.
             let path = path.replace("../", "");

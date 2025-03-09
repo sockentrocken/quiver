@@ -50,6 +50,8 @@
 
 require "bit"
 
+local WINDOW_FONT_SCALE         = 24.0
+local WINDOW_FONT_SPACE         = 2.0
 local WINDOW_COLOR_PRIMARY_MAIN = color:new(255, 87, 34, 255)
 local WINDOW_COLOR_PRIMARY_SIDE = color:new(255, 152, 0, 255)
 local WINDOW_COLOR_TEXT_WHITE   = color:new(255, 255, 255, 255)
@@ -191,7 +193,7 @@ local function window_glyph(self, board_label, mouse_label, pad_label)
 	end
 
 	-- draw label.
-	LOGGER_FONT:draw(label, point + WINDOW_SHIFT_A, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, color:white())
+	self.font:draw(label, point + WINDOW_SHIFT_A, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE, color:white())
 end
 
 local function window_gizmo(self, label, hover, index, focus, click)
@@ -248,8 +250,8 @@ local function window_border(self, shape, hover, index, focus, label, move)
 		local color_b = gizmo:fade(self, color:old(255.0, 255.0, 255.0, 255.0))
 
 		-- draw text, draw with back-drop.
-		LOGGER_FONT:draw(label, shift + vector_2:old(1.0, 1.0), LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, color_a)
-		LOGGER_FONT:draw(label, shift, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, color_b)
+		self.font:draw(label, shift + vector_2:old(1.0, 1.0), WINDOW_FONT_SCALE, WINDOW_FONT_SPACE, color_a)
+		self.font:draw(label, shift, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE, color_b)
 	end
 end
 
@@ -364,13 +366,14 @@ function window:new()
 	--[[]]
 
 	i.__type = "window"
-	i.index = 0.0
-	i.count = 0.0
-	i.point = 0.0
-	i.which = 0.0
-	i.shift = false
+	i.index  = 0.0
+	i.count  = 0.0
+	i.point  = 0.0
+	i.which  = 0.0
+	i.shift  = false
 	i.device = INPUT_DEVICE.MOUSE
-	i.data = {}
+	i.data   = {}
+	i.font   = quiver.font.new_default(WINDOW_FONT_SCALE)
 
 	return i
 end
@@ -610,12 +613,12 @@ function window:slider(shape, label, value, min, max, step, flag, call_back, cal
 			end
 
 			-- measure text.
-			local measure = LOGGER_FONT:measure_text(value, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE)
+			local measure = self.font:measure_text(value, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE)
 
 			-- draw value.
-			LOGGER_FONT:draw(value, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
-				LOGGER_FONT_SCALE,
-				LOGGER_FONT_SPACE,
+			self.font:draw(value, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
+				WINDOW_FONT_SCALE,
+				WINDOW_FONT_SPACE,
 				color:white())
 		end
 	end
@@ -683,12 +686,12 @@ function window:switch(shape, label, value, pool, flag, call_back, call_data)
 			window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
 
 			-- measure text.
-			local measure = LOGGER_FONT:measure_text(value_label, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE)
+			local measure = self.font:measure_text(value_label, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE)
 
 			-- draw value.
-			LOGGER_FONT:draw(value_label, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
-				LOGGER_FONT_SCALE,
-				LOGGER_FONT_SPACE,
+			self.font:draw(value_label, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
+				WINDOW_FONT_SCALE,
+				WINDOW_FONT_SPACE,
 				color:white())
 		end
 	end
@@ -785,12 +788,12 @@ function window:action(shape, label, value, clamp, flag, call_back, call_data)
 			end
 
 			-- measure text.
-			local measure = LOGGER_FONT:measure_text(label, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE)
+			local measure = self.font:measure_text(label, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE)
 
 			-- draw value.
-			LOGGER_FONT:draw(label, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
-				LOGGER_FONT_SCALE,
-				LOGGER_FONT_SPACE,
+			self.font:draw(label, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
+				WINDOW_FONT_SCALE,
+				WINDOW_FONT_SPACE,
 				color:white())
 		end
 	end
@@ -852,9 +855,9 @@ function window:entry(shape, label, value, flag)
 	window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
 
 	-- draw value.
-	LOGGER_FONT:draw(value, vector_2:old(shape.x + 4.0, shape.y + 4.0),
-		LOGGER_FONT_SCALE,
-		LOGGER_FONT_SPACE,
+	self.font:draw(value, vector_2:old(shape.x + 4.0, shape.y + 4.0),
+		WINDOW_FONT_SCALE,
+		WINDOW_FONT_SPACE,
 		color:white())
 
 	return value

@@ -211,11 +211,21 @@ impl Status {
             .map_err(|e| Self::panic(&e.to_string()))
             .unwrap();
 
-        // load default Quiver icon.
-        let icon = Image::load_image_from_mem(".png", Self::ICON)
-            .map_err(|e| Self::panic(&e.to_string()))
-            .unwrap();
-        handle.set_window_icon(icon);
+        if let Some(icon) = &info.icon {
+            if !icon.is_empty() {
+                // load icon from info manifest.
+                let icon = Image::load_image(&icon)
+                    .map_err(|e| Self::panic(&e.to_string()))
+                    .unwrap();
+                handle.set_window_icon(icon);
+            }
+        } else {
+            // load default Quiver icon.
+            let icon = Image::load_image_from_mem(".png", Self::ICON)
+                .map_err(|e| Self::panic(&e.to_string()))
+                .unwrap();
+            handle.set_window_icon(icon);
+        }
 
         Some((handle, thread, audio))
     }

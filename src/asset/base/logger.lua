@@ -77,22 +77,15 @@ end
 
 --[[----------------------------------------------------------------]]
 
-LOGGER_FONT_SCALE     = 24.0
-LOGGER_FONT_SPACE     = 2.0
---LOGGER_FONT           = quiver.general.get_info().info.head and quiver.font.new_default(LOGGER_FONT_SCALE)
-LOGGER_FONT           = quiver.font.new_default(LOGGER_FONT_SCALE)
-local LOGGER_LINE_CAP = 64.0
+local LOGGER_FONT_SCALE = 24.0
+local LOGGER_FONT_SPACE = 2.0
+local LOGGER_LINE_CAP   = 64.0
 
 ---@class logger
 ---@field buffer  table
-logger                = {
+logger                  = {
 	__meta = {}
 }
-
----Draw a small portion of the most recently sent content in the logger buffer. Only drawn when logger is not set.
-local function logger_draw_side(self)
-
-end
 
 ---Create a new logger.
 ---@return logger value # The logger.
@@ -103,13 +96,14 @@ function logger:new()
 
 	--[[]]
 
-	i.__type = "logger"
-	i.buffer = {}
+	i.__type        = "logger"
+	i.font          = quiver.font.new_default(LOGGER_FONT_SCALE)
+	i.buffer        = {}
 
 	local lua_print = print
 
 	-- over-ride default print function with our own.
-	print = function(...)
+	print           = function(...)
 		lua_print(...)
 		i:print(..., color:new(255.0, 255.0, 255.0, 255.0))
 	end

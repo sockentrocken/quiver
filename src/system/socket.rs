@@ -54,6 +54,7 @@ use crate::status::*;
 //================================================================
 
 use mlua::prelude::*;
+use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream, UdpSocket};
 
 //================================================================
@@ -90,14 +91,34 @@ impl mlua::UserData for SocketTCPStream {
         /* entry
         {
             "version": "1.0.0",
+            "name": "socket_TCP_stream:get",
+            "info": "TO-DO"
+        }
+        */
+        method.add_async_method("get", |_: Lua, this, _: ()| async move {
+            let mut data = [0; 32];
+            let mut length = 0;
+
+            while let Ok(read) = this.0.try_read(&mut data) {
+                println!("{:?} bytes received", read);
+                length += read;
+            }
+
+            Ok((data, length))
+        });
+
+        /* entry
+        {
+            "version": "1.0.0",
             "name": "socket_TCP_stream:set",
             "info": "TO-DO"
         }
         */
-        method.add_async_method("set", |_: Lua, this, data: Vec<u8>| async move {
-            this.0.try_write(&data)?;
+        method.add_async_method_mut("set", |_: Lua, mut this, data: Vec<u8>| async move {
+            let length = this.0.write(&data).await?;
+            println!("{:?} bytes sent", length);
 
-            Ok(())
+            Ok(length)
         });
     }
 }
@@ -112,6 +133,8 @@ impl SocketTCPStream {
     */
     async fn new(_: Lua, address: String) -> mlua::Result<Self> {
         let socket = TcpStream::connect(address).await?;
+
+        println!("done connect!");
 
         Ok(Self(socket))
     }
@@ -138,9 +161,11 @@ impl mlua::UserData for SocketTCPListen {
         }
         */
         method.add_async_method("accept", |_: Lua, this, _: ()| async move {
-            let (socket, _) = this.0.accept().await?;
+            let (socket, address) = this.0.accept().await?;
 
-            Ok(SocketTCPStream(socket))
+            println!("done accept!");
+
+            Ok((SocketTCPStream(socket), address.to_string()))
         });
     }
 }
@@ -195,12 +220,14 @@ impl mlua::UserData for SocketUDP {
         */
         method.add_async_method("get", |_: Lua, this, _: ()| async move {
             let mut data = [0; 32];
+            let mut length = 0;
 
-            while let Ok(length) = this.0.try_recv(&mut data) {
-                println!("{:?} bytes received", length);
+            while let Ok(read) = this.0.try_recv(&mut data) {
+                println!("{:?} bytes received", read);
+                length += read;
             }
 
-            Ok(data)
+            Ok((data, length))
         });
 
         /* entry
@@ -211,10 +238,10 @@ impl mlua::UserData for SocketUDP {
         }
         */
         method.add_async_method("set", |_: Lua, this, data: Vec<u8>| async move {
-            let len = this.0.send(&data).await?;
-            println!("{:?} bytes sent", len);
+            let length = this.0.send(&data).await?;
+            println!("{:?} bytes sent", length);
 
-            Ok(())
+            Ok(length)
         });
 
         /* entry
@@ -226,12 +253,14 @@ impl mlua::UserData for SocketUDP {
         */
         method.add_async_method("get_at", |_: Lua, this, _: ()| async move {
             let mut data = [0; 32];
+            let mut length = 0;
 
-            while let Ok((length, address)) = this.0.try_recv_from(&mut data) {
-                println!("{:?} bytes received from {address}", length);
+            while let Ok((read, address)) = this.0.try_recv_from(&mut data) {
+                println!("{:?} bytes received from {address}", read);
+                length += read;
             }
 
-            Ok(data)
+            Ok((data, length))
         });
 
         /* entry
@@ -244,10 +273,10 @@ impl mlua::UserData for SocketUDP {
         method.add_async_method(
             "set_at",
             |_: Lua, this, (data, address): (Vec<u8>, String)| async move {
-                let len = this.0.send_to(&data, address).await?;
-                println!("{:?} bytes sent", len);
+                let length = this.0.send_to(&data, address).await?;
+                println!("{:?} bytes sent", length);
 
-                Ok(())
+                Ok(length)
             },
         );
     }

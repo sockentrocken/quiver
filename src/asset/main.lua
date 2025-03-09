@@ -5,12 +5,64 @@
 
 --[[----------------------------------------------------------------]]
 
+-- Note that you can also call quiver.general.load_base() to load the standard Lua library.
 require "base/main"
 
 local time = 0.0
 
+-- Info entry point. Quiver will call this on window initialization. Note that this function is OPTIONAL, and Quiver will use a default info manifest if missing.
+function quiver.info()
+    -- Every entry in this table is completely optional.
+    return {
+        -- Window name.
+        name       = "Quiver",
+        -- Window icon. If nil, will use Quiver's logo. If empty (not-nil, empty string), will not set any icon. If not empty, will load an icon with that path.
+        icon       = nil,
+        -- Window size.
+        size       = { 1024, 768 },
+        -- Window frame-rate.
+        rate       = 60,
+        -- Window mode.
+        head       = true,
+        -- Vertical sync.
+        sync       = false,
+        -- Full-screen.
+        full       = false,
+        -- Border-less.
+        no_border  = false,
+        -- Window decoration.
+        no_decor   = false,
+        -- Window focus.
+        no_focus   = false,
+        -- Window resizability.
+        resizable  = false,
+        -- Initiate window as hidden.
+        hidden     = false,
+        -- Initiate window as minimized.
+        minimize   = false,
+        -- Initiate window as maximized.
+        maximize   = false,
+        -- Always show window on top.
+        always_top = false,
+        -- Always run window, even when minimized.
+        always_run = false,
+        -- Allow window transparency.
+        alpha      = false,
+        -- Allow high DPI window.
+        scale      = false,
+        -- Allow MSAA.
+        msaa       = false,
+        -- Allow mouse pass-through.
+        mouse_pass = false,
+        -- Allow video interlace for V3D.
+        interlace  = false,
+    }
+end
+
+--[[----------------------------------------------------------------]]
+
+-- Main entry-point. Quiver will call this on project initialization.
 function quiver.main()
-    --- Main entry-point. Quiver will call this on project initialization.
     while not quiver.window.get_close() do
         time = time + quiver.general.get_frame_time()
 
@@ -65,8 +117,8 @@ end
 
 -- Uncomment this to use a custom crash handler.
 --[[
+--- Fail entry-point. Quiver will call this on a script error, with the script error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
 function quiver.fail(message)
-    --- Fail entry-point. Quiver will call this on a script error, with the script error message as the argument. Note that this function is OPTIONAL, and Quiver will use a default crash handler if missing.
     while not quiver.window.get_close() do
         -- Initialize drawing.
         quiver.draw.begin()

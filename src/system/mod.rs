@@ -59,11 +59,10 @@ pub mod input;
 pub mod model;
 pub mod music;
 pub mod shader;
+pub mod socket;
 pub mod sound;
 pub mod texture;
 pub mod window;
-
-pub mod socket;
 
 #[cfg(feature = "rapier3d")]
 pub mod rapier;

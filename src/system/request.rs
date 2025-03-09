@@ -122,7 +122,7 @@ async fn post(
         Option<mlua::Table>,
         bool,
     ),
-) -> anyhow::Result<LuaValue> {
+) -> mlua::Result<LuaValue> {
     let client = reqwest::Client::new();
     let result = client.post(link);
 
@@ -154,21 +154,28 @@ async fn post(
         result
     };
 
-    let result = result.send().await?;
+    let result = result
+        .send()
+        .await
+        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
 
     if binary {
-        let data = result.bytes().await?.to_vec();
+        let data = result
+            .bytes()
+            .await
+            .map_err(|e| mlua::Error::runtime(e.to_string()))?
+            .to_vec();
 
         let data = crate::system::data::Data::new(&lua, data)?;
         let data = lua.create_userdata(data)?;
 
         Ok(mlua::Value::UserData(data))
     } else {
-        Ok(lua.to_value(
+        lua.to_value(
             &result
                 .text()
                 .await
                 .map_err(|e| mlua::Error::runtime(e.to_string()))?,
-        )?)
+        )
     }
 }
