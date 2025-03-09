@@ -57,22 +57,22 @@ local LOGGER_LINE_LABEL_TIME    = true
 
 ---@class logger_line
 logger_line                     = {
-	__meta = {}
+    __meta = {}
 }
 
 function logger_line:new(label, color)
-	local i = {}
-	setmetatable(i, self.__meta)
-	getmetatable(i).__index = self
+    local i = {}
+    setmetatable(i, self.__meta)
+    getmetatable(i).__index = self
 
-	--[[]]
+    --[[]]
 
-	i.__type = "logger_line"
-	i.label = label
-	i.color = color
-	i.time = quiver.general.get_time()
+    i.__type = "logger_line"
+    i.label = label
+    i.color = color
+    i.time = quiver.general.get_time()
 
-	return i
+    return i
 end
 
 --[[----------------------------------------------------------------]]
@@ -84,83 +84,83 @@ local LOGGER_LINE_CAP   = 64.0
 ---@class logger
 ---@field buffer  table
 logger                  = {
-	__meta = {}
+    __meta = {}
 }
 
 ---Create a new logger.
 ---@return logger value # The logger.
 function logger:new()
-	local i = {}
-	setmetatable(i, self.__meta)
-	getmetatable(i).__index = self
+    local i = {}
+    setmetatable(i, self.__meta)
+    getmetatable(i).__index = self
 
-	--[[]]
+    --[[]]
 
-	i.__type        = "logger"
-	i.font          = quiver.font.new_default(LOGGER_FONT_SCALE)
-	i.buffer        = {}
+    i.__type        = "logger"
+    i.font          = quiver.font.new_default(LOGGER_FONT_SCALE)
+    i.buffer        = {}
 
-	local lua_print = print
+    local lua_print = print
 
-	-- over-ride default print function with our own.
-	print           = function(...)
-		lua_print(...)
-		i:print(..., color:new(255.0, 255.0, 255.0, 255.0))
-	end
+    -- over-ride default print function with our own.
+    print           = function(...)
+        lua_print(...)
+        i:print(..., color:new(255.0, 255.0, 255.0, 255.0))
+    end
 
-	return i
+    return i
 end
 
 ---Draw the logger.
 ---@param window window # The window for rendering every possible command suggestion.
 function logger:draw(window)
-	-- get the length of the buffer worker.
-	local count = #self.buffer
-	local text_point_a = vector_2:old(0.0, 0.0)
-	local text_point_b = vector_2:old(0.0, 0.0)
+    -- get the length of the buffer worker.
+    local count = #self.buffer
+    local text_point_a = vector_2:old(0.0, 0.0)
+    local text_point_b = vector_2:old(0.0, 0.0)
 
-	-- draw the latest logger buffer, iterating through the buffer in reverse.
-	for i = 1, LOGGER_LINE_COUNT do
-		local line = self.buffer[count + 1 - i]
+    -- draw the latest logger buffer, iterating through the buffer in reverse.
+    for i = 1, LOGGER_LINE_COUNT do
+        local line = self.buffer[count + 1 - i]
 
-		-- line isn't nil...
-		if line then
-			-- line is within the time threshold...
-			if quiver.general.get_time() < line.time + LOGGER_LINE_DELAY then
-				-- start from 0.
-				i = i - 1
+        -- line isn't nil...
+        if line then
+            -- line is within the time threshold...
+            if quiver.general.get_time() < line.time + LOGGER_LINE_DELAY then
+                -- start from 0.
+                i = i - 1
 
-				text_point_a:set(13.0, 13.0 + (i * LOGGER_FONT_SCALE))
-				text_point_b:set(12.0, 12.0 + (i * LOGGER_FONT_SCALE))
-				local label = line.label
+                text_point_a:set(13.0, 13.0 + (i * LOGGER_FONT_SCALE))
+                text_point_b:set(12.0, 12.0 + (i * LOGGER_FONT_SCALE))
+                local label = line.label
 
-				-- line with time-stamp is set, add time-stamp to beginning.
-				if LOGGER_LINE_LABEL_TIME then
-					label = string.format("(%.2f) %s", line.time, line.label)
-				end
+                -- line with time-stamp is set, add time-stamp to beginning.
+                if LOGGER_LINE_LABEL_TIME then
+                    label = string.format("(%.2f) %s", line.time, line.label)
+                end
 
-				-- draw back-drop.
-				LOGGER_FONT:draw(label, text_point_a, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, line.color * 0.5)
-				-- draw line.
-				LOGGER_FONT:draw(label, text_point_b, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, line.color)
-			end
-		end
-	end
+                -- draw back-drop.
+                LOGGER_FONT:draw(label, text_point_a, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, line.color * 0.5)
+                -- draw line.
+                LOGGER_FONT:draw(label, text_point_b, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, line.color)
+            end
+        end
+    end
 end
 
 ---Print a new line to the logger.
 ---@param line_label  string # Line label.
 ---@param line_color? color  # OPTIONAL: Line color.
 function logger:print(line_label, line_color)
-	-- if line color is nil, use default color.
-	line_color = line_color and line_color or LOGGER_LINE_COLOR_MESSAGE
+    -- if line color is nil, use default color.
+    line_color = line_color and line_color or LOGGER_LINE_COLOR_MESSAGE
 
-	-- insert a new logger line.
-	table.insert(self.buffer, logger_line:new(tostring(line_label), line_color))
+    -- insert a new logger line.
+    table.insert(self.buffer, logger_line:new(tostring(line_label), line_color))
 
-	-- if logger line count is over the cap...
-	if #self.buffer > LOGGER_LINE_CAP then
-		-- pop one logger line.
-		table.remove(self.buffer, 1)
-	end
+    -- if logger line count is over the cap...
+    if #self.buffer > LOGGER_LINE_CAP then
+        -- pop one logger line.
+        table.remove(self.buffer, 1)
+    end
 end

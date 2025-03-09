@@ -79,7 +79,8 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
     "version": "1.0.0",
     "name": "quiver.request.get",
     "info": "TO-DO",
-    "test": "request/get.lua"
+    "test": "request/get.lua",
+    "routine": true
 }
 */
 async fn get(lua: Lua, (link, binary): (String, bool)) -> mlua::Result<LuaValue> {
@@ -110,7 +111,8 @@ async fn get(lua: Lua, (link, binary): (String, bool)) -> mlua::Result<LuaValue>
     "version": "1.0.0",
     "name": "quiver.request.post",
     "info": "TO-DO",
-    "test": "request/post.lua"
+    "test": "request/post.lua",
+    "routine": true
 }
 */
 async fn post(

@@ -1173,7 +1173,9 @@ quiver.request = {}
 ---```
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/request.rs#L85)
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/request.rs#L86)
 function quiver.request.get() end
 
 ---TO-DO
@@ -1236,7 +1238,9 @@ function quiver.request.get() end
 ---```
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/request.rs#L116)
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/request.rs#L118)
 function quiver.request.post() end
 
 ---The texture API.
@@ -2002,7 +2006,7 @@ function data:get_slice() end
 ---
 ----- Insert some dummy data in it.
 ---for x = 1, 63 do
----	table.insert(data, 0)
+--- table.insert(data, 0)
 ---end
 ---
 ----- Insert some data of significance at the last index.
@@ -2039,7 +2043,7 @@ function quiver.data.compress() end
 ---
 ----- Insert some dummy data in it.
 ---for x = 1, 63 do
----	table.insert(data, 0)
+--- table.insert(data, 0)
 ---end
 ---
 ----- Insert some data of significance at the last index.
@@ -2738,7 +2742,7 @@ font = {}
 ---@param color color # Color of font to draw.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L132)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L124)
 function font:draw(label,point,scale,space,color) end
 
 ---Measure the size of a given text on screen, with a given font.
@@ -2749,7 +2753,7 @@ function font:draw(label,point,scale,space,color) end
 ---@return number size_y # Size of text (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L170)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L162)
 function font:measure_text(label,scale,space) end
 
 ---Create a new font resource.
@@ -2758,19 +2762,19 @@ function font:measure_text(label,scale,space) end
 ---@return font font # Font resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L199)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L191)
 function quiver.font.new(path,size) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L223)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L215)
 function quiver.font.new_from_memory() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L255)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/src/system/font.rs#L247)
 function quiver.font.new_default() end
 
 ---The window API.

@@ -282,7 +282,7 @@ r#"---{info}
         #[rustfmt::skip]
     const META_ENTRY_FOOTER: &'static str =
 r#"---
---- ---{feature}{head}
+--- ---{feature}{head}{routine}
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/{path}#L{line})
 function {name}({member}) end
 
@@ -302,7 +302,7 @@ r#"---@return {kind} {name} # {info}
     #[rustfmt::skip]
     const WIKI_CLASS_HEADER: &'static str =
 r#"## {name}
-*Available since version: {version}.*{feature}{head}
+*Available since version {version}.*{feature}{head}
 
 ```lua
 {code}
@@ -327,7 +327,7 @@ r#"* Field: `{name}` – {info}
     #[rustfmt::skip]
     const WIKI_ENTRY_HEADER: &'static str =
 r#"## {name}
-*Available since version: {version}.*{feature}{head}
+*Available since version {version}.*{feature}{head}{routine}
 
 ```lua
 {code}
@@ -584,6 +584,20 @@ r#"* Return: `{name}` – {info}
 
         data = data.replace("{head}", head);
 
+        let routine = {
+            if let Some(routine) = entry.routine {
+                if routine {
+                    "\n---*This function is asynchronous and can run within a co-routine.*\n---"
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{routine}", routine);
+
         self.meta_file
             .write_all(data.as_bytes())
             .expect("Meta::write_meta_entry(): Could not write to file.");
@@ -688,6 +702,21 @@ r#"* Return: `{name}` – {info}
         };
 
         data = data.replace("{head}", head);
+
+        let routine = {
+            if let Some(routine) = entry.routine {
+                if routine {
+                    " *This function is asynchronous and can run within a co-routine.*"
+                } else {
+                    ""
+                }
+            } else {
+                ""
+            }
+        };
+
+        data = data.replace("{routine}", routine);
+
         data = data.replace("{info}", &entry.info);
 
         let mut data_member = String::new();
@@ -782,6 +811,7 @@ struct Entry {
     pub info: String,
     pub test: Option<String>,
     pub head: Option<bool>,
+    pub routine: Option<bool>,
     pub member: Option<Vec<Variable>>,
     pub result: Option<Vec<Variable>>,
 }

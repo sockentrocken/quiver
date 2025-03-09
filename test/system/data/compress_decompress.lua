@@ -3,7 +3,7 @@ local data = {}
 
 -- Insert some dummy data in it.
 for x = 1, 63 do
-	table.insert(data, 0)
+    table.insert(data, 0)
 end
 
 -- Insert some data of significance at the last index.
