@@ -48,7 +48,6 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-use std::ffi::{CStr, CString};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::script::*;
@@ -56,7 +55,6 @@ use crate::status::*;
 
 //================================================================
 
-use ffi::__va_list_tag;
 use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -225,14 +223,17 @@ unsafe extern "C" fn call_back_load_text(file_name: *const i8) -> *mut i8 {
 {
     "version": "1.0.0",
     "name": "quiver.general.set_call_back_save_file",
-    "info": "TO-DO"
+    "info": "Set the file save call-back.",
+    "member": [
+        { "name": "call", "info": "The call-back. Must accept a file-name and a data parameter, and return a boolean (true on success, false on failure).", "kind": "function" }
+    ]
 }
 */
-fn set_call_back_save_file(_: &Lua, function: mlua::Function) -> mlua::Result<()> {
+fn set_call_back_save_file(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
     unsafe {
         ffi::SetSaveFileDataCallback(Some(call_back_save_file));
 
-        CALL_BACK_SAVE_FILE = Some(function);
+        CALL_BACK_SAVE_FILE = Some(call);
 
         Ok(())
     }
@@ -242,14 +243,17 @@ fn set_call_back_save_file(_: &Lua, function: mlua::Function) -> mlua::Result<()
 {
     "version": "1.0.0",
     "name": "quiver.general.set_call_back_load_file",
-    "info": "TO-DO"
+    "info": "Set the file load call-back.",
+    "member": [
+        { "name": "call", "info": "The call-back. Must accept a file-name, and return a data buffer. Return anything else to indicate failure.", "kind": "function" }
+    ]
 }
 */
-fn set_call_back_load_file(_: &Lua, function: mlua::Function) -> mlua::Result<()> {
+fn set_call_back_load_file(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
     unsafe {
         ffi::SetLoadFileDataCallback(Some(call_back_load_file));
 
-        CALL_BACK_LOAD_FILE = Some(function);
+        CALL_BACK_LOAD_FILE = Some(call);
 
         Ok(())
     }
@@ -259,14 +263,17 @@ fn set_call_back_load_file(_: &Lua, function: mlua::Function) -> mlua::Result<()
 {
     "version": "1.0.0",
     "name": "quiver.general.set_call_back_save_text",
-    "info": "TO-DO"
+    "info": "Set the file text save call-back.",
+    "member": [
+        { "name": "call", "info": "The call-back. Must accept a file-name and a string parameter, and return a boolean (true on success, false on failure).", "kind": "function" }
+    ]
 }
 */
-fn set_call_back_save_text(_: &Lua, function: mlua::Function) -> mlua::Result<()> {
+fn set_call_back_save_text(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
     unsafe {
         ffi::SetSaveFileTextCallback(Some(call_back_save_text));
 
-        CALL_BACK_SAVE_TEXT = Some(function);
+        CALL_BACK_SAVE_TEXT = Some(call);
 
         Ok(())
     }
@@ -276,14 +283,17 @@ fn set_call_back_save_text(_: &Lua, function: mlua::Function) -> mlua::Result<()
 {
     "version": "1.0.0",
     "name": "quiver.general.set_call_back_load_text",
-    "info": "TO-DO"
+    "info": "Set the file load call-back.",
+    "member": [
+        { "name": "call", "info": "The call-back. Must accept a file-name, and return a string. Return anything else to indicate failure.", "kind": "function" }
+    ]
 }
 */
-fn set_call_back_load_text(_: &Lua, function: mlua::Function) -> mlua::Result<()> {
+fn set_call_back_load_text(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
     unsafe {
         ffi::SetLoadFileTextCallback(Some(call_back_load_text));
 
-        CALL_BACK_LOAD_TEXT = Some(function);
+        CALL_BACK_LOAD_TEXT = Some(call);
 
         Ok(())
     }
@@ -293,7 +303,10 @@ fn set_call_back_load_text(_: &Lua, function: mlua::Function) -> mlua::Result<()
 {
     "version": "1.0.0",
     "name": "quiver.general.standard_input",
-    "info": "TO-DO"
+    "info": "Get the standard input.",
+    "result": [
+        { "name": "input", "info": "The standard input.", "kind": "string" }
+    ]
 }
 */
 fn standard_input(_: &Lua, _: ()) -> mlua::Result<String> {
@@ -307,7 +320,7 @@ fn standard_input(_: &Lua, _: ()) -> mlua::Result<String> {
 {
     "version": "1.0.0",
     "name": "quiver.general.load_base",
-    "info": "TO-DO"
+    "info": "Load the standard Lua library."
 }
 */
 fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
@@ -331,7 +344,10 @@ fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
 {
     "version": "1.0.0",
     "name": "quiver.general.set_log_level",
-    "info": "TO-DO"
+    "info": "Set the log level.",
+    "member": [
+        { "name": "level", "info": "The log level.", "kind": "number" }
+    ]
 }
 */
 fn set_log_level(_: &Lua, level: i32) -> mlua::Result<()> {
@@ -345,7 +361,10 @@ fn set_log_level(_: &Lua, level: i32) -> mlua::Result<()> {
 {
     "version": "1.0.0",
     "name": "quiver.general.open_link",
-    "info": "TO-DO"
+    "info": "Open an URL link.",
+    "member": [
+        { "name": "link", "info": "The URL link.", "kind": "string" }
+    ]
 }
 */
 fn open_link(_: &Lua, link: String) -> mlua::Result<()> {
@@ -354,14 +373,6 @@ fn open_link(_: &Lua, link: String) -> mlua::Result<()> {
         Ok(())
     }
 }
-
-/* entry
-{ "version": "1.0.0", "name": "quiver.general.load", "info": "Load the engine.", "skip_definition": "true" }
-*/
-
-/* entry
-{ "version": "1.0.0", "name": "quiver.general.exit", "info": "Exit the engine.", "skip_definition": "true" }
-*/
 
 /* entry
 {
@@ -395,7 +406,10 @@ fn get_time(_: &Lua, _: ()) -> mlua::Result<f64> {
 /* entry
 {
     "version": "1.0.0", "name": "quiver.general.get_time_unix",
-    "info": "TO-DO"
+    "info": "Get the time in UNIX time-stamp format.",
+    "member": [
+        { "name": "add", "info": "OPTIONAL: Add (or subtract) by this amount.", "kind": "number?" }
+    ]
 }
 */
 fn get_time_unix(_: &Lua, add: Option<i64>) -> mlua::Result<String> {
@@ -452,7 +466,10 @@ fn set_frame_rate(_: &Lua, rate: i32) -> mlua::Result<()> {
 {
     "version": "1.0.0",
     "name": "quiver.general.get_argument",
-    "info": "TO-DO"
+    "info": "Get the argument list.",
+    "result": [
+        { "name": "list", "info": "The list of every argument.", "kind": "table" }
+    ]
 }
 */
 fn get_argument(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
@@ -466,7 +483,10 @@ fn get_argument(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     "version": "1.0.0",
     "feature": "system_info",
     "name": "quiver.general.get_system",
-    "info": "TO-DO"
+    "info": "Get the system info.",
+    "result": [
+        { "name": "info", "info": "The system info.", "kind": "table" }
+    ]
 }
 */
 #[cfg(feature = "system_info")]
@@ -481,18 +501,25 @@ fn get_system(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
 {
     "version": "1.0.0",
     "name": "quiver.general.get_memory",
-    "info": "TO-DO"
+    "info": "Get the currently in-use memory by the Lua VM.",
+    "result": [
+        { "name": "memory", "info": "The currently in-use memory.", "kind": "number" }
+    ]
 }
 */
 fn get_memory(lua: &Lua, _: ()) -> mlua::Result<usize> {
     Ok(lua.used_memory())
 }
 
+// TO-DO "get info" might be kind of misleading? it's a lot more than just the info manifest.
 /* entry
 {
     "version": "1.0.0",
     "name": "quiver.general.get_info",
-    "info": "TO-DO"
+    "info": "Get the current info manifest.",
+    "result": [
+        { "name": "info", "info": "The info manifest.", "kind": "table" }
+    ]
 }
 */
 fn get_info(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {

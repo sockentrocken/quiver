@@ -55,7 +55,6 @@ use crate::status::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::CString;
 
 //================================================================
 
@@ -95,12 +94,12 @@ impl Music {
         ],
         "result": [
             { "name": "music", "info": "Music resource.", "kind": "music" }
-        ]
+        ],
+        "routine": true
     }
     */
     async fn new(lua: Lua, path: String) -> mlua::Result<Self> {
-        let name = CString::new(ScriptData::get_path(&lua, &path)?)
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+        let name = Script::rust_to_c_string(&ScriptData::get_path(&lua, &path)?)?;
 
         tokio::task::spawn_blocking(move || unsafe {
             let data = ffi::LoadMusicStream(name.as_ptr());
@@ -121,7 +120,15 @@ impl Music {
     {
         "version": "1.0.0",
         "name": "quiver.music.new_from_memory",
-        "info": "TO-DO"
+        "info": "Create a new music resource, from memory.",
+        "member": [
+            { "name": "data", "info": "The data buffer.",                     "kind": "data"   },
+            { "name": "kind", "info": "The kind of music file (.png, etc.).", "kind": "string" }
+        ],
+        "result": [
+            { "name": "music", "info": "Music resource.", "kind": "music" }
+        ],
+        "routine": true
     }
     */
     async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {

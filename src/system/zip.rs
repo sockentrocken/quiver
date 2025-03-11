@@ -62,7 +62,7 @@ use std::io::Read;
 { "version": "1.0.0", "name": "quiver.zip", "info": "The ZIP API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, status_info: &StatusInfo, script_info: Option<&ScriptInfo>) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, script_info: Option<&ScriptInfo>) -> mlua::Result<()> {
     // part of head-less API. do not run code when doing head API.
     if script_info.is_some() {
         return Ok(())
@@ -90,13 +90,21 @@ impl mlua::UserData for Zip {
         {
             "version": "1.0.0",
             "name": "zip:get_file",
-            "info": "TO-DO"
+            "info": "Get a file from the ZIP file.",
+            "member": [
+                { "name": "path",   "info": "Path to the file.", "kind": "string"  },
+                { "name": "binary", "info": "Read as binary.",   "kind": "boolean" }
+            ],
+            "result": [
+                { "name": "file", "info": "The file.", "kind": "string | data" }
+            ],
+            "routine": true
         }
         */
         method.add_async_method_mut(
             "get_file",
-            |lua: Lua, mut this, (path, binary, sync): (String, bool, bool)| async move {
-                let mut function = move || match this.0.by_name(&path) {
+            |lua: Lua, mut this, (path, binary): (String, bool)| async move {
+                tokio::task::spawn_blocking(move || match this.0.by_name(&path) {
                     Ok(mut value) => {
                         if binary {
                             let mut data = Vec::new();
@@ -114,13 +122,9 @@ impl mlua::UserData for Zip {
                         }
                     }
                     Err(value) => Err(mlua::Error::runtime(value.to_string())),
-                };
-
-                if sync {
-                    function()
-                } else {
-                    tokio::task::spawn_blocking(function).await.unwrap()
-                }
+                })
+                .await
+                .unwrap()
             },
         );
 
@@ -128,7 +132,10 @@ impl mlua::UserData for Zip {
         {
             "version": "1.0.0",
             "name": "zip:get_list",
-            "info": "TO-DO"
+            "info": "Get a list of every file in the ZIP file.",
+            "result": [
+                { "name": "list", "info": "The list of every file.", "kind": "table" }
+            ]
         }
         */
         method.add_method_mut("get_list", |_: &Lua, this, _: ()| {
@@ -141,7 +148,13 @@ impl mlua::UserData for Zip {
         {
             "version": "1.0.0",
             "name": "zip:is_file",
-            "info": "TO-DO"
+            "info": "Check if the given path is a file.",
+            "member": [
+                { "name": "path", "info": "Path to the file.", "kind": "string" }
+            ],
+            "result": [
+                { "name": "value", "info": "True if the path is a file, false otherwise.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("is_file", |_: &Lua, this, path: String| {
@@ -155,26 +168,18 @@ impl mlua::UserData for Zip {
         {
             "version": "1.0.0",
             "name": "zip:is_path",
-            "info": "TO-DO"
+            "info": "Check if the given path is a folder.",
+            "member": [
+                { "name": "path", "info": "Path to the folder.", "kind": "string" }
+            ],
+            "result": [
+                { "name": "value", "info": "True if the path is a folder, false otherwise.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("is_path", |_: &Lua, this, path: String| {
             match this.0.by_name(&path) {
                 Ok(value) => Ok(value.is_dir()),
-                Err(value) => Err(mlua::Error::runtime(value.to_string())),
-            }
-        });
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "zip:is_link",
-            "info": "TO-DO"
-        }
-        */
-        method.add_method_mut("is_link", |_: &Lua, this, path: String| {
-            match this.0.by_name(&path) {
-                Ok(value) => Ok(value.is_symlink()),
                 Err(value) => Err(mlua::Error::runtime(value.to_string())),
             }
         });

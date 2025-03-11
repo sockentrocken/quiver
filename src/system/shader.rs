@@ -55,7 +55,6 @@ use crate::status::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::CString;
 
 //================================================================
 
@@ -102,8 +101,7 @@ impl Shader {
         unsafe {
             let v_path = match v_path {
                 Some(name) => {
-                    let pointer = CString::new(ScriptData::get_path(lua, &name)?)
-                        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+                    let pointer = Script::rust_to_c_string(&ScriptData::get_path(lua, &name)?)?;
 
                     pointer.into_raw()
                 }
@@ -112,8 +110,7 @@ impl Shader {
 
             let f_path = match f_path {
                 Some(name) => {
-                    let pointer = CString::new(ScriptData::get_path(lua, &name)?)
-                        .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+                    let pointer = Script::rust_to_c_string(&ScriptData::get_path(lua, &name)?)?;
 
                     pointer.into_raw()
                 }

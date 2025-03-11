@@ -48,8 +48,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-use crate::status::*;
 use crate::script::*;
+use crate::status::*;
 
 //================================================================
 
@@ -86,7 +86,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
     file.set("get_application_directory", lua.create_function(self::get_application_directory)?)?;
     // LoadDirectoryFiles/LoadDirectoryFilesEx
     file.set("scan_path",                 lua.create_function(self::scan_path)?)?;
-    file.set("get_path_escape",           lua.create_function(self::get_path_escape)?)?;
     file.set("set_path_escape",           lua.create_function(self::set_path_escape)?)?;
     file.set("move",                      lua.create_function(self::move_file)?)?;
     file.set("copy",                      lua.create_function(self::copy)?)?;
@@ -329,7 +328,7 @@ fn get_application_directory(_: &Lua, _: ()) -> mlua::Result<String> {
     "info": "Scan a path.",
     "member": [
         { "name": "path",      "info": "Path to scan.",                                                                               "kind": "string"  },
-        { "name": "filter",    "info": "OPTIONAL: Extension filter. If filter is 'DIR', will include every directory in the result.", "kind": "string"  },
+        { "name": "filter",    "info": "OPTIONAL: Extension filter. If filter is 'DIR', will include every directory in the result.", "kind": "string?" },
         { "name": "recursive", "info": "If true, recursively scan the directory.",                                                    "kind": "boolean" },
         { "name": "absolute",  "info": "If true, return path relatively.",                                                            "kind": "boolean" }
     ],
@@ -387,19 +386,11 @@ fn scan_path(
 /* entry
 {
     "version": "1.0.0",
-    "name": "quiver.file.get_path_escape",
-    "info": "TO-DO"
-}
-*/
-fn get_path_escape(lua: &Lua, _: ()) -> mlua::Result<bool> {
-    ScriptData::get_path_escape(lua)
-}
-
-/* entry
-{
-    "version": "1.0.0",
     "name": "quiver.file.set_path_escape",
-    "info": "TO-DO"
+    "info": "Set the state of the path sand-box.",
+    "member": [
+        { "name": "state", "info": "The state of the path sand-box.", "kind": "boolean" }
+    ]
 }
 */
 fn set_path_escape(lua: &Lua, state: bool) -> mlua::Result<()> {
@@ -410,14 +401,18 @@ fn set_path_escape(lua: &Lua, state: bool) -> mlua::Result<()> {
 {
     "version": "1.0.0",
     "name": "quiver.file.move",
-    "info": "TO-DO"
+    "info": "Move a file.",
+    "member": [
+        { "name": "source", "info": "The source path.", "kind": "string" },
+        { "name": "target", "info": "The target path.", "kind": "string" }
+    ]
 }
 */
 fn move_file(lua: &Lua, (source, target): (String, String)) -> mlua::Result<()> {
     let source = ScriptData::get_path(lua, &source)?;
     let target = ScriptData::get_path(lua, &target)?;
 
-    std::fs::rename(source, target).unwrap();
+    std::fs::rename(source, target).map_err(mlua::Error::runtime)?;
 
     Ok(())
 }
@@ -426,14 +421,18 @@ fn move_file(lua: &Lua, (source, target): (String, String)) -> mlua::Result<()> 
 {
     "version": "1.0.0",
     "name": "quiver.file.copy",
-    "info": "TO-DO"
+    "info": "Copy a file.",
+    "member": [
+        { "name": "source", "info": "The source path.", "kind": "string" },
+        { "name": "target", "info": "The target path.", "kind": "string" }
+    ]
 }
 */
 fn copy(lua: &Lua, (source, target): (String, String)) -> mlua::Result<()> {
     let source = ScriptData::get_path(lua, &source)?;
     let target = ScriptData::get_path(lua, &target)?;
 
-    std::fs::copy(source, target).unwrap();
+    std::fs::copy(source, target).map_err(mlua::Error::runtime)?;
 
     Ok(())
 }
@@ -442,13 +441,16 @@ fn copy(lua: &Lua, (source, target): (String, String)) -> mlua::Result<()> {
 {
     "version": "1.0.0",
     "name": "quiver.file.remove_file",
-    "info": "TO-DO"
+    "info": "Remove a file.",
+    "member": [
+        { "name": "path", "info": "The path to the file to remove.", "kind": "string" }
+    ]
 }
 */
 fn remove_file(lua: &Lua, path: String) -> mlua::Result<()> {
     let path = ScriptData::get_path(lua, &path)?;
 
-    std::fs::remove_file(path).unwrap();
+    std::fs::remove_file(path).map_err(mlua::Error::runtime)?;
 
     Ok(())
 }
@@ -457,13 +459,16 @@ fn remove_file(lua: &Lua, path: String) -> mlua::Result<()> {
 {
     "version": "1.0.0",
     "name": "quiver.file.remove_path",
-    "info": "TO-DO"
+    "info": "Remove a folder.",
+    "member": [
+        { "name": "path", "info": "The path to the folder to remove.", "kind": "string" }
+    ]
 }
 */
 fn remove_path(lua: &Lua, path: String) -> mlua::Result<()> {
     let path = ScriptData::get_path(lua, &path)?;
 
-    std::fs::remove_dir_all(path).unwrap();
+    std::fs::remove_dir_all(path).map_err(mlua::Error::runtime)?;
 
     Ok(())
 }

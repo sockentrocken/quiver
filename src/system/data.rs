@@ -93,6 +93,13 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
     Ok(())
 }
 
+/* class
+{
+    "version": "1.0.0",
+    "name": "data",
+    "info": "An unique handle for a data buffer in memory."
+}
+*/
 pub struct Data<T: Clone + IntoLua + Send + 'static>(pub Vec<T>);
 
 impl<T: Clone + IntoLua + Send + 'static> Data<T> {
@@ -140,8 +147,11 @@ impl<T: Clone + IntoLua + Send + 'static> mlua::UserData for Data<T> {
         /* entry
         {
             "version": "1.0.0",
-            "name": "data:foo",
-            "info": "TO-DO"
+            "name": "data:get_length",
+            "info": "Get the length of the data buffer.",
+            "result": [
+                { "name": "length", "info": "The length of the data buffer.", "kind": "number" }
+            ]
         }
         */
         method.add_method_mut("get_length", |_: &Lua, this, _: ()| Ok(this.0.len()));
@@ -150,7 +160,10 @@ impl<T: Clone + IntoLua + Send + 'static> mlua::UserData for Data<T> {
         {
             "version": "1.0.0",
             "name": "data:get_buffer",
-            "info": "TO-DO"
+            "info": "Get the data buffer.",
+            "result": [
+                { "name": "buffer", "info": "The data buffer.", "kind": "table" }
+            ]
         }
         */
         method.add_method_mut("get_buffer", |_: &Lua, this, _: ()| Ok(this.0.clone()));
@@ -159,16 +172,21 @@ impl<T: Clone + IntoLua + Send + 'static> mlua::UserData for Data<T> {
         {
             "version": "1.0.0",
             "name": "data:get_slice",
-            "info": "TO-DO"
+            "info": "Get a slice out of the data buffer, as another data buffer.",
+            "member": [
+                { "name": "index_a", "info": "Index A into the data buffer.", "kind": "number" },
+                { "name": "index_b", "info": "Index B into the data buffer.", "kind": "number" }
+            ],
+            "result": [
+                { "name": "slice", "info": "The slice, as another data buffer.", "kind": "data" }
+            ]
         }
         */
         method.add_method_mut(
             "get_slice",
             |lua: &Lua, this, (index_a, index_b): (usize, usize)| {
-                if (index_a <= this.0.len() && index_b <= this.0.len()) && (index_a <= index_b) {
-                    let slice = &this.0[index_a..index_b];
-
-                    let data = crate::system::data::Data::new(lua, slice.to_vec())?;
+                if let Some(data) = this.0.get(index_a..index_b) {
+                    let data = crate::system::data::Data::new(lua, data.to_vec())?;
 
                     Ok(data)
                 } else {
@@ -185,15 +203,21 @@ impl<T: Clone + IntoLua + Send + 'static> mlua::UserData for Data<T> {
 {
     "version": "1.0.0",
     "name": "quiver.data.compress",
-    "info": "TO-DO",
+    "info": "Compress a given data buffer (DEFLATE).",
+    "member": [
+        { "name": "data", "info": "The data buffer to compress.", "kind": "data" }
+    ],
+    "result": [
+        { "name": "data", "info": "The data buffer.", "kind": "data" }
+    ],
     "test": "data/compress_decompress.lua"
 }
 */
 fn compress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
-    let data = Data::get_buffer(data)?;
-    let data = &data.0;
-    let mut out = 0;
     unsafe {
+        let data = Data::get_buffer(data)?;
+        let data = &data.0;
+        let mut out = 0;
         let value = ffi::CompressData(data.as_ptr(), data.len() as i32, &mut out);
         let slice = std::slice::from_raw_parts(value, out as usize).to_vec();
 
@@ -205,17 +229,23 @@ fn compress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
 {
     "version": "1.0.0",
     "name": "quiver.data.decompress",
-    "info": "TO-DO",
+    "info": "Decompress a given data buffer (DEFLATE).",
+    "member": [
+        { "name": "data", "info": "The data buffer to decompress.", "kind": "data" }
+    ],
+    "result": [
+        { "name": "data", "info": "The data buffer.", "kind": "data" }
+    ],
     "test": "data/compress_decompress.lua"
 }
 */
 fn decompress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
-    let data = Data::get_buffer(data)?;
-    let data = &data.0;
-    let mut out = 0;
     unsafe {
+        let data = Data::get_buffer(data)?;
+        let data = &data.0;
+        let mut out = 0;
         let value = ffi::DecompressData(data.as_ptr(), data.len() as i32, &mut out);
-        let slice = std::slice::from_raw_parts(value, out as usize).to_vec();
+        let slice = Vec::from_raw_parts(value, out as usize, out as usize);
 
         Data::new(lua, slice)
     }
@@ -227,16 +257,22 @@ fn decompress(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
 {
     "version": "1.0.0",
     "name": "quiver.data.encode",
-    "info": "TO-DO"
+    "info": "Encode a given data buffer (Base64).",
+    "member": [
+        { "name": "data", "info": "The data buffer to encode.", "kind": "data" }
+    ],
+    "result": [
+        { "name": "data", "info": "The data buffer.", "kind": "data" }
+    ]
 }
 */
 fn encode(lua: &Lua, data: LuaValue) -> mlua::Result<Data<i8>> {
-    let data = Data::get_buffer(data)?;
-    let data = &data.0;
-    let mut out = 0;
     unsafe {
+        let data = Data::get_buffer(data)?;
+        let data = &data.0;
+        let mut out = 0;
         let value = ffi::EncodeDataBase64(data.as_ptr(), data.len() as i32, &mut out);
-        let slice = std::slice::from_raw_parts(value, out as usize).to_vec();
+        let slice = Vec::from_raw_parts(value, out as usize, out as usize);
 
         Data::new(lua, slice)
     }
@@ -246,16 +282,22 @@ fn encode(lua: &Lua, data: LuaValue) -> mlua::Result<Data<i8>> {
 {
     "version": "1.0.0",
     "name": "quiver.data.decode",
-    "info": "TO-DO"
+    "info": "Decode a given data buffer (Base64).",
+    "member": [
+        { "name": "data", "info": "The data buffer to decode.", "kind": "data" }
+    ],
+    "result": [
+        { "name": "data", "info": "The data buffer.", "kind": "data" }
+    ]
 }
 */
 fn decode(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
-    let data = Data::get_buffer(data)?;
-    let data = &data.0;
-    let mut out = 0;
     unsafe {
+        let data = Data::get_buffer(data)?;
+        let data = &data.0;
+        let mut out = 0;
         let value = ffi::DecodeDataBase64(data.as_ptr(), &mut out);
-        let slice = std::slice::from_raw_parts(value, out as usize).to_vec();
+        let slice = Vec::from_raw_parts(value, out as usize, out as usize);
 
         Data::new(lua, slice)
     }
@@ -274,7 +316,14 @@ impl HashKind {
 {
     "version": "1.0.0",
     "name": "quiver.data.hash",
-    "info": "TO-DO"
+    "info": "Hash a given data buffer.",
+    "member": [
+        { "name": "data", "info": "The data buffer to encode.",                 "kind": "data"       },
+        { "name": "data", "info": "OPTIONAL: The hash method. Default: CRC32.", "kind": "hash_kind?" }
+    ],
+    "result": [
+        { "name": "data", "info": "The hash code.", "kind": "data" }
+    ]
 }
 */
 fn hash(lua: &Lua, (data, kind): (LuaValue, Option<i32>)) -> mlua::Result<LuaValue> {
@@ -333,8 +382,8 @@ impl FormatKind {
     "name": "quiver.data.serialize",
     "info": "Serialize a given Lua value as another format, in the form of a string.",
     "member": [
-        { "name": "text", "info": "Lua value to serialize.", "kind": "any"    },
-        { "name": "kind", "info": "Format.",                 "kind": "number" }
+        { "name": "text", "info": "Lua value to serialize.",                              "kind": "any"          },
+        { "name": "kind", "info": "OPTIONAL: The format to serialize to. Default: JSON.", "kind": "format_kind?" }
     ],
     "result": [
         { "name": "value", "info": "The value, in string form.", "kind": "string" }
@@ -381,8 +430,8 @@ fn serialize(lua: &Lua, (text, _): (LuaValue, Option<i32>)) -> mlua::Result<Stri
     "name": "quiver.data.deserialize",
     "info": "Deserialize a given format string as a Lua value.",
     "member": [
-        { "name": "text", "info": "String to deserialize.", "kind": "string" },
-        { "name": "kind", "info": "Format.",                "kind": "number" }
+        { "name": "text", "info": "String to deserialize.",                                   "kind": "string"       },
+        { "name": "kind", "info": "OPTIONAL: The format to deserialize from. Default: JSON.", "kind": "format_kind?" }
     ],
     "result": [
         { "name": "value", "info": "The value, in Lua value form.", "kind": "any" }
@@ -435,7 +484,14 @@ fn deserialize(lua: &Lua, (text, _): (String, Option<i32>)) -> mlua::Result<LuaV
 {
     "version": "1.0.0",
     "name": "quiver.data.to_data",
-    "info": "TO-DO"
+    "info": "Convert a given Lua value to a data buffer.",
+    "member": [
+        { "name": "data", "info": "Lua value to convert to a data buffer.", "kind": "any"       },
+        { "name": "kind", "info": "The data kind to convert to.",           "kind": "data_kind" }
+    ],
+    "result": [
+        { "name": "value", "info": "The value, in data buffer form.", "kind": "data" }
+    ]
 }
 */
 fn to_data(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<Data<u8>> {
@@ -459,7 +515,14 @@ fn to_data(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<Data<u8>> {
 {
     "version": "1.0.0",
     "name": "quiver.data.from_data",
-    "info": "TO-DO"
+    "info": "Convert a given data buffer to a Lua value.",
+    "member": [
+        { "name": "data", "info": "Data buffer to convert to a Lua value.", "kind": "data"      },
+        { "name": "kind", "info": "The data kind to convert to.",           "kind": "data_kind" }
+    ],
+    "result": [
+        { "name": "value", "info": "The value, in Lua value form.", "kind": "number | string" }
+    ]
 }
 */
 fn from_data(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<LuaValue> {
@@ -487,16 +550,29 @@ fn from_data(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<LuaValue>
     "version": "1.0.0",
     "feature": "embed",
     "name": "quiver.data.get_embed_file",
-    "info": "TO-DO"
+    "info": "Get a file from the embed file.",
+    "member": [
+        { "name": "path",   "info": "Path to the file.", "kind": "string"  },
+        { "name": "binary", "info": "Read as binary.",   "kind": "boolean" }
+    ],
+    "result": [
+        { "name": "file", "info": "The file.", "kind": "string | data" }
+    ]
 }
 */
 #[cfg(feature = "embed")]
-fn get_embed_file(lua: &Lua, path: String) -> mlua::Result<LuaValue> {
+fn get_embed_file(lua: &Lua, (path, binary): (String, bool)) -> mlua::Result<LuaValue> {
     if let Some(asset) = crate::status::Asset::get(&path) {
-        let data = crate::system::data::Data::new(lua, asset.data.to_vec())?;
-        let data = lua.create_userdata(data)?;
+        if binary {
+            let data = crate::system::data::Data::new(lua, asset.data.to_vec())?;
+            let data = lua.create_userdata(data)?;
 
-        Ok(mlua::Value::UserData(data))
+            Ok(mlua::Value::UserData(data))
+        } else {
+            let data = String::from_utf8(asset.data.to_vec()).map_err(mlua::Error::runtime)?;
+
+            lua.to_value(&data)
+        }
     } else {
         Ok(mlua::Value::Nil)
     }
@@ -507,7 +583,10 @@ fn get_embed_file(lua: &Lua, path: String) -> mlua::Result<LuaValue> {
     "version": "1.0.0",
     "feature": "embed",
     "name": "quiver.data.get_embed_list",
-    "info": "TO-DO"
+    "info": "Get a list of every file in the embed data.",
+    "result": [
+        { "name": "list", "info": "The list of every file.", "kind": "table" }
+    ]
 }
 */
 #[cfg(feature = "embed")]

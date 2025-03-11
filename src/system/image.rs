@@ -48,8 +48,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-use crate::status::*;
 use crate::script::*;
+use crate::status::*;
 
 //================================================================
 
@@ -103,7 +103,10 @@ impl mlua::UserData for Image {
         {
             "version": "1.0.0",
             "name": "image:to_texture",
-            "info": "TO-DO"
+            "info": "Get a texture resource from an image.",
+            "result": [
+                { "name": "texture", "info": "Texture resource.", "kind": "texture" }
+            ]
         }
         */
         method.add_method_mut("to_texture", |_: &Lua, this, _: ()| {
@@ -123,7 +126,8 @@ impl Image {
         ],
         "result": [
             { "name": "image", "info": "Image resource.", "kind": "image" }
-        ]
+        ],
+        "routine": true
     }
     */
     async fn new(lua: Lua, path: String) -> mlua::Result<Self> {
@@ -149,7 +153,12 @@ impl Image {
     {
         "version": "1.0.0",
         "name": "quiver.image.new_from_memory",
-        "info": "TO-DO"
+        "info": "Create a new image resource, from memory.",
+        "member": [
+            { "name": "data", "info": "The data buffer.",                     "kind": "data"   },
+            { "name": "kind", "info": "The kind of image file (.png, etc.).", "kind": "string" }
+        ],
+        "routine": true
     }
     */
     pub async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {

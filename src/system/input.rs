@@ -55,7 +55,7 @@ use crate::status::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 
 //================================================================
 
@@ -164,7 +164,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 }
 */
 fn set_clipboard_text(_: &Lua, text: String) -> mlua::Result<()> {
-    let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let text = Script::rust_to_c_string(&text)?;
 
     unsafe {
         ffi::SetClipboardText(text.as_ptr());
@@ -186,10 +186,7 @@ fn set_clipboard_text(_: &Lua, text: String) -> mlua::Result<()> {
 fn get_clipboard_text(_: &Lua, _: ()) -> mlua::Result<String> {
     unsafe {
         let name = ffi::GetClipboardText();
-        Ok(CStr::from_ptr(name)
-            .to_str()
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?
-            .to_string())
+        Script::c_to_rust_string(name)
     }
 }
 
@@ -242,10 +239,7 @@ fn get_board_name(_: &Lua, value: i32) -> mlua::Result<String> {
         if name.is_null() {
             Err(mlua::Error::runtime("get_board_name(): Unknown key code."))
         } else {
-            Ok(CStr::from_ptr(name)
-                .to_str()
-                .map_err(|e| mlua::Error::runtime(e.to_string()))?
-                .to_string())
+            Script::c_to_rust_string(name)
         }
     }
 }
@@ -523,7 +517,10 @@ fn get_mouse_wheel(_: &Lua, _: ()) -> mlua::Result<(f32, f32)> {
 {
     "version": "1.0.0",
     "name": "quiver.input.mouse.get_mouse_queue",
-    "info": "TO-DO"
+    "info": "Get the last mouse button press.",
+    "result": [
+        { "name": "input", "info": "The last mouse button press.", "kind": "input_mouse" }
+    ]
 }
 */
 fn get_mouse_queue(_: &Lua, _: ()) -> mlua::Result<bool> {

@@ -69,7 +69,7 @@ use std::num::ParseIntError;
 //================================================================
 
 /* class
-{ "version": "1.0.0", "name": "quiver.discord", "info": "The discord API." }
+{ "version": "1.0.0", "name": "quiver.discord", "info": "The Discord API." }
 */
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table, status_info: &StatusInfo, script_info: Option<&ScriptInfo>) -> mlua::Result<()> {
@@ -135,7 +135,11 @@ impl mlua::UserData for Discord {
         {
             "version": "1.0.0",
             "name": "discord:set_rich_presence",
-            "info": "TO-DO"
+            "info": "Set the rich presence.",
+            "member": [
+                { "name": "activity", "info": "The rich presence.", "kind": "table" }
+            ],
+            "routine": true
         }
         */
         method.add_async_method_mut(
@@ -244,7 +248,8 @@ impl mlua::UserData for Discord {
         {
             "version": "1.0.0",
             "name": "discord:clear_rich_presence",
-            "info": "TO-DO"
+            "info": "Clear the rich presence.",
+            "routine": true
         }
         */
         method.add_async_method_mut("clear_rich_presence", |_: Lua, this, _: ()| async move {
@@ -256,7 +261,8 @@ impl mlua::UserData for Discord {
         {
             "version": "1.0.0",
             "name": "discord:update",
-            "info": "TO-DO"
+            "info": "TO-DO",
+            "routine": true
         }
         */
         method.add_async_method_mut(
@@ -287,7 +293,16 @@ impl Discord {
     {
         "version": "1.0.0",
         "name": "quiver.discord.new",
-        "info": "Create a new Discord client."
+        "info": "Create a new Discord client.",
+        "member": [
+            { "name": "ID",      "info": "Discord App ID.",                                                      "kind": "string"                     },
+            { "name": "name",    "info": "OPTIONAL: The application name.",                                      "kind": "string?"                    },
+            { "name": "command", "info": "OPTIONAL: The application command to run on the rich presence state.", "kind": "number? | string? | table?" }
+        ],
+        "result": [
+            { "name": "file", "info": "The file.", "kind": "string | data" }
+        ],
+        "routine": true
     }
     */
     async fn new(

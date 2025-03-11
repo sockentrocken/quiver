@@ -62,7 +62,7 @@ use std::num::ParseIntError;
 { "version": "1.0.0", "feature": "steam", "name": "quiver.steam", "info": "The Steam API." }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, status_info: &StatusInfo, script_info: Option<&ScriptInfo>) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let steam = lua.create_table()?;
 
     steam.set("new", lua.create_function(self::Steam::new)?)?;
@@ -130,7 +130,7 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:update",
-            "info": "TO-DO"
+            "info": "Update the Steam state."
         }
         */
         method.add_method_mut("update", |_: &Lua, this, _: ()| {

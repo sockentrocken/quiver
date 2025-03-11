@@ -70,7 +70,7 @@ use raylib::prelude::*;
 { "version": "1.0.0", "name": "quiver.video", "info": "The video API.", "head": true }
 */
 #[rustfmt::skip]
-pub fn set_global(lua: &Lua, table: &mlua::Table, status_info: &StatusInfo, script_info: Option<&ScriptInfo>) -> mlua::Result<()> {
+pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let video = lua.create_table()?;
 
     video.set("new", lua.create_function(self::Video::new)?)?;

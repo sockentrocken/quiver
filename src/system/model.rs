@@ -57,7 +57,7 @@ use mlua::prelude::*;
 use raylib::prelude::*;
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 
 //================================================================
 
@@ -122,8 +122,7 @@ impl Model {
     }
     */
     fn new(lua: &Lua, path: String) -> mlua::Result<Self> {
-        let name = CString::new(ScriptData::get_path(lua, &path)?)
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+        let name = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
 
         unsafe {
             let data = ffi::LoadModel(name.as_ptr());
@@ -525,8 +524,7 @@ impl ModelAnimation {
     }
     */
     fn new(lua: &Lua, path: String) -> mlua::Result<Vec<Self>> {
-        let name = CString::new(ScriptData::get_path(lua, &path)?)
-            .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+        let name = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
 
         unsafe {
             let mut count = 0;

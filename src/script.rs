@@ -313,7 +313,7 @@ impl Script {
             .unwrap();
     }
 
-    fn set_environment(lua: &Lua, status_info: &StatusInfo) -> mlua::Result<mlua::Table> {
+    fn set_environment(lua: &Lua, _status_info: &StatusInfo) -> mlua::Result<mlua::Table> {
         // get the global lua table.
         let global = lua.globals();
         // over-load print to use rust's println instead. otherwise, RL will consume the Lua print.
@@ -342,6 +342,7 @@ impl Script {
 
         #[cfg(feature = "embed")]
         {
+            let package = global.get::<mlua::Table>("package")?;
             let loader: mlua::Table = package.get("loaders")?;
             loader.push(lua.create_function(|lua, path: String| {
                 let path = format!("{path}.lua");

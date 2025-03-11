@@ -55,7 +55,6 @@ use crate::status::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::CString;
 
 //================================================================
 
@@ -134,7 +133,7 @@ impl mlua::UserData for Font {
                 )| {
                     let point : Vector2 = lua.from_value(point)?;
                     let color : Color   = lua.from_value(color)?;
-                    let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+                    let text = Script::rust_to_c_string(&text)?;
 
                     unsafe {
                         ffi::DrawTextEx(*this.0, text.as_ptr(), point.into(), scale, space, color.into());
@@ -162,7 +161,7 @@ impl mlua::UserData for Font {
         method.add_method(
             "measure_text",
             |_: &Lua, this, (text, scale, space): (String, f32, f32)| {
-                let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+                let text = Script::rust_to_c_string(&text)?;
 
                 unsafe {
                     let result = ffi::MeasureTextEx(*this.0, text.as_ptr(), scale, space);
@@ -190,8 +189,7 @@ impl Font {
     */
     fn new(lua: &Lua, (path, size): (String, i32)) -> mlua::Result<Self> {
         unsafe {
-            let name = CString::new(ScriptData::get_path(lua, &path)?)
-                .map_err(|e| mlua::Error::runtime(e.to_string()))?;
+            let name = Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?;
 
             let data = ffi::LoadFontEx(name.as_ptr(), size, std::ptr::null_mut(), 0);
 
@@ -209,7 +207,15 @@ impl Font {
     {
         "version": "1.0.0",
         "name": "quiver.font.new_from_memory",
-        "info": "TO-DO"
+        "info": "Create a new font resource, from memory.",
+        "member": [
+            { "name": "data", "info": "The data buffer.",                    "kind": "data"   },
+            { "name": "kind", "info": "The kind of font file (.ttf, etc.).", "kind": "string" },
+            { "name": "size", "info": "Size for font.",                      "kind": "number" }
+        ],
+        "result": [
+            { "name": "font", "info": "Font resource.", "kind": "font" }
+        ]
     }
     */
     fn new_from_memory(_: &Lua, (data, kind, size): (LuaValue, String, i32)) -> mlua::Result<Self> {
@@ -241,12 +247,16 @@ impl Font {
     {
         "version": "1.0.0",
         "name": "quiver.font.new_default",
-        "info": "TO-DO"
+        "info": "Create a new font resource, from the default font.",
+        "member": [
+            { "name": "size", "info": "Size for font.", "kind": "number" }
+        ],
+        "result": [
+            { "name": "font", "info": "Font resource.", "kind": "font" }
+        ]
     }
     */
     fn new_default(_: &Lua, size: i32) -> mlua::Result<Self> {
-        println!("foo");
-
         let data = Status::FONT;
 
         unsafe {

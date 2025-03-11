@@ -214,7 +214,7 @@ impl Status {
         if let Some(icon) = &info.icon {
             if !icon.is_empty() {
                 // load icon from info manifest.
-                let icon = Image::load_image(&icon)
+                let icon = Image::load_image(icon)
                     .map_err(|e| Self::panic(&e.to_string()))
                     .unwrap();
                 handle.set_window_icon(icon);

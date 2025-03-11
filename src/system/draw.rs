@@ -56,7 +56,6 @@ use crate::system::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use std::ffi::CString;
 
 //================================================================
 
@@ -787,7 +786,7 @@ mod draw_2d {
         lua: &Lua,
         (text, point, scale, color): (String, LuaValue, i32, LuaValue),
     ) -> mlua::Result<()> {
-        let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+        let text = Script::rust_to_c_string(&text)?;
         let point: Vector2 = lua.from_value(point)?;
         let color: Color = lua.from_value(color)?;
 

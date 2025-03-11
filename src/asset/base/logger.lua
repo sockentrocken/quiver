@@ -140,9 +140,9 @@ function logger:draw(window)
                 end
 
                 -- draw back-drop.
-                LOGGER_FONT:draw(label, text_point_a, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, line.color * 0.5)
+                self.font:draw(label, text_point_a, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, line.color * 0.5)
                 -- draw line.
-                LOGGER_FONT:draw(label, text_point_b, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, line.color)
+                self.font:draw(label, text_point_b, LOGGER_FONT_SCALE, LOGGER_FONT_SPACE, line.color)
             end
         end
     end

@@ -78,7 +78,14 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 {
     "version": "1.0.0",
     "name": "quiver.request.get",
-    "info": "TO-DO",
+    "info": "Perform a GET request.",
+    "member": [
+        { "name": "link",   "info": "The target URL link.", "kind": "string"  },
+        { "name": "binary", "info": "Receive as binary.",   "kind": "boolean" }
+    ],
+    "result": [
+        { "name": "value", "info": "The return value.", "kind": "string | data" }
+    ],
     "test": "request/get.lua",
     "routine": true
 }
@@ -110,7 +117,17 @@ async fn get(lua: Lua, (link, binary): (String, bool)) -> mlua::Result<LuaValue>
 {
     "version": "1.0.0",
     "name": "quiver.request.post",
-    "info": "TO-DO",
+    "info": "Perform a POST request.",
+    "member": [
+        { "name": "link",   "info": "The target URL link.",            "kind": "string"  },
+        { "name": "data",   "info": "OPTIONAL: The \"data\" payload.", "kind": "string?" },
+        { "name": "form",   "info": "OPTIONAL: The \"form\" payload.", "kind": "table?"  },
+        { "name": "json",   "info": "OPTIONAL: The \"json\" payload.", "kind": "table?"  },
+        { "name": "binary", "info": "Receive as binary.",              "kind": "boolean" }
+    ],
+    "result": [
+        { "name": "value", "info": "The return value.", "kind": "string | data" }
+    ],
     "test": "request/post.lua",
     "routine": true
 }

@@ -92,7 +92,8 @@ impl mlua::UserData for SocketTCPStream {
         {
             "version": "1.0.0",
             "name": "socket_TCP_stream:get",
-            "info": "TO-DO"
+            "info": "TO-DO",
+            "routine": true
         }
         */
         method.add_async_method("get", |_: Lua, this, _: ()| async move {
@@ -111,7 +112,8 @@ impl mlua::UserData for SocketTCPStream {
         {
             "version": "1.0.0",
             "name": "socket_TCP_stream:set",
-            "info": "TO-DO"
+            "info": "TO-DO",
+            "routine": true
         }
         */
         method.add_async_method_mut("set", |_: Lua, mut this, data: Vec<u8>| async move {
@@ -128,7 +130,8 @@ impl SocketTCPStream {
     {
         "version": "1.0.0",
         "name": "quiver.socket.new_TCP_stream",
-        "info": "TO-DO"
+        "info": "TO-DO",
+        "routine": true
     }
     */
     async fn new(_: Lua, address: String) -> mlua::Result<Self> {
@@ -157,7 +160,8 @@ impl mlua::UserData for SocketTCPListen {
         {
             "version": "1.0.0",
             "name": "socket_TCP:accept",
-            "info": "TO-DO"
+            "info": "TO-DO",
+            "routine": true
         }
         */
         method.add_async_method("accept", |_: Lua, this, _: ()| async move {
@@ -175,7 +179,8 @@ impl SocketTCPListen {
     {
         "version": "1.0.0",
         "name": "quiver.socket.new_TCP_listen",
-        "info": "TO-DO"
+        "info": "TO-DO",
+        "routine": true
     }
     */
     async fn new(_: Lua, address: String) -> mlua::Result<Self> {
@@ -202,7 +207,8 @@ impl mlua::UserData for SocketUDP {
         {
             "version": "1.0.0",
             "name": "socket_UDP:connect",
-            "info": "TO-DO"
+            "info": "TO-DO",
+            "routine": true
         }
         */
         method.add_async_method("connect", |_: Lua, this, address: String| async move {
@@ -218,7 +224,7 @@ impl mlua::UserData for SocketUDP {
             "info": "TO-DO"
         }
         */
-        method.add_async_method("get", |_: Lua, this, _: ()| async move {
+        method.add_method("get", |_: &Lua, this, _: ()| {
             let mut data = [0; 32];
             let mut length = 0;
 
@@ -234,7 +240,8 @@ impl mlua::UserData for SocketUDP {
         {
             "version": "1.0.0",
             "name": "socket_UDP:set",
-            "info": "TO-DO"
+            "info": "TO-DO",
+            "routine": true
         }
         */
         method.add_async_method("set", |_: Lua, this, data: Vec<u8>| async move {
@@ -251,7 +258,7 @@ impl mlua::UserData for SocketUDP {
             "info": "TO-DO"
         }
         */
-        method.add_async_method("get_at", |_: Lua, this, _: ()| async move {
+        method.add_method("get_at", |_: &Lua, this, _: ()| {
             let mut data = [0; 32];
             let mut length = 0;
 
@@ -267,7 +274,8 @@ impl mlua::UserData for SocketUDP {
         {
             "version": "1.0.0",
             "name": "socket_UDP:set_at",
-            "info": "TO-DO"
+            "info": "TO-DO",
+            "routine": true
         }
         */
         method.add_async_method(
@@ -287,7 +295,8 @@ impl SocketUDP {
     {
         "version": "1.0.0",
         "name": "quiver.socket.new_UDP",
-        "info": "TO-DO"
+        "info": "TO-DO",
+        "routine": true
     }
     */
     async fn new(_: Lua, address: String) -> mlua::Result<Self> {

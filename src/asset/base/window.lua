@@ -144,8 +144,14 @@ end
 ---@param color color # The color.
 ---@return color color # The color, with animation.
 function gizmo:fade(window, color)
+    dark = 1.0
+
+    if window.pick and not (window.count == window.pick + 1) then
+        dark = 0.5
+    end
+
     -- fade in/out from hover.
-    color = color * (ease.in_out_quad(self.hover) * 0.25 + 0.75)
+    color = color * (ease.in_out_quad(self.hover) * 0.25 + 0.75) * dark
 
     -- fade in/out from time.
     --color.a = math.floor(math.out_quad(math.min(1.0, window.time * 4.0)) * 255.0)
@@ -253,6 +259,8 @@ local function window_border(self, shape, hover, index, focus, label, move)
         self.font:draw(label, shift + vector_2:old(1.0, 1.0), WINDOW_FONT_SCALE, WINDOW_FONT_SPACE, color_a)
         self.font:draw(label, shift, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE, color_b)
     end
+
+    return gizmo
 end
 
 ---Get the state of a gizmo.
@@ -602,14 +610,14 @@ function window:slider(shape, label, value, min, max, step, flag, call_back, cal
             call_back(call_data, self, shape, hover, index, focus, label, value, percentage)
         else
             -- draw a border, with a text off-set.
-            window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0),
+            local gizmo = window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0),
                 function() window_glyph(self, "board", "mouse", "pad") end)
 
             -- if percentage is above 0.0...
             if percentage > 0.0 then
                 quiver.draw_2d.draw_box_2_round(
                     box_2:old(shape.x + 6.0, shape.y + 6.0, (shape.width - 12.0) * percentage, shape.height - 12.0),
-                    WINDOW_CARD_ROUND_SHAPE, WINDOW_CARD_ROUND_COUNT, WINDOW_COLOR_PRIMARY_SIDE)
+                    WINDOW_CARD_ROUND_SHAPE, WINDOW_CARD_ROUND_COUNT, gizmo:fade(self, WINDOW_COLOR_PRIMARY_SIDE))
             end
 
             -- measure text.
@@ -619,7 +627,7 @@ function window:slider(shape, label, value, min, max, step, flag, call_back, cal
             self.font:draw(value, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
                 WINDOW_FONT_SCALE,
                 WINDOW_FONT_SPACE,
-                color:white())
+                gizmo:fade(self, color:white()))
         end
     end
 

@@ -57,7 +57,7 @@ use mlua::prelude::*;
 use raylib::prelude::*;
 use std::{
     collections::HashMap,
-    ffi::{CStr, CString},
+    ffi::CStr,
 };
 
 //================================================================
@@ -162,7 +162,15 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, script_info: O
 {
     "version": "1.0.0",
     "name": "quiver.window.file_dialog",
-    "info": "TO-DO"
+    "info": "Create a new native OS file dialog.",
+    "member": [
+        { "name": "kind",   "info": "The kind of file dialog to display.",                                                       "kind": "file_dialog_kind" },
+        { "name": "title",  "info": "OPTIONAL: Window title.",                                                                   "kind": "string?"          },
+        { "name": "path",   "info": "OPTIONAL: Default file path.",                                                              "kind": "string?"          },
+        { "name": "name",   "info": "OPTIONAL: Default file name.",                                                              "kind": "string?"          },
+        { "name": "filter", "info": "OPTIONAL: Extension filter table. Must be in { extension = { \".txt\", \".ini\" } format.", "kind": "table?"           }
+    ],
+    "routine": true
 }
 */
 async fn file_dialog(
@@ -177,13 +185,8 @@ async fn file_dialog(
 ) -> mlua::Result<LuaValue> {
     let mut file = rfd::AsyncFileDialog::new();
 
-    if let Some(filter) = filter {
-        let filter: HashMap<String, Vec<String>> = lua.from_value(filter)?;
-
-        for (k, v) in filter {
-            println!("adding filter {k} : {v:?}");
-            file = file.add_filter(k, &v);
-        }
+    if let Some(title) = title {
+        file = file.set_title(title);
     }
 
     if let Some(path) = path {
@@ -194,8 +197,13 @@ async fn file_dialog(
         file = file.set_file_name(name);
     }
 
-    if let Some(title) = title {
-        file = file.set_title(title);
+    if let Some(filter) = filter {
+        let filter: HashMap<String, Vec<String>> = lua.from_value(filter)?;
+
+        for (k, v) in filter {
+            println!("adding filter {k} : {v:?}");
+            file = file.add_filter(k, &v);
+        }
     }
 
     match kind {
@@ -249,17 +257,24 @@ async fn file_dialog(
 {
     "version": "1.0.0",
     "name": "quiver.window.text_dialog",
-    "info": "TO-DO"
+    "info": "Create a new native OS text dialog.",
+    "member": [
+        { "name": "kind",   "info": "OPTIONAL: The kind of text dialog to display.", "kind": "text_dialog_kind?"   },
+        { "name": "title",  "info": "OPTIONAL: Window title.",                       "kind": "string?"             },
+        { "name": "label",  "info": "OPTIONAL: Window label.",                       "kind": "string?"             },
+        { "name": "button", "info": "OPTIONAL: Window button layout.",               "kind": "text_dialog_button?" }
+    ],
+    "routine": true
 }
 */
 async fn text_dialog(
     lua: Lua,
-    (level, title, description, button): (Option<i32>, Option<String>, Option<String>, Option<i32>),
+    (kind, title, label, button): (Option<i32>, Option<String>, Option<String>, Option<i32>),
 ) -> mlua::Result<LuaValue> {
     let mut text = rfd::AsyncMessageDialog::new();
 
-    if let Some(level) = level {
-        match level {
+    if let Some(kind) = kind {
+        match kind {
             0 => text = text.set_level(rfd::MessageLevel::Info),
             1 => text = text.set_level(rfd::MessageLevel::Warning),
             _ => text = text.set_level(rfd::MessageLevel::Error),
@@ -270,8 +285,8 @@ async fn text_dialog(
         text = text.set_title(title)
     }
 
-    if let Some(description) = description {
-        text = text.set_description(description)
+    if let Some(label) = label {
+        text = text.set_description(label)
     }
 
     if let Some(button) = button {
@@ -503,7 +518,7 @@ fn set_icon(_: &Lua, icon: LuaAnyUserData) -> mlua::Result<()> {
 { "version": "1.0.0", "name": "quiver.window.set_name", "info": "Set the window name." }
 */
 fn set_name(_: &Lua, text: String) -> mlua::Result<()> {
-    let text = CString::new(text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
+    let text = Script::rust_to_c_string(&text)?;
 
     unsafe {
         ffi::SetWindowTitle(text.as_ptr());
@@ -833,7 +848,10 @@ fn get_screen_name(_: &Lua, index: i32) -> mlua::Result<String> {
 {
     "version": "1.0.0",
     "name": "quiver.window.get_screen_shot",
-    "info": "TO-DO"
+    "info": "Get a screen-shot of the current frame.",
+    "member": [
+        { "name": "path", "info": "Path to save the screen-shot to.", "kind": "string" }
+    ]
 }
 */
 fn get_screen_shot(lua: &Lua, path: String) -> mlua::Result<()> {
