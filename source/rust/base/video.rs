@@ -175,7 +175,7 @@ impl mlua::UserData for Video {
             "draw",
             |lua: &Lua, this, (point, angle, scale, color): (LuaValue, f32, f32, LuaValue)| unsafe {
                 let texture: ffi::Texture = std::mem::transmute(this.0.videoTexture);
-                Ok(crate::system::texture::texture_draw(
+                Ok(crate::base::texture::texture_draw(
                     lua,
                     (&texture, point, angle, scale, color),
                 ))
@@ -208,7 +208,7 @@ impl mlua::UserData for Video {
                     LuaValue,
                 )| unsafe {
                     let texture : ffi::Texture = std::mem::transmute(this.0.videoTexture);
-                    Ok(crate::system::texture::texture_pro_draw(
+                    Ok(crate::base::texture::texture_pro_draw(
                         lua,
                         (&texture, box_a, box_b, point, angle, color),
                     ))

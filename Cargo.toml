@@ -3,6 +3,10 @@ name    = "quiver"
 version = "1.0.0"
 edition = "2024"
 
+[[bin]]
+name = "quiver"
+path = "source/rust/main.rs"
+
 [features]
 default = [
 	#"serialization",

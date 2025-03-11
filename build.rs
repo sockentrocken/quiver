@@ -56,7 +56,7 @@ use std::path::PathBuf;
 
 //================================================================
 
-const PATH_SYSTEM: &str = "src/system/";
+const PATH_SYSTEM: &str = "source/rust/base/";
 
 fn write_documentation() {
     // create parser object.
@@ -116,7 +116,7 @@ fn compile_external_dependency() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-        .header("src/system/external/raymedia.h")
+        .header("source/rust/base/external/raymedia.h")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
@@ -132,9 +132,9 @@ fn compile_external_dependency() {
         .expect("Couldn't write bindings!");
 
     cc::Build::new()
-        .file("src/system/external/rmedia.c")
+        .file("source/rust/base/external/rmedia.c")
         .cargo_warnings(false)
-        .include("src/system/external")
+        .include("source/rust/base/external")
         .compile("rmedia");
 
     // Tell cargo to tell rustc to link the system bzip2
@@ -153,7 +153,7 @@ fn main() {
         write_documentation();
 
         // read every file in the API directory.
-        for file in std::fs::read_dir("src/asset/base").unwrap() {
+        for file in std::fs::read_dir("source/lua/base").unwrap() {
             // convert to string.
             let file = file.expect("build.rs: Could not unwrap file.");
 
@@ -186,7 +186,7 @@ fn main() {
             for line in file.map_while(Result::ok) {
                 if line.starts_with("---@example") {
                     let line = &line["---@example".len()..line.len()];
-                    let line = &format!("test/system/{}", line.trim());
+                    let line = &format!("test/base/{}", line.trim());
 
                     // open file.
                     let file = File::open(line)
@@ -357,7 +357,7 @@ r#"* Return: `{name}` – {info}
 
     // create a new instance.
     pub fn new() -> Self {
-        let meta_file = File::create(format!("src/asset/{}", Self::META_FILE))
+        let meta_file = File::create(format!("source/lua/{}", Self::META_FILE))
             .unwrap_or_else(|_| panic!("build.rs: Could not create \"{}\" file.", Self::META_FILE));
         let mut meta_file = BufWriter::new(meta_file);
 
@@ -435,10 +435,9 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{line}", &format!("{}", line + 2));
 
         if let Some(test) = class.test {
-            let test =
-                std::fs::read_to_string(format!("test/system/{test}")).unwrap_or_else(|_| {
-                    panic!("Meta::write_meta_class(): Could not read file {test}.")
-                });
+            let test = std::fs::read_to_string(format!("test/base/{test}")).unwrap_or_else(|_| {
+                panic!("Meta::write_meta_class(): Could not read file {test}.")
+            });
 
             data.push_str("---```lua\n");
 
@@ -505,10 +504,9 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{info}", &entry.info);
 
         if let Some(test) = entry.test {
-            let test =
-                std::fs::read_to_string(format!("test/system/{test}")).unwrap_or_else(|_| {
-                    panic!("Meta::write_meta_entry(): Could not read file {test}.")
-                });
+            let test = std::fs::read_to_string(format!("test/base/{test}")).unwrap_or_else(|_| {
+                panic!("Meta::write_meta_entry(): Could not read file {test}.")
+            });
 
             data.push_str("---```lua\n");
 
@@ -641,10 +639,9 @@ r#"* Return: `{name}` – {info}
         data = data.replace("{info}", &class.info);
 
         if let Some(test) = class.test {
-            let test =
-                std::fs::read_to_string(format!("test/system/{test}")).unwrap_or_else(|_| {
-                    panic!("Meta::write_wiki_class(): Could not read file {test}.")
-                });
+            let test = std::fs::read_to_string(format!("test/base/{test}")).unwrap_or_else(|_| {
+                panic!("Meta::write_wiki_class(): Could not read file {test}.")
+            });
 
             data.push_str("```lua\n");
             data.push_str(&test);
@@ -747,10 +744,9 @@ r#"* Return: `{name}` – {info}
         );
 
         if let Some(test) = entry.test {
-            let test =
-                std::fs::read_to_string(format!("test/system/{test}")).unwrap_or_else(|_| {
-                    panic!("Meta::write_wiki_entry(): Could not read file {test}.")
-                });
+            let test = std::fs::read_to_string(format!("test/base/{test}")).unwrap_or_else(|_| {
+                panic!("Meta::write_wiki_entry(): Could not read file {test}.")
+            });
 
             data.push_str("```lua\n");
             data.push_str(&test);

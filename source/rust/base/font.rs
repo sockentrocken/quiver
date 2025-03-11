@@ -219,7 +219,7 @@ impl Font {
     }
     */
     fn new_from_memory(_: &Lua, (data, kind, size): (LuaValue, String, i32)) -> mlua::Result<Self> {
-        let data = crate::system::data::Data::get_buffer(data)?;
+        let data = crate::base::data::Data::get_buffer(data)?;
 
         unsafe {
             let data = &data.0;

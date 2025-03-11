@@ -186,7 +186,7 @@ impl<T: Clone + IntoLua + Send + 'static> mlua::UserData for Data<T> {
             "get_slice",
             |lua: &Lua, this, (index_a, index_b): (usize, usize)| {
                 if let Some(data) = this.0.get(index_a..index_b) {
-                    let data = crate::system::data::Data::new(lua, data.to_vec())?;
+                    let data = crate::base::data::Data::new(lua, data.to_vec())?;
 
                     Ok(data)
                 } else {
@@ -564,7 +564,7 @@ fn from_data(lua: &Lua, (data, kind): (LuaValue, i32)) -> mlua::Result<LuaValue>
 fn get_embed_file(lua: &Lua, (path, binary): (String, bool)) -> mlua::Result<LuaValue> {
     if let Some(asset) = crate::status::Asset::get(&path) {
         if binary {
-            let data = crate::system::data::Data::new(lua, asset.data.to_vec())?;
+            let data = crate::base::data::Data::new(lua, asset.data.to_vec())?;
             let data = lua.create_userdata(data)?;
 
             Ok(mlua::Value::UserData(data))

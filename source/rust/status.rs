@@ -77,9 +77,9 @@ pub enum Status {
 
 impl Status {
     pub const VERSION: &str = env!("CARGO_PKG_VERSION");
-    pub const FONT: &'static [u8] = include_bytes!("asset/font.ttf");
-    pub const LOGO: &'static [u8] = include_bytes!("asset/logo.png");
-    pub const ICON: &'static [u8] = include_bytes!("asset/icon.png");
+    pub const FONT: &'static [u8] = include_bytes!("../../data/font.ttf");
+    pub const LOGO: &'static [u8] = include_bytes!("../../data/logo.png");
+    pub const ICON: &'static [u8] = include_bytes!("../../data/icon.png");
 
     // get a new status instance.
     #[rustfmt::skip]

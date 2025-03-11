@@ -50,7 +50,7 @@
 
 use crate::script::*;
 use crate::status::*;
-use crate::system::*;
+use crate::base::*;
 
 //================================================================
 
@@ -208,7 +208,7 @@ impl mlua::UserData for Texture {
         }
         */
         method.add_method_mut("to_image", |_: &Lua, this, _: ()| {
-            crate::system::image::Image::new_from_texture(this.0)
+            crate::base::image::Image::new_from_texture(this.0)
         });
 
         /* entry
@@ -416,7 +416,7 @@ impl Texture {
     }
     */
     async fn new_from_memory(lua: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
-        let image = crate::system::image::Image::new_from_memory(lua, (data, kind)).await?;
+        let image = crate::base::image::Image::new_from_memory(lua, (data, kind)).await?;
 
         unsafe {
             let data = ffi::LoadTextureFromImage(image.0);

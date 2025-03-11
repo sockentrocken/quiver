@@ -143,7 +143,7 @@ impl Sound {
         _: Lua,
         (data, alias, kind): (LuaValue, Option<usize>, String),
     ) -> mlua::Result<Self> {
-        let data = crate::system::data::Data::get_buffer(data)?;
+        let data = crate::base::data::Data::get_buffer(data)?;
 
         tokio::task::spawn_blocking(move || unsafe {
             let data = &data.0;

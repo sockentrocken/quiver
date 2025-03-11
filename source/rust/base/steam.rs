@@ -1023,7 +1023,7 @@ impl mlua::UserData for Steam {
             let achievement = this.user_statistic.achievement(&name);
 
             if let Some(result) = achievement.get_achievement_icon() {
-                let data = crate::system::data::Data::new(lua, result)?;
+                let data = crate::base::data::Data::new(lua, result)?;
                 let data = lua.create_userdata(data)?;
 
                 Ok(mlua::Value::UserData(data))

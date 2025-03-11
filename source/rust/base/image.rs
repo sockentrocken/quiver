@@ -110,7 +110,7 @@ impl mlua::UserData for Image {
         }
         */
         method.add_method_mut("to_texture", |_: &Lua, this, _: ()| {
-            crate::system::texture::Texture::new_from_image(this.0)
+            crate::base::texture::Texture::new_from_image(this.0)
         });
     }
 }
@@ -162,7 +162,7 @@ impl Image {
     }
     */
     pub async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
-        let data = crate::system::data::Data::get_buffer(data)?;
+        let data = crate::base::data::Data::get_buffer(data)?;
 
         tokio::task::spawn_blocking(move || unsafe {
             let data = &*data.0;

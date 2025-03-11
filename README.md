@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="src/asset/card.png" width="192" height="240">
+<img src="data/card.png" width="192" height="240">
 
 **A 3D/2D game development framework for Lua, written in Rust.**
 
@@ -36,9 +36,8 @@ To run any game example, simply download either example, move the Quiver executa
 
 ```
 example_2D/
-	quiver
-	main.lua
-	data/
+	main/
+    quiver
 ``` 
 
 and launch Quiver.

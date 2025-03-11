@@ -499,8 +499,8 @@ fn set_restore(_: &Lua, _: ()) -> mlua::Result<()> {
 { "version": "1.0.0", "name": "quiver.window.set_icon", "info": "Set the window icon." }
 */
 fn set_icon(_: &Lua, icon: LuaAnyUserData) -> mlua::Result<()> {
-    if icon.is::<crate::system::image::Image>() {
-        let icon = icon.borrow::<crate::system::image::Image>().unwrap();
+    if icon.is::<crate::base::image::Image>() {
+        let icon = icon.borrow::<crate::base::image::Image>().unwrap();
         let icon = &*icon;
 
         unsafe {

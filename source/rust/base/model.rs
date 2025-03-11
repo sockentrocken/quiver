@@ -251,8 +251,8 @@ impl mlua::UserData for Model {
         method.add_method_mut(
             "bind",
             |_, this, (index, which, texture): (usize, usize, LuaAnyUserData)| {
-                if texture.is::<crate::system::texture::Texture>() {
-                    let texture = texture.borrow::<crate::system::texture::Texture>().unwrap();
+                if texture.is::<crate::base::texture::Texture>() {
+                    let texture = texture.borrow::<crate::base::texture::Texture>().unwrap();
                     let texture = &*texture;
 
                     this.0.materials_mut()[index].maps_mut()[which].texture = texture.0;
@@ -265,8 +265,8 @@ impl mlua::UserData for Model {
         method.add_method_mut(
             "bind_shader",
             |_, this, (index, shader): (usize, LuaAnyUserData)| {
-                if shader.is::<crate::system::shader::Shader>() {
-                    let shader = shader.borrow::<crate::system::shader::Shader>().unwrap();
+                if shader.is::<crate::base::shader::Shader>() {
+                    let shader = shader.borrow::<crate::base::shader::Shader>().unwrap();
                     let shader = &*shader;
 
                     this.0.materials_mut()[index].shader = *shader.0;

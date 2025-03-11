@@ -50,7 +50,7 @@
 
 use crate::script::*;
 use crate::status::*;
-use crate::system::*;
+use crate::base::*;
 
 //================================================================
 

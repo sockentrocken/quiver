@@ -132,7 +132,7 @@ impl Music {
     }
     */
     async fn new_from_memory(_: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
-        let data = crate::system::data::Data::get_buffer(data)?;
+        let data = crate::base::data::Data::get_buffer(data)?;
 
         tokio::task::spawn_blocking(move || unsafe {
             let buffer = data.0.clone();

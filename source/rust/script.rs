@@ -48,8 +48,8 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::base::*;
 use crate::status::*;
-use crate::system::*;
 
 //================================================================
 
@@ -92,7 +92,7 @@ pub struct Script {
 }
 
 impl Script {
-    const FILE_MAIN: &'static str = include_str!("asset/main.lua");
+    const FILE_MAIN: &'static str = include_str!("../lua/main.lua");
     #[rustfmt::skip]
     pub const FILE_BASE: [BaseFile; 10] = [
         BaseFile::new("base/constant.lua",    include_str!(concat!(env!("OUT_DIR"), "/constant.lua"))),
@@ -106,9 +106,11 @@ impl Script {
         BaseFile::new("base/system.lua",      include_str!(concat!(env!("OUT_DIR"), "/system.lua"))),
         BaseFile::new("base/scene.lua",       include_str!(concat!(env!("OUT_DIR"), "/scene.lua"))),
     ];
-    const FILE_BASE_MAIN: BaseFile =
-        BaseFile::new("base/main.lua", include_str!("asset/base/main.lua"));
-    const FILE_META: &'static str = include_str!("asset/meta.lua");
+    const FILE_BASE_MAIN: BaseFile = BaseFile::new(
+        "base/main.lua",
+        include_str!(concat!(env!("OUT_DIR"), "/main.lua")),
+    );
+    const FILE_META: &'static str = include_str!("../lua/meta.lua");
     const NAME_MAIN: &'static str = "main.lua";
     const NAME_META: &'static str = "meta.lua";
     const CALL_MAIN: &'static str = "main";

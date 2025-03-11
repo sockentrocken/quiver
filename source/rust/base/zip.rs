@@ -110,7 +110,7 @@ impl mlua::UserData for Zip {
                             let mut data = Vec::new();
                             value.read_to_end(&mut data)?;
 
-                            let data = crate::system::data::Data::new(&lua, data)?;
+                            let data = crate::base::data::Data::new(&lua, data)?;
                             let data = lua.create_userdata(data)?;
 
                             Ok(mlua::Value::UserData(data))
