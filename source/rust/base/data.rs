@@ -64,6 +64,8 @@ use raylib::prelude::*;
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let data = lua.create_table()?;
+    
+    data.set("new",            lua.create_function(self::Data::<u8>::new)?)?;
 
     // CompressData
     data.set("compress",       lua.create_function(self::compress)?)?;
@@ -85,8 +87,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 
     #[cfg(feature = "embed")]
     data.set("get_embed_list", lua.create_function(self::get_embed_list)?)?;
-
-    data.set("new",            lua.create_function(self::Data::<u8>::new)?)?;
 
     table.set("data", data)?;
 
@@ -305,13 +305,6 @@ fn decode(lua: &Lua, data: LuaValue) -> mlua::Result<Data<u8>> {
 
 //================================================================
 
-struct HashKind;
-
-impl HashKind {
-    const CRC32: i32 = 0;
-    const MD5: i32 = 1;
-}
-
 /* entry
 {
     "version": "1.0.0",
@@ -333,10 +326,8 @@ fn hash(lua: &Lua, (data, kind): (LuaValue, Option<i32>)) -> mlua::Result<LuaVal
 
     unsafe {
         match kind {
-            HashKind::CRC32 => {
-                lua.to_value(&ffi::ComputeCRC32(data.as_mut_ptr(), data.len() as i32))
-            }
-            HashKind::MD5 => {
+            0 => lua.to_value(&ffi::ComputeCRC32(data.as_mut_ptr(), data.len() as i32)),
+            1 => {
                 let value = ffi::ComputeMD5(data.as_mut_ptr(), data.len() as i32);
                 let value = vec![
                     *value.wrapping_add(0),
@@ -365,17 +356,6 @@ fn hash(lua: &Lua, (data, kind): (LuaValue, Option<i32>)) -> mlua::Result<LuaVal
 
 //================================================================
 
-#[cfg(feature = "serialization")]
-struct FormatKind;
-
-#[cfg(feature = "serialization")]
-impl FormatKind {
-    const JSON: i32 = 0;
-    const YAML: i32 = 1;
-    const TOML: i32 = 2;
-    const XML: i32 = 3;
-}
-
 /* entry
 {
     "version": "1.0.0",
@@ -395,19 +375,19 @@ fn serialize(lua: &Lua, (text, kind): (LuaValue, Option<i32>)) -> mlua::Result<S
     let kind = kind.unwrap_or_default();
 
     match kind {
-        FormatKind::JSON => {
+        0 => {
             let text: serde_json::Value = lua.from_value(text)?;
             serde_json::to_string(&text).map_err(|e| mlua::Error::runtime(e.to_string()))
         }
-        FormatKind::YAML => {
+        1 => {
             let text: serde_json::Value = lua.from_value(text)?;
             serde_yaml::to_string(&text).map_err(|e| mlua::Error::runtime(e.to_string()))
         }
-        FormatKind::TOML => {
+        2 => {
             let text: serde_json::Value = lua.from_value(text)?;
             toml::to_string(&text).map_err(|e| mlua::Error::runtime(e.to_string()))
         }
-        FormatKind::XML => {
+        3 => {
             let text: serde_json::Value = lua.from_value(text)?;
             serde_xml_rs::to_string(&text).map_err(|e| mlua::Error::runtime(e.to_string()))
         }
@@ -443,22 +423,22 @@ fn deserialize(lua: &Lua, (text, kind): (String, Option<i32>)) -> mlua::Result<L
     let kind = kind.unwrap_or_default();
 
     match kind {
-        FormatKind::JSON => {
+        0 => {
             let text: serde_json::Value =
                 serde_json::from_str(&text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
             lua.to_value(&text)
         }
-        FormatKind::YAML => {
+        1 => {
             let text: serde_json::Value =
                 serde_yaml::from_str(&text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
             lua.to_value(&text)
         }
-        FormatKind::TOML => {
+        2 => {
             let text: serde_json::Value =
                 toml::from_str(&text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
             lua.to_value(&text)
         }
-        FormatKind::XML => {
+        3 => {
             let text: serde_json::Value =
                 serde_xml_rs::from_str(&text).map_err(|e| mlua::Error::runtime(e.to_string()))?;
             lua.to_value(&text)

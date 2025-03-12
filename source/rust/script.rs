@@ -66,10 +66,10 @@ use std::ffi::{CStr, CString};
 
 //================================================================
 
-pub static mut CALL_BACK_SAVE_FILE: Option<mlua::Function> = None;
-pub static mut CALL_BACK_LOAD_FILE: Option<mlua::Function> = None;
-pub static mut CALL_BACK_SAVE_TEXT: Option<mlua::Function> = None;
-pub static mut CALL_BACK_LOAD_TEXT: Option<mlua::Function> = None;
+pub static mut CALL_SAVE_FILE: Option<mlua::Function> = None;
+pub static mut CALL_LOAD_FILE: Option<mlua::Function> = None;
+pub static mut CALL_SAVE_TEXT: Option<mlua::Function> = None;
+pub static mut CALL_LOAD_TEXT: Option<mlua::Function> = None;
 
 pub struct BaseFile {
     pub name: &'static str,
@@ -261,20 +261,22 @@ impl Script {
         status_info: &StatusInfo,
         script_info: Option<&ScriptInfo>,
     ) -> mlua::Result<()> {
-        general::set_global(lua, quiver, status_info, script_info)?;
-        window::set_global (lua, quiver, status_info, script_info)?;
-        draw::set_global   (lua, quiver, status_info, script_info)?;
-        input::set_global  (lua, quiver, status_info, script_info)?;
-        model::set_global  (lua, quiver, status_info, script_info)?;
-        texture::set_global(lua, quiver, status_info, script_info)?;
-        image::set_global  (lua, quiver, status_info, script_info)?;
-        sound::set_global  (lua, quiver, status_info, script_info)?;
-        music::set_global  (lua, quiver, status_info, script_info)?;
-        font::set_global   (lua, quiver, status_info, script_info)?;
-        shader::set_global (lua, quiver, status_info, script_info)?;
-        file::set_global   (lua, quiver, status_info, script_info)?;
-        data::set_global   (lua, quiver, status_info, script_info)?;
-        socket::set_global (lua, quiver, status_info, script_info)?;
+        general::set_global   (lua, quiver, status_info, script_info)?;
+        window::set_global    (lua, quiver, status_info, script_info)?;
+        draw::set_global      (lua, quiver, status_info, script_info)?;
+        input::set_global     (lua, quiver, status_info, script_info)?;
+        model::set_global     (lua, quiver, status_info, script_info)?;
+        texture::set_global   (lua, quiver, status_info, script_info)?;
+        image::set_global     (lua, quiver, status_info, script_info)?;
+        sound::set_global     (lua, quiver, status_info, script_info)?;
+        music::set_global     (lua, quiver, status_info, script_info)?;
+        font::set_global      (lua, quiver, status_info, script_info)?;
+        shader::set_global    (lua, quiver, status_info, script_info)?;
+        file::set_global      (lua, quiver, status_info, script_info)?;
+        data::set_global      (lua, quiver, status_info, script_info)?;
+        socket::set_global    (lua, quiver, status_info, script_info)?;
+        automation::set_global(lua, quiver, status_info, script_info)?;
+        collision::set_global (lua, quiver, status_info, script_info)?;
 
         #[cfg(feature = "rapier3d")] rapier::set_global (lua, quiver, status_info, script_info)?;
         #[cfg(feature = "zip")]      zip::set_global    (lua, quiver, status_info, script_info)?;
@@ -426,10 +428,10 @@ impl Script {
 impl Drop for Script {
     fn drop(&mut self) {
         unsafe {
-            CALL_BACK_SAVE_FILE = None;
-            CALL_BACK_LOAD_FILE = None;
-            CALL_BACK_SAVE_TEXT = None;
-            CALL_BACK_LOAD_TEXT = None;
+            CALL_SAVE_FILE = None;
+            CALL_LOAD_FILE = None;
+            CALL_SAVE_TEXT = None;
+            CALL_LOAD_TEXT = None;
         }
     }
 }

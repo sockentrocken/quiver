@@ -36,7 +36,7 @@ To run any game example, simply download either example, move the Quiver executa
 
 ```
 example_2D/
-	main/
+    main/
     quiver
 ``` 
 

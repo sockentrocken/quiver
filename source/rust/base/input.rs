@@ -65,11 +65,10 @@ use std::ffi::CStr;
 #[rustfmt::skip]
 pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let input = lua.create_table()?;
-
-    // SetClipboardText
-    input.set("set_clipboard_text",  lua.create_function(self::set_clipboard_text)?)?;
-    // GetClipboardText
-    input.set("get_clipboard_text",  lua.create_function(self::get_clipboard_text)?)?;
+    
+    input.set("set_exit_key",       lua.create_function(self::set_exit_key)?)?;       // SetExitKey
+    input.set("set_clipboard_text", lua.create_function(self::set_clipboard_text)?)?; // SetClipboardText
+    input.set("get_clipboard_text", lua.create_function(self::get_clipboard_text)?)?; // GetClipboardText
 
     //================================================================
 
@@ -150,6 +149,22 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
     table.set("input", input)?;
 
     Ok(())
+}
+
+/* entry
+{
+    "version": "1.0.0", "name": "quiver.input.set_exit_key",
+    "info": "Set a key to exit Quiver.",
+    "member": [
+        { "name": "key", "info": "Key to exit Quiver with.", "kind": "input_board" }
+    ]
+}
+*/
+fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetExitKey(value);
+        Ok(())
+    }
 }
 
 /* entry

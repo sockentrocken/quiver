@@ -49,6 +49,8 @@
 */
 
 /* base library */
+pub mod automation;
+pub mod collision;
 pub mod data;
 pub mod draw;
 pub mod file;

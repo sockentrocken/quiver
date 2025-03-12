@@ -77,7 +77,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 
     general.set("standard_input",       lua.create_function(self::standard_input)?)?;
 
-    general.set("set_exit_key",    lua.create_function(self::set_exit_key)?)?;
     general.set("get_frame_time",  lua.create_function(self::get_frame_time)?)?;
     general.set("get_frame_rate",  lua.create_function(self::get_frame_rate)?)?;
     general.set("set_frame_rate",  lua.create_function(self::set_frame_rate)?)?;
@@ -91,11 +90,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 
     general.set("get_memory",      lua.create_function(self::get_memory)?)?;
     general.set("get_info",        lua.create_function(self::get_info)?)?;
-    
-    general.set("set_call_back_save_file", lua.create_function(self::set_call_back_save_file)?)?;
-    general.set("set_call_back_load_file", lua.create_function(self::set_call_back_load_file)?)?;
-    general.set("set_call_back_save_text", lua.create_function(self::set_call_back_save_text)?)?;
-    general.set("set_call_back_load_text", lua.create_function(self::set_call_back_load_text)?)?;
 
     table.set("general", general)?;
 
@@ -103,201 +97,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 }
 
 //================================================================
-
-unsafe extern "C" fn call_back_save_file(
-    file_name: *const i8,
-    data: *mut std::ffi::c_void,
-    size: i32,
-) -> bool {
-    unsafe {
-        let pointer = &raw const CALL_BACK_SAVE_FILE;
-
-        if let Some(Some(call)) = pointer.as_ref() {
-            let file_name = Script::c_to_rust_string(file_name)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            let data = data as *mut u8;
-            let data = Vec::from_raw_parts(data, size as usize, size as usize);
-
-            let value = call
-                .call::<bool>((file_name, data.clone()))
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            std::mem::forget(data);
-
-            return value;
-        }
-
-        false
-    }
-}
-
-unsafe extern "C" fn call_back_load_file(file_name: *const i8, data_size: *mut i32) -> *mut u8 {
-    unsafe {
-        let pointer = &raw const CALL_BACK_LOAD_FILE;
-
-        if let Some(Some(call)) = pointer.as_ref() {
-            let file_name = Script::c_to_rust_string(file_name)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            let value = call
-                .call::<LuaValue>(file_name)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            let data = crate::base::data::Data::<u8>::get_buffer(value)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            let mut data = data.0.clone();
-
-            let pointer = data.as_mut_ptr();
-            let length = data.len() as i32;
-
-            std::mem::forget(data);
-
-            *data_size = length;
-            return pointer;
-        }
-
-        *data_size = 0;
-
-        std::ptr::null_mut()
-    }
-}
-
-unsafe extern "C" fn call_back_save_text(file_name: *const i8, data: *mut i8) -> bool {
-    unsafe {
-        let pointer = &raw const CALL_BACK_SAVE_TEXT;
-
-        if let Some(Some(call)) = pointer.as_ref() {
-            let file_name = Script::c_to_rust_string(file_name)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            let data = Script::c_to_rust_string(data)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            let value = call
-                .call::<bool>((file_name, data))
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            return value;
-        }
-
-        false
-    }
-}
-
-unsafe extern "C" fn call_back_load_text(file_name: *const i8) -> *mut i8 {
-    unsafe {
-        let pointer = &raw const CALL_BACK_LOAD_TEXT;
-
-        if let Some(Some(call)) = pointer.as_ref() {
-            let file_name = Script::c_to_rust_string(file_name)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            let value = call
-                .call::<String>(file_name)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            let value = Script::rust_to_c_string(&value)
-                .map_err(|x| Status::panic(&x.to_string()))
-                .unwrap();
-
-            return value.into_raw();
-        }
-
-        std::ptr::null_mut()
-    }
-}
-
-/* entry
-{
-    "version": "1.0.0",
-    "name": "quiver.general.set_call_back_save_file",
-    "info": "Set the file save call-back.",
-    "member": [
-        { "name": "call", "info": "The call-back. Must accept a file-name and a data parameter, and return a boolean (true on success, false on failure).", "kind": "function" }
-    ]
-}
-*/
-fn set_call_back_save_file(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
-    unsafe {
-        ffi::SetSaveFileDataCallback(Some(call_back_save_file));
-
-        CALL_BACK_SAVE_FILE = Some(call);
-
-        Ok(())
-    }
-}
-
-/* entry
-{
-    "version": "1.0.0",
-    "name": "quiver.general.set_call_back_load_file",
-    "info": "Set the file load call-back.",
-    "member": [
-        { "name": "call", "info": "The call-back. Must accept a file-name, and return a data buffer. Return anything else to indicate failure.", "kind": "function" }
-    ]
-}
-*/
-fn set_call_back_load_file(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
-    unsafe {
-        ffi::SetLoadFileDataCallback(Some(call_back_load_file));
-
-        CALL_BACK_LOAD_FILE = Some(call);
-
-        Ok(())
-    }
-}
-
-/* entry
-{
-    "version": "1.0.0",
-    "name": "quiver.general.set_call_back_save_text",
-    "info": "Set the file text save call-back.",
-    "member": [
-        { "name": "call", "info": "The call-back. Must accept a file-name and a string parameter, and return a boolean (true on success, false on failure).", "kind": "function" }
-    ]
-}
-*/
-fn set_call_back_save_text(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
-    unsafe {
-        ffi::SetSaveFileTextCallback(Some(call_back_save_text));
-
-        CALL_BACK_SAVE_TEXT = Some(call);
-
-        Ok(())
-    }
-}
-
-/* entry
-{
-    "version": "1.0.0",
-    "name": "quiver.general.set_call_back_load_text",
-    "info": "Set the file load call-back.",
-    "member": [
-        { "name": "call", "info": "The call-back. Must accept a file-name, and return a string. Return anything else to indicate failure.", "kind": "function" }
-    ]
-}
-*/
-fn set_call_back_load_text(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
-    unsafe {
-        ffi::SetLoadFileTextCallback(Some(call_back_load_text));
-
-        CALL_BACK_LOAD_TEXT = Some(call);
-
-        Ok(())
-    }
-}
 
 /* entry
 {
@@ -326,13 +125,12 @@ fn standard_input(_: &Lua, _: ()) -> mlua::Result<String> {
 fn load_base(lua: &Lua, _: ()) -> mlua::Result<()> {
     // TO-DO only for debug. do not re-load from disk on release.
     for base in crate::script::Script::FILE_BASE {
-        //let data = if cfg!(debug_assertions) {
-        //    &std::fs::read_to_string(format!("source/lua/base/{}", base.name)).unwrap()
-        //} else {
-        //    base.data
-        //};
-
-        let data = base.data;
+        // load the base library from disk if using a debug build.
+        let data = if cfg!(debug_assertions) {
+            &std::fs::read_to_string(format!("../source/lua/{}", base.name)).unwrap()
+        } else {
+            base.data
+        };
 
         lua.load(data).set_name(format!("@{}", base.name)).exec()?;
     }
@@ -370,22 +168,6 @@ fn set_log_level(_: &Lua, level: i32) -> mlua::Result<()> {
 fn open_link(_: &Lua, link: String) -> mlua::Result<()> {
     unsafe {
         ffi::OpenURL(link.as_ptr() as *const i8);
-        Ok(())
-    }
-}
-
-/* entry
-{
-    "version": "1.0.0", "name": "quiver.general.set_exit_key",
-    "info": "Set a key to exit Quiver.",
-    "member": [
-        { "name": "key", "info": "Key to exit Quiver with.", "kind": "input_board" }
-    ]
-}
-*/
-fn set_exit_key(_: &Lua, value: i32) -> mlua::Result<()> {
-    unsafe {
-        ffi::SetExitKey(value);
         Ok(())
     }
 }

@@ -137,13 +137,13 @@ impl Shader {
     }
     */
     fn new_from_memory(
-        _: &Lua,
+        lua: &Lua,
         (v_path, f_path): (Option<String>, Option<String>),
     ) -> mlua::Result<Self> {
         unsafe {
             let v_path = match v_path {
                 Some(name) => {
-                    let pointer = Script::rust_to_c_string(&name)?;
+                    let pointer = Script::rust_to_c_string(&ScriptData::get_path(lua, &name)?)?;
 
                     pointer.into_raw()
                 }
@@ -152,7 +152,7 @@ impl Shader {
 
             let f_path = match f_path {
                 Some(name) => {
-                    let pointer = Script::rust_to_c_string(&name)?;
+                    let pointer = Script::rust_to_c_string(&ScriptData::get_path(lua, &name)?)?;
 
                     pointer.into_raw()
                 }
