@@ -83,9 +83,6 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
 
 type RLModel = raylib::models::Model;
 
-#[derive(Deserialize)]
-pub struct TransformBatch(usize, f32, f32, f32);
-
 /* class
 {
     "version": "1.0.0",
@@ -98,12 +95,7 @@ pub struct TransformBatch(usize, f32, f32, f32);
     ]
 }
 */
-pub struct Model(
-    pub RLModel,
-    pub HashMap<usize, ffi::Matrix>,
-    pub usize,
-    pub Vec<TransformBatch>,
-);
+pub struct Model(pub RLModel);
 
 unsafe impl Send for Model {}
 
@@ -128,12 +120,7 @@ impl Model {
             let data = ffi::LoadModel(name.as_ptr());
 
             if ffi::IsModelValid(data) {
-                Ok(Self(
-                    RLModel::from_raw(data),
-                    HashMap::new(),
-                    0,
-                    Vec::with_capacity(2048),
-                ))
+                Ok(Self(RLModel::from_raw(data)))
             } else {
                 Err(mlua::Error::RuntimeError(format!(
                     "Model::new(): Could not load file \"{path}\"."
@@ -151,91 +138,6 @@ impl mlua::UserData for Model {
     }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "model:insert_transform_list",
-            "info": "TO-DO"
-        }
-        */
-        method.add_method_mut("insert_transform_list", |lua, this, point: LuaValue| {
-            let point: Vector3 = lua.from_value(point)?;
-            this.1
-                .insert(this.2, Matrix::translate(point.x, point.y, point.z).into());
-            this.2 += 1;
-            Ok(this.2 - 1)
-        });
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "model:remove_transform_list",
-            "info": "TO-DO"
-        }
-        */
-        method.add_method_mut("remove_transform_list", |_, this, index: usize| {
-            this.1.remove(&index);
-            Ok(())
-        });
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "model:clear_transform_list",
-            "info": "TO-DO"
-        }
-        */
-        method.add_method_mut("clear_transform_list", |_, this, _: ()| {
-            this.1.clear();
-            this.2 = 0;
-            Ok(())
-        });
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "model:set_transform_list",
-            "info": "TO-DO"
-        }
-        */
-        method.add_method_mut(
-            "set_transform_list",
-            |lua, this, (index, point): (usize, LuaValue)| {
-                let point: Vector3 = lua.from_value(point)?;
-                if let Some(instance) = this.1.get_mut(&index) {
-                    *instance = Matrix::translate(point.x, point.y, point.z).into();
-                } else {
-                    return Err(mlua::Error::runtime(
-                        "set_transform_list(): Invalid instance index.",
-                    ));
-                }
-                Ok(())
-            },
-        );
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "model:set_transform_list_batch",
-            "info": "TO-DO"
-        }
-        */
-        method.add_method_mut("set_transform_list_batch", |lua, this, batch: LuaValue| {
-            this.3 = lua.from_value(batch)?;
-
-            for b in &this.3 {
-                if let Some(instance) = this.1.get_mut(&b.0) {
-                    *instance = Matrix::translate(b.1, b.2, b.3).into();
-                } else {
-                    return Err(mlua::Error::runtime(
-                        "set_transform_list_batch(): Invalid instance index.",
-                    ));
-                }
-            }
-
-            Ok(())
-        });
-
         /* entry
         {
             "version": "1.0.0",
@@ -303,27 +205,6 @@ impl mlua::UserData for Model {
                 Ok(())
             },
         );
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "model:draw_mesh_instance",
-            "info": "TO-DO"
-        }
-        */
-        method.add_method("draw_mesh_instance", |_, this, index: usize| unsafe {
-            let mesh = &this.0.meshes()[index];
-            let transform = &this.1;
-            let transform: Vec<ffi::Matrix> = transform.values().cloned().collect();
-
-            ffi::DrawMeshInstanced(
-                **mesh,
-                *this.0.materials()[0],
-                transform.as_ptr(),
-                transform.len().try_into().unwrap(),
-            );
-            Ok(())
-        });
 
         /* entry
         {

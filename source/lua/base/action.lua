@@ -67,6 +67,7 @@ function action_button:new(device, button)
     i.__type = "action_button"
     i.device = device
     i.button = button
+    i.bounce = 0.0
 
     return i
 end
@@ -135,6 +136,43 @@ function action_button:press(active_device)
     return false
 end
 
+function action_button:press_repeat(active_device)
+    if check_device(self, active_device, INPUT_DEVICE.BOARD) then
+        return quiver.input.board.get_press(self.button)
+            or quiver.input.board.get_press_repeat(self.button)
+    end
+    if check_device(self, active_device, INPUT_DEVICE.MOUSE) then
+        if quiver.input.mouse.get_down(self.button) then
+            local delta = quiver.general.get_frame_time()
+
+            self.bounce = self.bounce + delta
+
+            if self.bounce > 0.5 then
+                self.bounce = 0.4
+                return true
+            end
+        else
+            self.bounce = 0.0
+        end
+    end
+    if check_device(self, active_device, INPUT_DEVICE.PAD) then
+        if quiver.input.pad.get_down(0.0, self.button) then
+            local delta = quiver.general.get_frame_time()
+
+            self.bounce = self.bounce + delta
+
+            if self.bounce > 0.5 then
+                self.bounce = 0.4
+                return true
+            end
+        else
+            self.bounce = 0.0
+        end
+    end
+
+    return false
+end
+
 function action_button:release(active_device)
     if check_device(self, active_device, INPUT_DEVICE.BOARD) then
         return quiver.input.board.get_release(self.button)
@@ -143,6 +181,47 @@ function action_button:release(active_device)
         return quiver.input.mouse.get_release(self.button)
     end
     if check_device(self, active_device, INPUT_DEVICE.PAD) then
+        return quiver.input.pad.get_release(0.0, self.button)
+    end
+
+    return false
+end
+
+function action_button:release_repeat(active_device)
+    if check_device(self, active_device, INPUT_DEVICE.BOARD) then
+        return quiver.input.board.get_release(self.button)
+            or quiver.input.board.get_press_repeat(self.button)
+    end
+    if check_device(self, active_device, INPUT_DEVICE.MOUSE) then
+        if quiver.input.mouse.get_down(self.button) then
+            local delta = quiver.general.get_frame_time()
+
+            self.bounce = self.bounce + delta
+
+            if self.bounce > 0.5 then
+                self.bounce = 0.4
+                return true
+            end
+        else
+            self.bounce = 0.0
+        end
+
+        return quiver.input.mouse.get_release(self.button)
+    end
+    if check_device(self, active_device, INPUT_DEVICE.PAD) then
+        if quiver.input.pad.get_down(0.0, self.button) then
+            local delta = quiver.general.get_frame_time()
+
+            self.bounce = self.bounce + delta
+
+            if self.bounce > 0.5 then
+                self.bounce = 0.4
+                return true
+            end
+        else
+            self.bounce = 0.0
+        end
+
         return quiver.input.pad.get_release(0.0, self.button)
     end
 
@@ -186,7 +265,7 @@ function action:up(active_device)
     -- iterate over every button in our button list.
     for i, button in ipairs(self.list) do
         if button:up(active_device) then
-            return true, i
+            return true, button
         end
     end
 
@@ -197,7 +276,7 @@ function action:down(active_device)
     -- iterate over every button in our button list.
     for i, button in ipairs(self.list) do
         if button:down(active_device) then
-            return true, i
+            return true, button
         end
     end
 
@@ -208,7 +287,18 @@ function action:press(active_device)
     -- iterate over every button in our button list.
     for i, button in ipairs(self.list) do
         if button:press(active_device) then
-            return true, i
+            return true, button
+        end
+    end
+
+    return false, nil
+end
+
+function action:press_repeat(active_device)
+    -- iterate over every button in our button list.
+    for i, button in ipairs(self.list) do
+        if button:press_repeat(active_device) then
+            return true, button
         end
     end
 
@@ -219,7 +309,18 @@ function action:release(active_device)
     -- iterate over every button in our button list.
     for i, button in ipairs(self.list) do
         if button:release(active_device) then
-            return true, i
+            return true, button
+        end
+    end
+
+    return false, nil
+end
+
+function action:release_repeat(active_device)
+    -- iterate over every button in our button list.
+    for i, button in ipairs(self.list) do
+        if button:release_repeat(active_device) then
+            return true, button
         end
     end
 

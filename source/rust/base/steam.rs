@@ -146,7 +146,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_app_ID",
-            "info": "TO-DO"
+            "info": "Get the current AppID.",
+            "result": [
+                { "name": "ID", "info": "The current AppID.", "kind": "number" }
+            ]
         }
         */
         method.add_method_mut("get_app_ID", |_: &Lua, this, _: ()| {
@@ -157,7 +160,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_IP_country",
-            "info": "TO-DO"
+            "info": "Get the current country code from the user's IP.",
+            "result": [
+                { "name": "code", "info": "The current country code.", "kind": "string" }
+            ]
         }
         */
         method.add_method_mut("get_IP_country", |_: &Lua, this, _: ()| {
@@ -168,7 +174,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_UI_language",
-            "info": "TO-DO"
+            "info": "Get the current language for the Steam client.",
+            "result": [
+                { "name": "language", "info": "The current language.", "kind": "string" }
+            ]
         }
         */
         method.add_method_mut("get_UI_language", |_: &Lua, this, _: ()| {
@@ -179,7 +188,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_server_time",
-            "info": "TO-DO"
+            "info": "Get the current Steam server time, as an UNIX time-stamp.",
+            "result": [
+                { "name": "time", "info": "The current server time.", "kind": "number" }
+            ]
         }
         */
         method.add_method_mut("get_server_time", |_: &Lua, this, _: ()| {
@@ -190,11 +202,14 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:set_overlay_position",
-            "info": "TO-DO"
+            "info": "Set the position of the Steam overlay.",
+            "member": [
+                { "name": "position", "info": "The Steam overlay position.", "kind": "steam_overlay_position" }
+            ]
         }
         */
-        method.add_method_mut("set_overlay_position", |_: &Lua, this, kind: i32| {
-            match kind {
+        method.add_method_mut("set_overlay_position", |_: &Lua, this, position: i32| {
+            match position {
                 0 => this
                     .utility
                     .set_overlay_notification_position(NotificationPosition::TopLeft),
@@ -270,7 +285,13 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_app_install",
-            "info": "TO-DO"
+            "info": "Check if a given AppID is currently on the system.",
+            "member": [
+                { "name": "ID", "info": "The AppID.", "kind": "number" }
+            ],
+            "result": [
+                { "name": "install", "info": "The state of the AppID.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("get_app_install", |_: &Lua, this, app_id: u32| {
@@ -281,7 +302,13 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_DLC_install",
-            "info": "TO-DO"
+            "info": "Check if a given DLC is currently on the system.",
+            "member": [
+                { "name": "ID", "info": "The AppID.", "kind": "number" }
+            ],
+            "result": [
+                { "name": "install", "info": "The state of the AppID.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("get_DLC_install", |_: &Lua, this, app_id: u32| {
@@ -292,7 +319,13 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_app_subscribe",
-            "info": "TO-DO"
+            "info": "Check if the user has a subscription to the given AppID.",
+            "member": [
+                { "name": "ID", "info": "The AppID.", "kind": "number" }
+            ],
+            "result": [
+                { "name": "subscription", "info": "Subscription state.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("get_app_subscribe", |_: &Lua, this, app_id: u32| {
@@ -303,7 +336,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_VAC_ban",
-            "info": "TO-DO"
+            "info": "Check if the user has a VAC ban on record.",
+            "result": [
+                { "name": "ban", "info": "The VAC ban state.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("get_VAC_ban", |_: &Lua, this, _: ()| {
@@ -314,7 +350,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_cyber_cafe",
-            "info": "TO-DO"
+            "info": "Check if the user has a VAC ban on record.",
+            "result": [
+                { "name": "ban", "info": "The VAC ban state.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("get_cyber_cafe", |_: &Lua, this, _: ()| {
@@ -325,7 +364,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_low_violence",
-            "info": "TO-DO"
+            "info": "Check if the current AppID has support for low violence.",
+            "result": [
+                { "name": "low_violence", "info": "Low violence state.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("get_low_violence", |_: &Lua, this, _: ()| {
@@ -336,7 +378,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_subscribe",
-            "info": "TO-DO"
+            "info": "Check if the user has a subscription to the current AppID.",
+            "result": [
+                { "name": "subscription", "info": "Subscription state.", "kind": "boolean" }
+            ]
         }
         */
         method.add_method_mut("get_subscribe", |_: &Lua, this, _: ()| {
@@ -347,7 +392,10 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_app_build_ID",
-            "info": "TO-DO"
+            "info": "Get the build ID for the current AppID.",
+            "result": [
+                { "name": "ID", "info": "The build ID.", "kind": "number" }
+            ]
         }
         */
         method.add_method_mut("get_app_build_ID", |_: &Lua, this, _: ()| {
@@ -357,11 +405,17 @@ impl mlua::UserData for Steam {
         /* entry
         {
             "version": "1.0.0",
-            "name": "steam:get_app_install_directory",
-            "info": "TO-DO"
+            "name": "steam:get_app_install_path",
+            "info": "Get the installation path for the given AppID. NOTE: this will work even if the app is not in disk.",
+            "member": [
+                { "name": "ID", "info": "The AppID.", "kind": "number" }
+            ],
+            "result": [
+                { "name": "path", "info": "Installation path.", "kind": "string" }
+            ]
         }
         */
-        method.add_method_mut("get_app_install_directory", |_: &Lua, this, app_id: u32| {
+        method.add_method_mut("get_app_install_path", |_: &Lua, this, app_id: u32| {
             Ok(this.app.app_install_dir(AppId(app_id)))
         });
 
@@ -369,11 +423,14 @@ impl mlua::UserData for Steam {
         {
             "version": "1.0.0",
             "name": "steam:get_app_owner",
-            "info": "TO-DO"
+            "info": "Get the SteamID of the owner's current AppID.",
+            "result": [
+                { "name": "ID", "info": "The SteamID.", "kind": "string" }
+            ]
         }
         */
         method.add_method_mut("get_app_owner", |_: &Lua, this, _: ()| {
-            Ok(this.app.app_owner().raw())
+            Ok(this.app.app_owner().raw().to_string())
         });
 
         /* entry

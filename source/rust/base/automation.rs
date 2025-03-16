@@ -82,7 +82,9 @@ struct AutomationEvent(ffi::AutomationEventList);
 unsafe impl Send for AutomationEvent {}
 
 impl mlua::UserData for AutomationEvent {
-    fn add_fields<F: mlua::UserDataFields<Self>>(_: &mut F) {}
+    fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
+        field.add_field_method_get("count", |_, this| Ok(this.0.count));
+    }
 
     fn add_methods<M: mlua::UserDataMethods<Self>>(method: &mut M) {
         /* entry

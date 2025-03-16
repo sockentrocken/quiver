@@ -60,19 +60,20 @@ local WINDOW_CARD_ROUND_SHAPE   = 0.25
 local WINDOW_CARD_ROUND_COUNT   = 4
 local WINDOW_ACTION_ABOVE       = action:new(
     {
-        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.W),
+        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.UP),
         action_button:new(INPUT_DEVICE.PAD, INPUT_PAD.LEFT_FACE_UP),
     }
 )
 local WINDOW_ACTION_BELOW       = action:new(
     {
-        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.S),
+        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.DOWN),
         action_button:new(INPUT_DEVICE.PAD, INPUT_PAD.LEFT_FACE_DOWN),
     }
 )
 local WINDOW_ACTION_FOCUS       = action:new(
     {
         action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.SPACE),
+        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.RETURN),
         action_button:new(INPUT_DEVICE.MOUSE, INPUT_MOUSE.LEFT),
         action_button:new(INPUT_DEVICE.PAD, INPUT_PAD.RIGHT_FACE_DOWN),
     }
@@ -89,12 +90,18 @@ local WINDOW_ACTION_ALTERNATE   = action:new(
 )
 local WINDOW_ACTION_LATERAL     = action:new(
     {
-        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.A),
-        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.D),
+        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.LEFT),
+        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.RIGHT),
         action_button:new(INPUT_DEVICE.MOUSE, INPUT_MOUSE.LEFT),
         action_button:new(INPUT_DEVICE.MOUSE, INPUT_MOUSE.RIGHT),
         action_button:new(INPUT_DEVICE.PAD, INPUT_PAD.LEFT_FACE_LEFT),
         action_button:new(INPUT_DEVICE.PAD, INPUT_PAD.LEFT_FACE_RIGHT),
+    }
+)
+local WINDOW_ACTION_ENTRY       = action:new(
+    {
+        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.LEFT),
+        action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.RIGHT),
     }
 )
 local WINDOW_SHIFT_A            = vector_2:new(6.0, 4.0)
@@ -120,8 +127,10 @@ function gizmo:new()
     i.__type       = "gizmo"
     i.hover        = 0.0
     i.focus        = 0.0
+    -- TO-DO consider only initializing this for the appropiate gizmo and not before?
     i.scroll_value = 0.0
     i.scroll_frame = 0.0
+    i.entry_cursor = 0.0
 
     return i
 end
@@ -278,11 +287,12 @@ local function window_state(self, shape, flag, input)
     -- if there is a view-port shape set...
     if self.shape then
         -- check if the gizmo is within it.
-        check = quiver.collision.box_box(shape, self.shape) and quiver.collision.point_box(mouse, self.shape)
+        check = quiver.collision.get_box_2_box_2(shape, self.shape) and
+            quiver.collision.get_point_box_2(mouse, self.shape)
     end
 
     -- mouse interaction check.
-    local hover = self.device == INPUT_DEVICE.MOUSE and quiver.collision.point_box(mouse, shape) and check
+    local hover = self.device == INPUT_DEVICE.MOUSE and quiver.collision.get_point_box_2(mouse, shape) and check
     -- board interaction check.
     local index = self.device ~= INPUT_DEVICE.MOUSE and self.index == self.count
     -- whether or not this gizmo has been set off.
@@ -314,12 +324,12 @@ local function window_state(self, shape, flag, input)
     -- if we have any form of interaction with the gizmo...
     if hover or index then
         -- check if the focus button has been set off.
-        local hover_click = WINDOW_ACTION_FOCUS:press(self.device)
+        local hover_click = WINDOW_ACTION_FOCUS:press_repeat(self.device)
 
         -- if input over-ride isn't nil...
         if input then
             -- over-ride the default focus button with the given one.
-            hover_click, which = input:press(self.device)
+            hover_click, which = input:press_repeat(self.device)
         end
 
         if hover_click then
@@ -338,12 +348,12 @@ local function window_state(self, shape, flag, input)
     -- if we are the focus gizmo...
     if focus then
         -- check if the focus button has been set up.
-        local focus_click = WINDOW_ACTION_FOCUS:release(self.device)
+        local focus_click = WINDOW_ACTION_FOCUS:release_repeat(self.device)
 
         -- if input over-ride isn't nil...
         if input then
             -- over-ride the default focus button with the given one.
-            focus_click, which = input:release(self.device)
+            focus_click, which = input:release_repeat(self.device)
         end
 
         -- focus button was set up, set off click event, release focus gizmo.
@@ -460,7 +470,7 @@ end
 
 local function window_check_draw(self, shape)
     if self.shape then
-        return quiver.collision.box_box(self.shape, shape)
+        return quiver.collision.get_box_2_box_2(self.shape, shape)
     end
 
     return true
@@ -586,10 +596,7 @@ function window:slider(shape, label, value, min, max, step, flag, call_back, cal
     else
         -- if there has been input at all...
         if which then
-            -- get the actual button.
-            which = WINDOW_ACTION_LATERAL.list[which]
-
-            if which.button == INPUT_BOARD.A or which == INPUT_PAD.LEFT_FACE_LEFT then
+            if which.button == INPUT_BOARD.LEFT or which == INPUT_PAD.LEFT_FACE_LEFT then
                 -- decrease value.
                 value = value - step
             else
@@ -668,10 +675,7 @@ function window:switch(shape, label, value, pool, flag, call_back, call_data)
 
     -- if there has been input at all...
     if which then
-        -- get the actual button.
-        which = WINDOW_ACTION_LATERAL.list[which]
-
-        if which.button == INPUT_BOARD.A or which.button == INPUT_MOUSE.LEFT or which.button == INPUT_PAD.LEFT_FACE_LEFT then
+        if which.button == INPUT_BOARD.LEFT or which.button == INPUT_MOUSE.LEFT or which.button == INPUT_PAD.LEFT_FACE_LEFT then
             -- if below value is valid...
             if value_a then
                 -- decrease value.
@@ -766,9 +770,6 @@ function window:action(shape, label, value, clamp, flag, call_back, call_data)
 
     -- if there has been input at all...
     if which then
-        -- get the actual button.
-        which = WINDOW_ACTION_ALTERNATE.list[which]
-
         if which.button == INPUT_BOARD.SPACE or which.button == INPUT_MOUSE.LEFT or which.button == INPUT_PAD.LEFT_FACE_DOWN then
             -- make us the focus/pick gizmo
             self.focus = self.count - 1.0
@@ -819,6 +820,8 @@ function window:entry(shape, label, value, flag)
     -- scroll.
     shape.y = shape.y + self.point
 
+    local gizmo = window_gizmo(self, label)
+
     local pick = false
 
     -- if pick gizmo is not nil...
@@ -832,19 +835,46 @@ function window:entry(shape, label, value, flag)
         -- get every button press in the queue.
         local board_queue = quiver.input.board.get_uni_code_queue()
 
-        -- if a button was set off...
-        if board_queue > 0.0 then
-            value = value .. string.char(board_queue)
-        end
+        -- TO-DO change device to keyboard on focus gain.
+        local _, which = WINDOW_ACTION_ENTRY:press_repeat()
 
-        if quiver.input.board.get_press(INPUT_BOARD.RETURN) then
-            -- remove us from the focus gizmo, lock navigation, and remove us from the pick gizmo.
-            self.focus = nil
-            self.shift = true
-            self.pick = nil
-        elseif quiver.input.board.get_press(INPUT_BOARD.BACKSPACE) then
-            -- pop the last character of the working buffer.
-            value = string.sub(value, 0, #value - 1)
+        if which then
+            if which.button == INPUT_BOARD.LEFT then
+                if gizmo.entry_cursor > 0 then
+                    gizmo.entry_cursor = gizmo.entry_cursor - 1
+                end
+            elseif which.button == INPUT_BOARD.RIGHT then
+                if gizmo.entry_cursor < #value then
+                    gizmo.entry_cursor = gizmo.entry_cursor + 1
+                end
+            end
+        else
+            if quiver.input.board.get_press(INPUT_BOARD.RETURN) then
+                -- remove us from the focus gizmo, lock navigation, and remove us from the pick gizmo.
+                self.focus = nil
+                self.shift = true
+                self.pick = nil
+            elseif quiver.input.board.get_press(INPUT_BOARD.BACKSPACE) or quiver.input.board.get_press_repeat(INPUT_BOARD.BACKSPACE) then
+                if gizmo.entry_cursor > 0 then
+                    local value_a = string.sub(value, 0, gizmo.entry_cursor - 1)
+                    local value_b = string.sub(value, gizmo.entry_cursor + 1)
+
+                    gizmo.entry_cursor = gizmo.entry_cursor - 1
+                    value = value_a .. value_b
+                end
+            elseif quiver.input.board.get_press(INPUT_BOARD.SPACE) or quiver.input.board.get_press_repeat(INPUT_BOARD.SPACE) then
+                local value_a = string.sub(value, 0, gizmo.entry_cursor)
+                local value_b = string.sub(value, gizmo.entry_cursor + 1)
+
+                gizmo.entry_cursor = gizmo.entry_cursor + 1
+                value = value_a .. " " .. value_b
+            elseif board_queue > 0.0 then
+                local value_a = string.sub(value, 0, gizmo.entry_cursor)
+                local value_b = string.sub(value, gizmo.entry_cursor + 1)
+
+                gizmo.entry_cursor = gizmo.entry_cursor + 1
+                value = value_a .. string.char(board_queue) .. value_b
+            end
         end
     end
 
@@ -861,6 +891,14 @@ function window:entry(shape, label, value, flag)
 
     -- draw a border.
     window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
+
+    if pick then
+        local measure = self.font:measure_text(string.sub(value, 0, gizmo.entry_cursor), WINDOW_FONT_SCALE,
+            WINDOW_FONT_SPACE)
+
+        quiver.draw_2d.draw_box_2(box_2:old(shape.x + measure + 4.0, shape.y, 2.0, shape.height), vector_2:zero(),
+            0.0, color:white())
+    end
 
     -- draw value.
     self.font:draw(value, vector_2:old(shape.x + 4.0, shape.y + 4.0),
@@ -928,7 +966,7 @@ function window:scroll(shape, call, call_back, call_data)
     local mouse = vector_2:old(quiver.input.mouse.get_point())
     local delta = vector_2:old(quiver.input.mouse.get_wheel())
 
-    if quiver.collision.point_box(mouse, shape) then
+    if quiver.collision.get_point_box_2(mouse, shape) then
         gizmo.scroll_value = math.clamp(0.0, 1.0, gizmo.scroll_value - delta.y * 0.05)
     end
 end

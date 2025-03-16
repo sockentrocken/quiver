@@ -48,9 +48,9 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+use crate::base::*;
 use crate::script::*;
 use crate::status::*;
-use crate::base::*;
 
 //================================================================
 
@@ -72,7 +72,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
     let texture = lua.create_table()?;
 
     texture.set("new",             lua.create_function(self::Texture::new)?)?;
-    texture.set("new_from_memory", lua.create_async_function(self::Texture::new_from_memory)?)?;
+    texture.set("new_from_memory", lua.create_function(self::Texture::new_from_memory)?)?;
 
     table.set("texture", texture)?;
 
@@ -415,8 +415,8 @@ impl Texture {
         "info": "TO-DO"
     }
     */
-    async fn new_from_memory(lua: Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
-        let image = crate::base::image::Image::new_from_memory(lua, (data, kind)).await?;
+    fn new_from_memory(lua: &Lua, (data, kind): (LuaValue, String)) -> mlua::Result<Self> {
+        let image = crate::base::image::Image::new_from_memory(lua, (data, kind))?;
 
         unsafe {
             let data = ffi::LoadTextureFromImage(image.0);

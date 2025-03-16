@@ -70,13 +70,46 @@ end
 
 --[[----------------------------------------------------------------]]
 
+---Perform an operation on each entry of a table.
+---@param value table    # Table to operate upon.
+---@param call  function # Operator function. Must receive a parameter and return a value.
+function table.map(value, call)
+    for k, v in pairs(value) do
+        value[k] = call(v)
+    end
+end
+
+---Filter each entry of a table with a predicate operation.
+---@param value table    # Table to operate upon.
+---@param call  function # Operator function. Must receive a parameter and return true, or false, to include, or exclude the entry.
+function table.filter(value, call)
+    local i = 1
+
+    for k, v in pairs(value) do
+        local result = call(v)
+
+        if not result then
+            value[k] = nil
+        end
+    end
+
+    for k, v in pairs(value) do
+        if type(k) == "number" then
+            value[i] = value[k]
+            value[k] = nil
+
+            i = i + 1
+        end
+    end
+end
+
 ---Get the length of the hash-side of a table.
 ---@param value table # Table to calculate length from.
 ---@return number length # The length of the hash-side of the table.
 function table.hash_length(value)
-    local i = 0.0
+    local i = 0
 
-    for _, _ in pairs(value) do i = i + 1.0 end
+    for _, _ in pairs(value) do i = i + 1 end
 
     return i
 end
@@ -132,7 +165,7 @@ end
 ---@param object any   # Value to check.
 ---@return boolean check # True if value is in table, false otherwise.
 function table.in_set(value, object)
-    for k, v in ipairs(value) do
+    for _, v in pairs(value) do
         if v == object then
             return true
         end
@@ -145,7 +178,7 @@ end
 ---@param value  table # Table to remove the value from.
 ---@param object any   # Value to remove.
 function table.remove_object(value, object)
-    for k, v in ipairs(value) do
+    for k, v in pairs(value) do
         if v == object then
             table.remove(value, k)
             return
