@@ -729,394 +729,413 @@ steam = {}
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L136)
 function steam:update() end
 
----TO-DO
+---Get the current AppID.
+---@return number ID # The current AppID.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L152)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L155)
 function steam:get_app_ID() end
 
----TO-DO
+---Get the current country code from the user's IP.
+---@return string code # The current country code.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L163)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L169)
 function steam:get_IP_country() end
 
----TO-DO
+---Get the current language for the Steam client.
+---@return string language # The current language.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L174)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L183)
 function steam:get_UI_language() end
 
----TO-DO
+---Get the current Steam server time, as an UNIX time-stamp.
+---@return number time # The current server time.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L185)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L197)
 function steam:get_server_time() end
 
----TO-DO
+---Set the position of the Steam overlay.
+---@param position steam_overlay_position # The Steam overlay position.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L196)
-function steam:set_overlay_position() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L211)
+function steam:set_overlay_position(position) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L230)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L245)
 function steam:set_message() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L254)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L269)
 function steam:get_message() end
 
----TO-DO
+---Check if a given AppID is currently on the system.
+---@param ID number # The AppID.
+---@return boolean install # The state of the AppID.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L276)
-function steam:get_app_install() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L297)
+function steam:get_app_install(ID) end
 
----TO-DO
+---Check if a given DLC is currently on the system.
+---@param ID number # The AppID.
+---@return boolean install # The state of the AppID.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L287)
-function steam:get_DLC_install() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L314)
+function steam:get_DLC_install(ID) end
 
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L298)
-function steam:get_app_subscribe() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L309)
-function steam:get_VAC_ban() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L320)
-function steam:get_cyber_cafe() end
-
----TO-DO
+---Check if the user has a subscription to the given AppID.
+---@param ID number # The AppID.
+---@return boolean subscription # Subscription state.
 ---
 --- ---
 ---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L331)
+function steam:get_app_subscribe(ID) end
+
+---Check if the user has a VAC ban on record.
+---@return boolean ban # The VAC ban state.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L345)
+function steam:get_VAC_ban() end
+
+---Check if the user has a VAC ban on record.
+---@return boolean ban # The VAC ban state.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L359)
+function steam:get_cyber_cafe() end
+
+---Check if the current AppID has support for low violence.
+---@return boolean low_violence # Low violence state.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L373)
 function steam:get_low_violence() end
 
----TO-DO
+---Check if the user has a subscription to the current AppID.
+---@return boolean subscription # Subscription state.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L342)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L387)
 function steam:get_subscribe() end
 
----TO-DO
+---Get the build ID for the current AppID.
+---@return number ID # The build ID.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L353)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L401)
 function steam:get_app_build_ID() end
 
----TO-DO
+---Get the installation path for the given AppID. NOTE: this will work even if the app is not in disk.
+---@param ID number # The AppID.
+---@return string path # Installation path.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L364)
-function steam:get_app_install_directory() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L418)
+function steam:get_app_install_path(ID) end
 
----TO-DO
+---Get the SteamID of the owner's current AppID.
+---@return string ID # The SteamID.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L375)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L432)
 function steam:get_app_owner() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L386)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L443)
 function steam:get_game_language_list() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L397)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L454)
 function steam:get_game_language() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L408)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L465)
 function steam:get_beta_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L419)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L476)
 function steam:get_launch_command_line() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L434)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L491)
 function steam:get_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L445)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L502)
 function steam:activate_overlay() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L457)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L514)
 function steam:activate_overlay_link() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L469)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L526)
 function steam:activate_overlay_store() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L490)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L547)
 function steam:activate_overlay_user() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L506)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L563)
 function steam:activate_invite_dialog() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L528)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L585)
 function steam:get_steam_ID() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L539)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L596)
 function steam:get_level() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L548)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L605)
 function steam:get_log_on() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L563)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L620)
 function steam:get_leader_board() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L583)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L640)
 function steam:get_or_create_leader_board() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L616)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L673)
 function steam:upload_leader_board_score() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L675)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L732)
 function steam:get_leader_board_show_kind() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L707)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L764)
 function steam:get_leader_board_sort_kind() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L738)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L795)
 function steam:get_leader_board_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L765)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L822)
 function steam:get_leader_board_entry_count() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L792)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L849)
 function steam:pull_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L805)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L862)
 function steam:push_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L818)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L875)
 function steam:reset_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L838)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L895)
 function steam:get_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L860)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L917)
 function steam:set_user_statistic() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L884)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L941)
 function steam:get_achievement() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L903)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L960)
 function steam:get_achievement_list() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L920)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L977)
 function steam:set_achievement() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L946)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1003)
 function steam:get_achievement_percent() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L965)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1022)
 function steam:get_achievement_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L984)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1041)
 function steam:get_achievement_() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1003)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1060)
 function steam:get_achievement_hidden() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1022)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1079)
 function steam:get_achievement_icon() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1051)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1108)
 function steam:get_session_user() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1064)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1121)
 function steam:get_session_client_name() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1077)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1134)
 function steam:get_session_client_form_factor() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1102)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1159)
 function steam:get_session_client_resolution() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1122)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1179)
 function steam:invite_session() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1146)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1203)
 function steam:set_cloud_app() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1158)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1215)
 function steam:get_cloud_app() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1169)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1226)
 function steam:get_cloud_account() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1180)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1237)
 function steam:get_file_list() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1200)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1257)
 function steam:file_delete() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1213)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1270)
 function steam:file_forget() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1226)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1283)
 function steam:file_exist() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1239)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1296)
 function steam:get_file_persist() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1252)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1309)
 function steam:get_file_time_stamp() end
 
 ---Create a new Steam client.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1274)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/steam.rs#L1331)
 function quiver.steam.new() end
 
 ---The video API.
@@ -1477,14 +1496,14 @@ function quiver.zip.new(path) end
 --- ---
 ---*Not available in head-less mode.*
 ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L67)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L65)
 ---@class quiver.model
 quiver.model = {}
 
 ---An unique handle for a model in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L101)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L96)
 ---@class model
 ---@field mesh_count number # Mesh count.
 ---@field bone_count number # Bone count.
@@ -1496,38 +1515,8 @@ model = {}
 ---@return model model # Model resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L124)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L114)
 function quiver.model.new(path) end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L161)
-function model:insert_transform_list() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L176)
-function model:remove_transform_list() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L188)
-function model:clear_transform_list() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L201)
-function model:set_transform_list() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L223)
-function model:set_transform_list_batch() end
 
 ---Bind a texture to the model.
 ---@param index number # TO-DO
@@ -1535,20 +1524,14 @@ function model:set_transform_list_batch() end
 ---@param texture texture # Texture to bind to model.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L251)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L151)
 function model:bind(index,which,texture) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L286)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L186)
 function model:draw_mesh() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L314)
-function model:draw_mesh_instance() end
 
 ---Draw the model.
 ---@param point vector_3 # TO-DO
@@ -1556,7 +1539,7 @@ function model:draw_mesh_instance() end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L340)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L219)
 function model:draw(point,scale,color) end
 
 ---Draw the model (wire-frame).
@@ -1565,7 +1548,7 @@ function model:draw(point,scale,color) end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L363)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L242)
 function model:draw_wire(point,scale,color) end
 
 ---Draw the model with a transformation.
@@ -1575,7 +1558,7 @@ function model:draw_wire(point,scale,color) end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L387)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L266)
 function model:draw_transform(point,angle,scale,color) end
 
 ---TO-DO
@@ -1587,7 +1570,7 @@ function model:draw_transform(point,angle,scale,color) end
 ---@return number max_z # Maximum vector. (Z)
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L420)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L299)
 function model:get_box_3() end
 
 ---Get the vertex data of a specific mesh in the model.
@@ -1595,7 +1578,7 @@ function model:get_box_3() end
 ---@return table table # Vector3 table.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L445)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L324)
 function model:mesh_vertex(index) end
 
 ---Get the index data of a specific mesh in the model.
@@ -1603,7 +1586,7 @@ function model:mesh_vertex(index) end
 ---@return table table # Number table.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L463)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L342)
 function model:mesh_index(index) end
 
 ---Get the triangle count of a specific mesh in the model.
@@ -1611,13 +1594,13 @@ function model:mesh_index(index) end
 ---@return number count # Triangle count.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L492)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L371)
 function model:mesh_triangle_count(index) end
 
 ---An unique handle for a model animation in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L508)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L387)
 ---@class model_animation
 model_animation = {}
 
@@ -1626,19 +1609,19 @@ model_animation = {}
 ---@return model_animation model_animation # ModelAnimation resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L526)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L405)
 function quiver.model_animation.new(path) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L572)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L451)
 function model_animation:get_bone_() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L590)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L469)
 function model_animation:get_bone_() end
 
 ---Update model with new model animation data.
@@ -1646,7 +1629,7 @@ function model_animation:get_bone_() end
 ---@param frame number # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L613)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/model.rs#L492)
 function model_animation:update(model,frame) end
 
 ---The drawing API.
@@ -2722,12 +2705,113 @@ function quiver.general.get_info() end
 ---@class quiver.collision
 quiver.collision = {}
 
----Get the standard input.
----@return string input # The standard input.
+---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L96)
-function quiver.general.standard_input() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L104)
+function quiver.collision.get_box_2_box_2() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L118)
+function quiver.collision.get_circle_circle() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L142)
+function quiver.collision.get_circle_box_2() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L165)
+function quiver.collision.get_circle_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L190)
+function quiver.collision.get_point_box_2() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L204)
+function quiver.collision.get_point_circle() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L227)
+function quiver.collision.get_point_triangle() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L253)
+function quiver.collision.get_point_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L278)
+function quiver.collision.get_point_poly() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L299)
+function quiver.collision.get_line_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L331)
+function quiver.collision.get_box_2_box_2_difference() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L353)
+function quiver.collision.get_sphere_sphere() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L377)
+function quiver.collision.get_box_3_box_3() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L391)
+function quiver.collision.get_box_3_sphere() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L414)
+function quiver.collision.get_ray_sphere() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L455)
+function quiver.collision.get_ray_box_3() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L496)
+function quiver.collision.get_ray_triangle() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/collision.rs#L544)
+function quiver.collision.get_ray_quad() end
 
 ---The shader API.
 ---
@@ -2841,7 +2925,7 @@ quiver.image = {}
 ---An unique handle for a image in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L91)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L104)
 ---@class image
 ---@field shape_x number # Shape of the image (X).
 ---@field shape_y number # Shape of the image (Y).
@@ -2851,8 +2935,170 @@ image = {}
 ---@return texture texture # Texture resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L112)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L127)
 function image:to_texture() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L138)
+function image:power_of_two() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L156)
+function image:crop() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L172)
+function image:crop_alpha() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L184)
+function image:crop_alpha() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L205)
+function image:blur_gaussian() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L217)
+function image:kernel_convolution() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L232)
+function image:resize() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L253)
+function image:extend() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L279)
+function image:mipmap() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L291)
+function image:dither() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L306)
+function image:flip() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L322)
+function image:rotate() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L336)
+function image:color_tint() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L350)
+function image:color_invert() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L362)
+function image:color_gray_scale() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L374)
+function image:color_contrast() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L386)
+function image:color_contrast() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L406)
+function image:get_alpha_border() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L418)
+function image:get_alpha_border() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L432)
+function image:draw_pixel() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L447)
+function image:draw_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L472)
+function image:draw_circle() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L490)
+function image:draw_circle_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L508)
+function image:draw_box_2() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L523)
+function image:draw_box_2_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L541)
+function image:draw_triangle() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L571)
+function image:draw_triangle_line() end
 
 ---Create a new image resource.
 ---@param path string # Path to image file.
@@ -2861,18 +3107,100 @@ function image:to_texture() end
 --- ---
 ---*This function is asynchronous and can run within a co-routine.*
 ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L133)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L609)
 function quiver.image.new(path) end
 
 ---Create a new image resource, from memory.
 ---@param data data # The data buffer.
 ---@param kind string # The kind of image file (.png, etc.).
+---@return image image # Image resource.
 ---
 --- ---
 ---*This function is asynchronous and can run within a co-routine.*
 ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L164)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L643)
 function quiver.image.new_from_memory(data,kind) end
+
+---Create a new image resource, from the current screen buffer.
+---@return image image # Image resource.
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L673)
+function quiver.image.new_from_screen() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L695)
+function quiver.image.new_color() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L720)
+function quiver.image.new_gradient_linear() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L755)
+function quiver.image.new_gradient_radial() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L790)
+function quiver.image.new_gradient_square() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L825)
+function quiver.image.new_check() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L862)
+function quiver.image.new_white_noise() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L886)
+function quiver.image.new_perlin_noise() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L920)
+function quiver.image.new_cellular() end
+
+---TO-DO
+---
+--- ---
+---*This function is asynchronous and can run within a co-routine.*
+---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/image.rs#L944)
+function quiver.image.new_text() end
 
 ---The font API.
 ---
@@ -2963,50 +3291,50 @@ automation_event = {}
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L95)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L92)
+function quiver.automation.new() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L131)
 function automation_event:save() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L110)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L146)
 function automation_event:set_active() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L122)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L158)
 function automation_event:set_frame() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L134)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L170)
 function automation_event:start() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L146)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L182)
 function automation_event:stop() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L158)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L194)
 function automation_event:play() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L177)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L213)
 function automation_event:get_event() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/automation.rs#L198)
-function quiver.automation.new() end
 
 ---The window API.
 ---

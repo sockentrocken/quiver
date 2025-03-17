@@ -81,6 +81,40 @@ struct AutomationEvent(ffi::AutomationEventList);
 
 unsafe impl Send for AutomationEvent {}
 
+impl AutomationEvent {
+    /* entry
+    {
+        "version": "1.0.0",
+        "name": "quiver.automation.new",
+        "info": "TO-DO"
+    }
+    */
+    fn new(lua: &Lua, path: Option<String>) -> mlua::Result<Self> {
+        unsafe {
+            let path = match path {
+                Some(name) => {
+                    let pointer = Script::rust_to_c_string(&ScriptData::get_path(lua, &name)?)?;
+
+                    pointer.into_raw()
+                }
+                None => std::ptr::null(),
+            };
+
+            let list = ffi::LoadAutomationEventList(path);
+
+            Ok(Self(list))
+        }
+    }
+}
+
+impl Drop for AutomationEvent {
+    fn drop(&mut self) {
+        unsafe {
+            ffi::UnloadAutomationEventList(self.0);
+        }
+    }
+}
+
 impl mlua::UserData for AutomationEvent {
     fn add_fields<F: mlua::UserDataFields<Self>>(field: &mut F) {
         field.add_field_method_get("count", |_, this| Ok(this.0.count));
@@ -186,39 +220,5 @@ impl mlua::UserData for AutomationEvent {
                 "automation_event:get_event(): Invalid index.",
             ))
         });
-    }
-}
-
-impl AutomationEvent {
-    /* entry
-    {
-        "version": "1.0.0",
-        "name": "quiver.automation.new",
-        "info": "TO-DO"
-    }
-    */
-    fn new(lua: &Lua, path: Option<String>) -> mlua::Result<Self> {
-        unsafe {
-            let path = match path {
-                Some(name) => {
-                    let pointer = Script::rust_to_c_string(&ScriptData::get_path(lua, &name)?)?;
-
-                    pointer.into_raw()
-                }
-                None => std::ptr::null(),
-            };
-
-            let list = ffi::LoadAutomationEventList(path);
-
-            Ok(Self(list))
-        }
-    }
-}
-
-impl Drop for AutomationEvent {
-    fn drop(&mut self) {
-        unsafe {
-            ffi::UnloadAutomationEventList(self.0);
-        }
     }
 }

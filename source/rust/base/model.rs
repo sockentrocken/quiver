@@ -55,8 +55,6 @@ use crate::status::*;
 
 use mlua::prelude::*;
 use raylib::prelude::*;
-use serde::Deserialize;
-use std::collections::HashMap;
 use std::ffi::CStr;
 
 //================================================================

@@ -65,30 +65,21 @@ use raylib::prelude::*;
 pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let font = lua.create_table()?;
 
-    font.set("new",                 lua.create_function(self::Font::new)?)?;
-    font.set("new_from_memory",     lua.create_function(self::Font::new_from_memory)?)?;
-    font.set("new_default",         lua.create_function(self::Font::new_default)?)?;
-    font.set("set_text_line_space", lua.create_function(set_text_line_space)?)?;
+    font.set("new_default",         lua.create_function(self::Font::new_default)?)?;     // GetFontDefault
+    font.set("new",                 lua.create_function(self::Font::new)?)?;             // LoadFont/*Ex TO-DO convert to Ex
+    //font.set("new_from_image",      lua.create_function(self::Font::new_from_image)?)?;  // LoadFontFromImage
+    font.set("new_from_memory",     lua.create_function(self::Font::new_from_memory)?)?; // LoadFontFromMemory
+    
+    //================================================================
+
+    font.set("draw_FPS",  lua.create_function(self::draw_fps)?)?;  // DrawFPS
+    font.set("draw_text", lua.create_function(self::draw_text)?)?; // DrawText
+
+    //================================================================
+
+    font.set("set_text_line_space", lua.create_function(self::set_text_line_space)?)?; // SetTextLineSpacing
 
     table.set("font", font)?;
-
-    Ok(())
-}
-
-/* entry
-{
-    "version": "1.0.0",
-    "name": "quiver.font.set_text_line_space",
-    "info": "Set the vertical space between each line-break.",
-    "member": [
-        { "name": "space", "info": "Vertical space.", "kind": "number" }
-    ]
-}
-*/
-fn set_text_line_space(_: &Lua, space: i32) -> mlua::Result<()> {
-    unsafe {
-        ffi::SetTextLineSpacing(space);
-    }
 
     Ok(())
 }
@@ -112,35 +103,49 @@ impl mlua::UserData for Font {
             "name": "font:draw",
             "info": "Draw a font.",
             "member": [
-                { "name": "label", "info": "Label of font to draw.", "kind": "string"   },
-                { "name": "point", "info": "Point of font to draw.", "kind": "vector_2" },
-                { "name": "scale", "info": "Scale of font to draw.", "kind": "number"   },
-                { "name": "space", "info": "Space of font to draw.", "kind": "number"   },
-                { "name": "color", "info": "Color of font to draw.", "kind": "color"    }
+                { "name": "label",  "info": "Label of font to draw.", "kind": "string"   },
+                { "name": "point",  "info": "Point of font to draw.", "kind": "vector_2" },
+                { "name": "origin", "info": "TO-DO", "kind": "vector_2" },
+                { "name": "angle",  "info": "TO-DO", "kind": "number" },
+                { "name": "scale",  "info": "Scale of font to draw.", "kind": "number"   },
+                { "name": "space",  "info": "Space of font to draw.", "kind": "number"   },
+                { "name": "color",  "info": "Color of font to draw.", "kind": "color"    }
             ]
         }
         */
         method.add_method(
-                "draw",
-                |lua: &Lua,
-                 this,
-                 (text, point, scale, space, color): (
-                    String,
-                    LuaValue,
-                    f32,
-                    f32,
-                    LuaValue,
-                )| {
-                    let point : Vector2 = lua.from_value(point)?;
-                    let color : Color   = lua.from_value(color)?;
-                    let text = Script::rust_to_c_string(&text)?;
+            "draw",
+            |lua: &Lua,
+             this,
+             (text, point, origin, angle, scale, space, color): (
+                String,
+                LuaValue,
+                LuaValue,
+                f32,
+                f32,
+                f32,
+                LuaValue,
+            )| {
+                let point: Vector2 = lua.from_value(point)?;
+                let origin: Vector2 = lua.from_value(origin)?;
+                let color: Color = lua.from_value(color)?;
+                let text = Script::rust_to_c_string(&text)?;
 
-                    unsafe {
-                        ffi::DrawTextEx(*this.0, text.as_ptr(), point.into(), scale, space, color.into());
-                        Ok(())
-                    }
-                },
-            );
+                unsafe {
+                    ffi::DrawTextPro(
+                        *this.0,
+                        text.as_ptr(),
+                        point.into(),
+                        origin.into(),
+                        angle,
+                        scale,
+                        space,
+                        color.into(),
+                    );
+                    Ok(())
+                }
+            },
+        );
 
         /* entry
         {
@@ -278,4 +283,71 @@ impl Font {
             }
         }
     }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.font.draw_FPS",
+    "info": "TO-DO"
+}
+*/
+fn draw_fps(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
+    let point: Vector2 = lua.from_value(point)?;
+
+    unsafe {
+        ffi::DrawFPS(point.x as i32, point.y as i32);
+        Ok(())
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.font.draw_text",
+    "info": "Draw text.",
+    "member": [
+        { "name": "point", "info": "The point of the text.", "kind": "vector_2" },
+        { "name": "label", "info": "The label of the text.", "kind": "string"   },
+        { "name": "scale", "info": "The angle of the text.", "kind": "number"   },
+        { "name": "color", "info": "The color of the text.", "kind": "color"    }
+    ]
+}
+*/
+fn draw_text(
+    lua: &Lua,
+    (point, label, scale, color): (LuaValue, String, i32, LuaValue),
+) -> mlua::Result<()> {
+    let point: Vector2 = lua.from_value(point)?;
+    let label = Script::rust_to_c_string(&label)?;
+    let color: Color = lua.from_value(color)?;
+
+    unsafe {
+        ffi::DrawText(
+            label.as_ptr(),
+            point.x as i32,
+            point.y as i32,
+            scale,
+            color.into(),
+        );
+        Ok(())
+    }
+}
+
+/* entry
+{
+    "version": "1.0.0",
+    "name": "quiver.font.set_text_line_space",
+    "info": "Set the vertical space between each line-break.",
+    "member": [
+        { "name": "space", "info": "Vertical space.", "kind": "number" }
+    ]
+}
+*/
+fn set_text_line_space(_: &Lua, space: i32) -> mlua::Result<()> {
+    unsafe {
+        ffi::SetTextLineSpacing(space);
+    }
+
+    Ok(())
 }

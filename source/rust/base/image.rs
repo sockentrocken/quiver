@@ -69,7 +69,7 @@ type RLImage = ffi::Image;
 pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&ScriptInfo>) -> mlua::Result<()> {
     let image = lua.create_table()?;
 
-    image.set("new",             lua.create_async_function(self::Image::new)?)?;             // LoadImage
+    image.set("new",             lua.create_async_function(self::Image::new)?)?;       // LoadImage
     image.set("new_from_memory", lua.create_function(self::Image::new_from_memory)?)?; // LoadImageFromMemory
     image.set("new_from_screen", lua.create_function(self::Image::new_from_screen)?)?; // LoadImageFromScreen
 
@@ -79,6 +79,7 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
     image.set("new_gradient_linear", lua.create_function(self::Image::new_gradient_linear)?)?; // GenImageGradientLinear
     image.set("new_gradient_radial", lua.create_function(self::Image::new_gradient_radial)?)?; // GenImageGradientRadial
     image.set("new_gradient_square", lua.create_function(self::Image::new_gradient_square)?)?; // GenImageGradientSquare
+    image.set("new_check",           lua.create_function(self::Image::new_check)?)?;           // GenImageChecked
     image.set("new_white_noise",     lua.create_function(self::Image::new_white_noise)?)?;     // GenImageWhiteNoise
     image.set("new_perlin_noise",    lua.create_function(self::Image::new_perlin_noise)?)?;    // GenImagePerlinNoise
     image.set("new_cellular",        lua.create_function(self::Image::new_cellular)?)?;        // GenImageCellular

@@ -271,77 +271,60 @@ impl mlua::UserData for Shader {
         /* entry
         {
             "version": "1.0.0",
-            "name": "shader:set_shader_integer",
+            "name": "shader:set_shader_value",
             "info": "TO-DO",
             "member": [
                 { "name": "location", "info": "TO-DO", "kind": "number" },
-                { "name": "value",    "info": "TO-DO", "kind": "number" }
+                { "name": "kind",     "info": "TO-DO", "kind": "number" },
+                { "name": "value",    "info": "TO-DO", "kind": "any"    }
             ]
         }
         */
         method.add_method_mut(
-            "set_shader_integer",
-            |_, this, (location, value): (i32, i32)| {
-                this.0.set_shader_value(location, value);
-                Ok(())
-            },
-        );
+            "set_shader_value",
+            |lua, this, (location, kind, value): (i32, i32, LuaValue)| unsafe {
+                match kind {
+                    0 => {
+                        let value: i32 = lua.from_value(value)?;
+                        this.0.set_shader_value(location, value);
+                    }
+                    1 => {
+                        let value: f32 = lua.from_value(value)?;
+                        this.0.set_shader_value(location, value);
+                    }
+                    2 => {
+                        let value: Vector2 = lua.from_value(value)?;
+                        this.0.set_shader_value(location, value);
+                    }
+                    3 => {
+                        let value: Vector3 = lua.from_value(value)?;
+                        this.0.set_shader_value(location, value);
+                    }
+                    4 => {
+                        let value: Vector4 = lua.from_value(value)?;
+                        this.0.set_shader_value(location, value);
+                    }
+                    5 => {
+                        let value: Matrix = lua.from_value(value)?;
+                        ffi::SetShaderValueMatrix(*this.0, location, value.into());
+                    }
+                    _ => {
+                        if let Some(data) = value.as_userdata() {
+                            if let Ok(data) = data.borrow::<crate::base::texture::Texture>() {
+                                ffi::SetShaderValueTexture(*this.0, location, (*data).0);
+                            } else {
+                                return Err(mlua::Error::RuntimeError(
+                                    "set_shader_value(): Error borrowing texture.".to_string(),
+                                ));
+                            }
+                        } else {
+                            return Err(mlua::Error::RuntimeError(
+                                "set_shader_value(): Value is not a Texture user-data.".to_string(),
+                            ));
+                        }
+                    }
+                };
 
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "shader:set_shader_decimal",
-            "info": "TO-DO",
-            "member": [
-                { "name": "location", "info": "TO-DO", "kind": "number" },
-                { "name": "value",    "info": "TO-DO", "kind": "number" }
-            ]
-        }
-        */
-        method.add_method_mut(
-            "set_shader_decimal",
-            |_, this, (location, value): (i32, f32)| {
-                this.0.set_shader_value(location, value);
-                Ok(())
-            },
-        );
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "shader:set_shader_vector_3",
-            "info": "TO-DO",
-            "member": [
-                { "name": "location", "info": "TO-DO", "kind": "number"   },
-                { "name": "value",    "info": "TO-DO", "kind": "vector_3" }
-            ]
-        }
-        */
-        method.add_method_mut(
-            "set_shader_vector_3",
-            |lua, this, (location, value): (i32, LuaValue)| {
-                this.0
-                    .set_shader_value(location, lua.from_value::<Vector3>(value)?);
-                Ok(())
-            },
-        );
-
-        /* entry
-        {
-            "version": "1.0.0",
-            "name": "shader:set_shader_vector_4",
-            "info": "TO-DO",
-            "member": [
-                { "name": "location", "info": "TO-DO", "kind": "number"   },
-                { "name": "value",    "info": "TO-DO", "kind": "vector_4" }
-            ]
-        }
-        */
-        method.add_method_mut(
-            "set_shader_vector_4",
-            |lua, this, (location, value): (i32, LuaValue)| {
-                this.0
-                    .set_shader_value(location, lua.from_value::<Vector4>(value)?);
                 Ok(())
             },
         );

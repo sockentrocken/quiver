@@ -514,12 +514,6 @@ impl ScriptData {
         }
     }
 
-    pub fn get_path_escape(lua: &Lua) -> mlua::Result<bool> {
-        let script_data = lua.app_data_ref::<ScriptData>().unwrap();
-
-        Ok(script_data.path_escape)
-    }
-
     pub fn set_path_escape(lua: &Lua, state: bool) -> mlua::Result<()> {
         let mut script_data = lua.app_data_mut::<ScriptData>().unwrap();
 
