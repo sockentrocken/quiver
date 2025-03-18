@@ -166,14 +166,13 @@ function system:scan(search)
 
         if asset then
             if asset.kind == FILE_KIND.DISK then
-                asset = quiver.file.get(asset.path)
+                asset = quiver.file.get_file(asset.path)
             elseif asset.kind == FILE_KIND.PACK then
                 asset = asset.path:get_file(path .. ".lua", false, true)
             elseif asset.kind == FILE_KIND.EMBED then
                 asset = quiver.data.get_embed_file(asset.path)
             end
 
-            print("returning...")
             return loadstring(asset, path)
         else
             return string.format("\n\tno file '\"%s\"' in system user-data", path)

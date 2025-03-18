@@ -498,10 +498,6 @@ impl ScriptData {
         if script_data.status_info.safe {
             //let path = format!("{}/{path}", script_data.status_info.path);
 
-            println!("================");
-            println!("{path}");
-            println!("================");
-
             // always disallow going up the directory in safe mode.
             let path = path.replace("../", "");
             let path = path.replace("..",  "");

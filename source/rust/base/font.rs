@@ -72,8 +72,8 @@ pub fn set_global(lua: &Lua, table: &mlua::Table, _: &StatusInfo, _: Option<&Scr
     
     //================================================================
 
-    font.set("draw_FPS",  lua.create_function(self::draw_fps)?)?;  // DrawFPS
-    font.set("draw_text", lua.create_function(self::draw_text)?)?; // DrawText
+    font.set("draw_frame_rate", lua.create_function(self::draw_frame_rate)?)?; // DrawFPS
+    font.set("draw_text",       lua.create_function(self::draw_text)?)?;       // DrawText
 
     //================================================================
 
@@ -288,11 +288,11 @@ impl Font {
 /* entry
 {
     "version": "1.0.0",
-    "name": "quiver.font.draw_FPS",
+    "name": "quiver.font.draw_frame_rate",
     "info": "TO-DO"
 }
 */
-fn draw_fps(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
+fn draw_frame_rate(lua: &Lua, point: LuaValue) -> mlua::Result<()> {
     let point: Vector2 = lua.from_value(point)?;
 
     unsafe {

@@ -108,15 +108,19 @@ fn clear(lua: &Lua, color: LuaValue) -> mlua::Result<()> {
     "name": "quiver.draw.begin",
     "info": "Initialize drawing to the screen.",
     "member": [
-        { "name": "call", "info": "The draw code.", "kind": "function" }
+        { "name": "call", "info": "The draw code.", "kind": "function" },
+        { "name": "...",  "info": "Variadic data.", "kind": "any"      }
     ]
 }
 */
-fn begin(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
+fn begin(
+    _: &Lua,
+    (call, variadic): (mlua::Function, mlua::Variadic<LuaValue>),
+) -> mlua::Result<()> {
     unsafe {
         ffi::BeginDrawing();
 
-        call.call::<()>(())?;
+        call.call::<()>(variadic)?;
 
         ffi::EndDrawing();
         Ok(())
@@ -131,15 +135,19 @@ fn begin(_: &Lua, call: mlua::Function) -> mlua::Result<()> {
     "info": "Initialize drawing (blend mode) to the screen.",
     "member": [
         { "name": "call", "info": "The draw code.", "kind": "function" },
-        { "name": "mode", "info": "The draw code.", "kind": "function" }
+        { "name": "mode", "info": "The draw code.", "kind": "function" },
+        { "name": "...",  "info": "Variadic data.", "kind": "any"      }
     ]
 }
 */
-fn begin_blend(_: &Lua, (call, mode): (mlua::Function, i32)) -> mlua::Result<()> {
+fn begin_blend(
+    _: &Lua,
+    (call, mode, variadic): (mlua::Function, i32, mlua::Variadic<LuaValue>),
+) -> mlua::Result<()> {
     unsafe {
         ffi::BeginBlendMode(mode);
 
-        call.call::<()>(())?;
+        call.call::<()>(variadic)?;
 
         ffi::EndBlendMode();
         Ok(())
@@ -153,11 +161,15 @@ fn begin_blend(_: &Lua, (call, mode): (mlua::Function, i32)) -> mlua::Result<()>
     "info": "Initialize drawing (scissor mode) to the screen.",
     "member": [
         { "name": "call", "info": "The draw code.",        "kind": "function" },
-        { "name": "view", "info": "The clip test region.", "kind": "box_2"    }
+        { "name": "view", "info": "The clip test region.", "kind": "box_2"    },
+        { "name": "...",  "info": "Variadic data.",        "kind": "any"      }
     ]
 }
 */
-fn begin_scissor(lua: &Lua, (call, view): (mlua::Function, LuaValue)) -> mlua::Result<()> {
+fn begin_scissor(
+    lua: &Lua,
+    (call, view, variadic): (mlua::Function, LuaValue, mlua::Variadic<LuaValue>),
+) -> mlua::Result<()> {
     let view: Rectangle = lua.from_value(view)?;
 
     unsafe {
@@ -168,7 +180,7 @@ fn begin_scissor(lua: &Lua, (call, view): (mlua::Function, LuaValue)) -> mlua::R
             view.height as i32,
         );
 
-        call.call::<()>(())?;
+        call.call::<()>(variadic)?;
 
         ffi::EndScissorMode();
         Ok(())
@@ -218,17 +230,21 @@ mod draw_3d {
         "info": "Initialize the 3D draw mode.",
         "member": [
             { "name": "call",   "info": "The draw code.", "kind": "function"  },
-            { "name": "camera", "info": "The 2D camera.", "kind": "camera_3d" }
+            { "name": "camera", "info": "The 2D camera.", "kind": "camera_3d" },
+            { "name": "...",    "info": "Variadic data.", "kind": "any"       }
         ]
     }
     */
-    fn begin(lua: &Lua, (call, camera): (mlua::Function, LuaValue)) -> mlua::Result<()> {
+    fn begin(
+        lua: &Lua,
+        (call, camera, variadic): (mlua::Function, LuaValue, mlua::Variadic<LuaValue>),
+    ) -> mlua::Result<()> {
         let value: general::Camera3D = lua.from_value(camera)?;
 
         unsafe {
             ffi::BeginMode3D(value.into());
 
-            call.call::<()>(())?;
+            call.call::<()>(variadic)?;
 
             ffi::EndMode3D();
             Ok(())
@@ -779,17 +795,21 @@ mod draw_2d {
         "info": "Initialize the 2D draw mode.",
         "member": [
             { "name": "call",   "info": "The draw code.", "kind": "function"  },
-            { "name": "camera", "info": "The 2D camera.", "kind": "camera_2d" }
+            { "name": "camera", "info": "The 2D camera.", "kind": "camera_2d" },
+            { "name": "...",    "info": "Variadic data.", "kind": "any"       }
         ]
     }
     */
-    fn begin(lua: &Lua, (call, camera): (mlua::Function, LuaValue)) -> mlua::Result<()> {
+    fn begin(
+        lua: &Lua,
+        (call, camera, variadic): (mlua::Function, LuaValue, mlua::Variadic<LuaValue>),
+    ) -> mlua::Result<()> {
         let value: general::Camera2D = lua.from_value(camera)?;
 
         unsafe {
             ffi::BeginMode2D(value.into());
 
-            call.call::<()>(())?;
+            call.call::<()>(variadic)?;
 
             ffi::EndMode2D();
             Ok(())

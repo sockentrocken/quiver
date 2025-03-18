@@ -37,7 +37,7 @@ video         = []
 documentation = []
 
 [dependencies]
-raylib       = { git = "https://github.com/raylib-rs/raylib-rs.git", features = ["with_serde"] }
+raylib       = { git = "https://github.com/raylib-rs/raylib-rs.git", features = ["with_serde", "sdl"] }
 mlua         = { version = "0.10.3", features = ["luajit52", "vendored", "serialize", "send", "async"] }
 tokio        = { version = "1",      features = ["full"]   }
 serde  	     = { version = "1.0",    features = ["derive"] }
