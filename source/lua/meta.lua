@@ -1637,39 +1637,42 @@ function model_animation:update(model,frame) end
 --- ---
 ---*Not available in head-less mode.*
 ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L81)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L65)
 ---@class quiver.draw
 quiver.draw = {}
-
----Initialize drawing to the screen.
----@param call function # The draw code.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L108)
-function quiver.draw.begin(call) end
-
----Initialize drawing (blend mode) to the screen.
----@param call function # The draw code.
----@param mode function # The draw code.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L131)
-function quiver.draw.begin_blend(call,mode) end
-
----Initialize drawing (scissor mode) to the screen.
----@param call function # The draw code.
----@param view box_2 # The clip test region.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L153)
-function quiver.draw.begin_scissor(call,view) end
 
 ---Clear the screen with a color.
 ---@param color color # The color to use for clearing.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L180)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L96)
 function quiver.draw.clear(color) end
+
+---Initialize drawing to the screen.
+---@param call function # The draw code.
+---@param ... any # Variadic data.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L116)
+function quiver.draw.begin(call,...) end
+
+---Initialize drawing (blend mode) to the screen.
+---@param call function # The draw code.
+---@param mode function # The draw code.
+---@param ... any # Variadic data.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L143)
+function quiver.draw.begin_blend(call,mode,...) end
+
+---Initialize drawing (scissor mode) to the screen.
+---@param call function # The draw code.
+---@param view box_2 # The clip test region.
+---@param ... any # Variadic data.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L169)
+function quiver.draw.begin_scissor(call,view,...) end
 
 ---The 3D drawing API.
 ---
@@ -1678,17 +1681,14 @@ function quiver.draw.clear(color) end
 ---@class quiver.draw_3d
 quiver.draw_3d = {}
 
----TO-DO
+---Initialize the 3D draw mode.
+---@param call function # The draw code.
+---@param camera camera_3d # The 2D camera.
+---@param ... any # Variadic data.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L230)
-function quiver.draw_3d.get_matrix_projection() end
-
----TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L250)
-function quiver.draw_3d.get_matrix_model_view() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L238)
+function quiver.draw_3d.begin(call,camera,...) end
 
 ---Get a ray for a 2D screen-space point.
 ---@param camera camera_3d # The current camera.
@@ -1702,7 +1702,7 @@ function quiver.draw_3d.get_matrix_model_view() end
 ---@return number direction_z # The 3D ray direction. (Z).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L283)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L274)
 function quiver.draw_3d.get_screen_to_world(camera,point,shape) end
 
 ---Get a 2D screen-space point for a 3D world-space point.
@@ -1713,58 +1713,8 @@ function quiver.draw_3d.get_screen_to_world(camera,point,shape) end
 ---@return number point_y # The 2D screen-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L326)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L317)
 function quiver.draw_3d.get_world_to_screen(camera,point,shape) end
-
----Initialize the 3D draw mode.
----@param call function # The draw code.
----@param camera camera_3d # The 2D camera.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L357)
-function quiver.draw_3d.begin(call,camera) end
-
----Draw a grid.
----@param slice number # The slice count of the grid.
----@param space number # The space shift of the grid.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L380)
-function quiver.draw_3d.draw_grid(slice,space) end
-
----Draw a cube.
----@param point vector_3 # The point of the cube.
----@param shape vector_3 # The shape of the cube.
----@param color color # The color of the cube.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L398)
-function quiver.draw_3d.draw_cube(point,shape,color) end
-
----Draw a ball.
----@param point vector_3 # The point of the ball.
----@param shape number # The shape of the ball.
----@param color color # The color of the ball.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L423)
-function quiver.draw_3d.draw_ball(point,shape,color) end
-
----Draw a 3D box.
----@param shape box_3 # The shape of the ball.
----@param color color # The color of the ball.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L443)
-function quiver.draw_3d.draw_box_3(shape,color) end
-
----Draw a ray.
----@param ray ray # The ray.
----@param color color # The color of the ray.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L463)
-function quiver.draw_3d.draw_ray(ray,color) end
 
 ---Draw a line.
 ---@param point_a vector_3 # The point A of the line.
@@ -1772,63 +1722,132 @@ function quiver.draw_3d.draw_ray(ray,color) end
 ---@param color color # The color of the line.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L484)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L348)
 function quiver.draw_3d.draw_line(point_a,point_b,color) end
 
----Set the current state of backface culling.
----@param state boolean # The new state.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L507)
-function quiver.draw_3d.set_backface_cull(state) end
-
 ---TO-DO
----@param call function # The draw code.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L528)
-function quiver.draw.begin_quad(call) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L368)
+function quiver.draw_3d.draw_point() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L555)
-function quiver.draw.draw_quad_color() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L384)
+function quiver.draw_3d.draw_circle() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L570)
-function quiver.draw.draw_quad_normal() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L404)
+function quiver.draw_3d.draw_triangle() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L585)
-function quiver.draw.draw_quad_coordinate() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L425)
+function quiver.draw_3d.draw_triangle_strip() end
+
+---Draw a cube.
+---@param point vector_3 # The point of the cube.
+---@param shape vector_3 # The shape of the cube.
+---@param color color # The color of the cube.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L447)
+function quiver.draw_3d.draw_cube(point,shape,color) end
+
+---Draw a cube (wire-frame).
+---@param point vector_3 # The point of the cube.
+---@param shape vector_3 # The shape of the cube.
+---@param color color # The color of the cube.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L472)
+function quiver.draw_3d.draw_cube_wire(point,shape,color) end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L600)
-function quiver.draw.draw_quad_vertex() end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L492)
+function quiver.draw_3d.draw_sphere() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L511)
+function quiver.draw_3d.draw_sphere_wire() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L530)
+function quiver.draw_3d.draw_cylinder() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L564)
+function quiver.draw_3d.draw_cylinder_wire() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L598)
+function quiver.draw_3d.draw_capsule() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L632)
+function quiver.draw_3d.draw_capsule_wire() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L666)
+function quiver.draw_3d.draw_plane() end
+
+---Draw a ray.
+---@param ray ray # The ray.
+---@param color color # The color of the ray.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L690)
+function quiver.draw_3d.draw_ray(ray,color) end
+
+---Draw a grid.
+---@param slice number # The slice count of the grid.
+---@param space number # The space shift of the grid.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L710)
+function quiver.draw_3d.draw_grid(slice,space) end
+
+---Draw a 3D box.
+---@param shape box_3 # The shape of the ball.
+---@param color color # The color of the ball.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L727)
+function quiver.draw_3d.draw_box_3(shape,color) end
 
 ---The 2D drawing API.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L615)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L744)
 ---@class quiver.draw_2d
 quiver.draw_2d = {}
 
----Get a world-space point for a 2D screen-space point.
----@param camera camera_2d # The current camera.
----@param point vector_2 # The screen-space point.
----@return number point_x # The 2D world-space point (X).
----@return number point_y # The 2D world-space point (Y).
+---Initialize the 2D draw mode.
+---@param call function # The draw code.
+---@param camera camera_2d # The 2D camera.
+---@param ... any # Variadic data.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L657)
-function quiver.draw_2d.get_screen_to_world(camera,point) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L803)
+function quiver.draw_2d.begin(call,camera,...) end
 
 ---Get a screen-space point for a 2D world-space point.
 ---@param camera camera_2d # The current camera.
@@ -1837,23 +1856,25 @@ function quiver.draw_2d.get_screen_to_world(camera,point) end
 ---@return number point_y # The 2D screen-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L686)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L834)
 function quiver.draw_2d.get_world_to_screen(camera,point) end
 
----Initialize the 2D draw mode.
----@param call function # The draw code.
----@param camera camera_2d # The 2D camera.
+---Get a world-space point for a 2D screen-space point.
+---@param camera camera_2d # The current camera.
+---@param point vector_2 # The screen-space point.
+---@return number point_x # The 2D world-space point (X).
+---@return number point_y # The 2D world-space point (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L711)
-function quiver.draw_2d.begin(call,camera) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L863)
+function quiver.draw_2d.get_screen_to_world(camera,point) end
 
 ---Draw pixel.
 ---@param point vector_2 # The point of the pixel.
 ---@param color color # The color of the pixel.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L735)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L888)
 function quiver.draw_2d.draw_pixel(point,color) end
 
 ---Draw a line.
@@ -1863,18 +1884,20 @@ function quiver.draw_2d.draw_pixel(point,color) end
 ---@param color color # The color of the line.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L758)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L911)
 function quiver.draw_2d.draw_line(point_a,point_b,thick,color) end
 
----Draw text.
----@param label string # The label of the text.
----@param point vector_2 # The point of the text.
----@param scale number # The angle of the text.
----@param color color # The color of the text.
+---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L785)
-function quiver.draw_2d.draw_text(label,point,scale,color) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L932)
+function quiver.draw_2d.draw_line_strip() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L951)
+function quiver.draw_2d.draw_line_bezier() end
 
 ---Draw a circle.
 ---@param point vector_2 # TO-DO
@@ -1882,8 +1905,14 @@ function quiver.draw_2d.draw_text(label,point,scale,color) end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L817)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L977)
 function quiver.draw_2d.draw_circle(point,radius,color) end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L997)
+function quiver.draw_2d.draw_circle_line() end
 
 ---Draw the sector of a circle.
 ---@param point vector_2 # TO-DO
@@ -1894,8 +1923,44 @@ function quiver.draw_2d.draw_circle(point,radius,color) end
 ---@param color color # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L845)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1025)
 function quiver.draw_2d.draw_circle_sector(point,radius,begin_angle,close_angle,segment_count,color) end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1059)
+function quiver.draw_2d.draw_circle_sector_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1079)
+function quiver.draw_2d.draw_circle_gradient() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1106)
+function quiver.draw_2d.draw_ellipse() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1133)
+function quiver.draw_2d.draw_ellipse_line() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1160)
+function quiver.draw_2d.draw_ring() end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1196)
+function quiver.draw_2d.draw_ring_line() end
 
 ---Draw 2D box.
 ---@param shape box_2 # The shape of the box.
@@ -1904,26 +1969,8 @@ function quiver.draw_2d.draw_circle_sector(point,radius,begin_angle,close_angle,
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L885)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1238)
 function quiver.draw_2d.draw_box_2(shape,point,angle,color) end
-
----Draw 2D box with a gradient (X-direction).
----@param shape box_2 # The shape of the box.
----@param color_a color # The color A of the box.
----@param color_b color # The color B of the box.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L911)
-function quiver.draw_2d.draw_box_2_gradient_x(shape,color_a,color_b) end
-
----Draw 2D box with a gradient (Y-direction).
----@param shape box_2 # The shape of the box.
----@param color_a color # The color A of the box.
----@param color_b color # The color B of the box.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L944)
-function quiver.draw_2d.draw_box_2_gradient_y(shape,color_a,color_b) end
 
 ---Draw 2D box with a 4-point gradient.
 ---@param shape box_2 # The shape of the box.
@@ -1933,7 +1980,7 @@ function quiver.draw_2d.draw_box_2_gradient_y(shape,color_a,color_b) end
 ---@param color_d color # The color D (B.R.) of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L979)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1266)
 function quiver.draw_2d.draw_box_2_gradient(shape,color_a,color_b,color_c,color_d) end
 
 ---Draw 2D box (out-line).
@@ -1942,7 +1989,7 @@ function quiver.draw_2d.draw_box_2_gradient(shape,color_a,color_b,color_c,color_
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1019)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1306)
 function quiver.draw_2d.draw_box_2_line(shape,thick,color) end
 
 ---Draw 2D box (round).
@@ -1952,7 +1999,7 @@ function quiver.draw_2d.draw_box_2_line(shape,thick,color) end
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1045)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1332)
 function quiver.draw_2d.draw_box_2_round(shape,round,count,color) end
 
 ---Draw 2D box (out-line, round).
@@ -1963,7 +2010,7 @@ function quiver.draw_2d.draw_box_2_round(shape,round,count,color) end
 ---@param color color # The color of the box.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1072)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1359)
 function quiver.draw_2d.draw_box_2_line_round(shape,round,count,thick,color) end
 
 ---Draw 2D triangle.
@@ -1973,7 +2020,7 @@ function quiver.draw_2d.draw_box_2_line_round(shape,round,count,thick,color) end
 ---@param color color # The color of the triangle.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1098)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1385)
 function quiver.draw_2d.draw_triangle(point_a,point_b,point_c,color) end
 
 ---Draw 2D triangle (out-line).
@@ -1983,7 +2030,7 @@ function quiver.draw_2d.draw_triangle(point_a,point_b,point_c,color) end
 ---@param color color # The color of the triangle.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1126)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/draw.rs#L1413)
 function quiver.draw_2d.draw_triangle_line(point_a,point_b,point_c,color) end
 
 ---The data API.
@@ -2584,19 +2631,19 @@ function quiver.file.scan_path(path,filter,recursive,absolute) end
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/file.rs#L804)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/file.rs#L802)
 function quiver.file.get_file_drop() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/file.rs#L815)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/file.rs#L813)
 function quiver.file.get_file_drop_list() end
 
 ---TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/file.rs#L842)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/file.rs#L840)
 function quiver.file.get_file_modification() end
 
 ---The general API.
@@ -2885,35 +2932,12 @@ function shader:set_location(location,value) end
 
 ---TO-DO
 ---@param location number # TO-DO
----@param value number # TO-DO
+---@param kind number # TO-DO
+---@param value any # TO-DO
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/shader.rs#L282)
-function shader:set_shader_integer(location,value) end
-
----TO-DO
----@param location number # TO-DO
----@param value number # TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/shader.rs#L301)
-function shader:set_shader_decimal(location,value) end
-
----TO-DO
----@param location number # TO-DO
----@param value vector_3 # TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/shader.rs#L320)
-function shader:set_shader_vector_3(location,value) end
-
----TO-DO
----@param location number # TO-DO
----@param value vector_4 # TO-DO
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/shader.rs#L340)
-function shader:set_shader_vector_4(location,value) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/shader.rs#L283)
+function shader:set_shader_value(location,kind,value) end
 
 ---The image API.
 ---
@@ -3211,30 +3235,25 @@ function quiver.image.new_text() end
 ---@class quiver.font
 quiver.font = {}
 
----Set the vertical space between each line-break.
----@param space number # Vertical space.
----
---- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L88)
-function quiver.font.set_text_line_space(space) end
-
 ---An unique handle to a font in memory.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L101)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L92)
 ---@class font
 font = {}
 
 ---Draw a font.
 ---@param label string # Label of font to draw.
 ---@param point vector_2 # Point of font to draw.
+---@param origin vector_2 # TO-DO
+---@param angle number # TO-DO
 ---@param scale number # Scale of font to draw.
 ---@param space number # Space of font to draw.
 ---@param color color # Color of font to draw.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L123)
-function font:draw(label,point,scale,space,color) end
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L116)
+function font:draw(label,point,origin,angle,scale,space,color) end
 
 ---Measure the size of a given text on screen, with a given font.
 ---@param label string # Label of font to measure.
@@ -3244,7 +3263,7 @@ function font:draw(label,point,scale,space,color) end
 ---@return number size_y # Size of text (Y).
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L161)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L166)
 function font:measure_text(label,scale,space) end
 
 ---Create a new font resource.
@@ -3253,7 +3272,7 @@ function font:measure_text(label,scale,space) end
 ---@return font font # Font resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L190)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L195)
 function quiver.font.new(path,size) end
 
 ---Create a new font resource, from memory.
@@ -3263,7 +3282,7 @@ function quiver.font.new(path,size) end
 ---@return font font # Font resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L221)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L226)
 function quiver.font.new_from_memory(data,kind,size) end
 
 ---Create a new font resource, from the default font.
@@ -3271,8 +3290,31 @@ function quiver.font.new_from_memory(data,kind,size) end
 ---@return font font # Font resource.
 ---
 --- ---
----[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L259)
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L264)
 function quiver.font.new_default(size) end
+
+---TO-DO
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L295)
+function quiver.font.draw_frame_rate() end
+
+---Draw text.
+---@param point vector_2 # The point of the text.
+---@param label string # The label of the text.
+---@param scale number # The angle of the text.
+---@param color color # The color of the text.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L317)
+function quiver.font.draw_text(point,label,scale,color) end
+
+---Set the vertical space between each line-break.
+---@param space number # Vertical space.
+---
+--- ---
+---[Source Code Definition](https://github.com/sockentrocken/quiver/tree/main/source/rust/base/font.rs#L347)
+function quiver.font.set_text_line_space(space) end
 
 ---The automation API.
 ---

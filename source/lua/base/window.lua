@@ -50,7 +50,7 @@
 
 require "bit"
 
-local WINDOW_FONT_SCALE         = 24.0
+local WINDOW_FONT_SCALE         = 48.0
 local WINDOW_FONT_SPACE         = 2.0
 local WINDOW_COLOR_PRIMARY_MAIN = color:new(255, 87, 34, 255)
 local WINDOW_COLOR_PRIMARY_SIDE = color:new(255, 152, 0, 255)
@@ -104,23 +104,22 @@ local WINDOW_ACTION_ENTRY       = action:new(
         action_button:new(INPUT_DEVICE.BOARD, INPUT_BOARD.RIGHT),
     }
 )
-local WINDOW_SHIFT_A            = vector_2:new(6.0, 4.0)
-local WINDOW_SHIFT_B            = vector_2:new(8.0, 6.0)
-local WINDOW_DOT                = vector_2:new(4.0, 4.0)
+local WINDOW_SHIFT              = vector_2:new(6.0, 2.0)
 
 ---@class gizmo
 ---@field hover       number
 ---@field sound_hover boolean
 ---@field sound_focus boolean
-gizmo                           = {}
+gizmo                           = {
+    __meta = {}
+}
 
 ---Create a new gizmo.
 ---@return gizmo value # The gizmo.
 function gizmo:new()
     local i = {}
-    setmetatable(i, {
-        __index = self
-    })
+    setmetatable(i, self.__meta)
+    getmetatable(i).__index = self
 
     --[[]]
 
@@ -208,7 +207,8 @@ local function window_glyph(self, board_label, mouse_label, pad_label)
     end
 
     -- draw label.
-    self.font:draw(label, point + WINDOW_SHIFT_A, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE, color:white())
+    self.font:draw(label, point + WINDOW_SHIFT, vector_2:zero(), 0.0, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE,
+        color:white())
 end
 
 local function window_gizmo(self, label, hover, index, focus, click)
@@ -242,7 +242,7 @@ local function window_border(self, shape, hover, index, focus, label, move)
     local gizmo = window_gizmo(self, label, hover, index, focus, click)
     local shape = gizmo:move(self, shape)
     local color = gizmo:fade(self, WINDOW_COLOR_PRIMARY_MAIN)
-    local shift = vector_2:old(shape.x + WINDOW_SHIFT_A.x, shape.y + WINDOW_SHIFT_A.y)
+    local shift = vector_2:old(shape.x + WINDOW_SHIFT.x, shape.y + WINDOW_SHIFT.y)
 
     -- if move isn't nil...
     if move then
@@ -252,9 +252,11 @@ local function window_border(self, shape, hover, index, focus, label, move)
 
     -- draw border.
     --quiver.draw_2d.draw_box_2_border(shape, focus)
-    quiver.draw_2d.draw_box_2_gradient_y(
+    quiver.draw_2d.draw_box_2_gradient(
         box_2:old(shape.x, shape.y + shape.height - (shape.height * WINDOW_CARD_ROUND_SHAPE * 0.35), shape.width,
             (shape.height * WINDOW_CARD_ROUND_SHAPE * 0.35) * 4.0),
+        color:old(0, 0, 0, 99),
+        color:old(0, 0, 0, 0),
         color:old(0, 0, 0, 99),
         color:old(0, 0, 0, 0))
     quiver.draw_2d.draw_box_2_round(shape, WINDOW_CARD_ROUND_SHAPE, WINDOW_CARD_ROUND_COUNT, color)
@@ -265,8 +267,10 @@ local function window_border(self, shape, hover, index, focus, label, move)
         local color_b = gizmo:fade(self, color:old(255.0, 255.0, 255.0, 255.0))
 
         -- draw text, draw with back-drop.
-        self.font:draw(label, shift + vector_2:old(1.0, 1.0), WINDOW_FONT_SCALE, WINDOW_FONT_SPACE, color_a)
-        self.font:draw(label, shift, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE, color_b)
+        self.font:draw(label, shift + vector_2:old(1.0, 1.0), vector_2:zero(), 0.0, shape.height,
+            WINDOW_FONT_SPACE,
+            color_a)
+        self.font:draw(label, shift, vector_2:zero(), 0.0, shape.height, WINDOW_FONT_SPACE, color_b)
     end
 
     return gizmo
@@ -484,7 +488,7 @@ end
 ---@param space  number # The text space of the gizmo.
 ---@param color  number # The text color of the gizmo.
 ---@return boolean click # True on click, false otherwise.
-function window:text(point, label, font, scale, space, color, call_back, call_data)
+function window:text(point, label, font, scale, space, color)
     -- scroll.
     point.y = point.y + self.point
 
@@ -498,7 +502,7 @@ end
 ---@param label string     # The label of the gizmo.
 ---@param flag? gizmo_flag # OPTIONAL: The flag of the gizmo.
 ---@return boolean click # True on click, false otherwise.
-function window:button(shape, label, flag, call_back, call_data)
+function window:button(shape, label, flag)
     -- scroll.
     shape.y = shape.y + self.point
 
@@ -506,12 +510,8 @@ function window:button(shape, label, flag, call_back, call_data)
     local hover, index, focus, click = window_state(self, shape, flag)
 
     if window_check_draw(self, shape) then
-        if call_back then
-            call_back(call_data, self, shape, hover, index, focus, click, label)
-        else
-            -- draw a border.
-            window_border(self, shape, hover, index, focus, label)
-        end
+        -- draw a border.
+        window_border(self, shape, hover, index, focus, label)
     end
 
     -- return true on click.
@@ -525,7 +525,7 @@ end
 ---@param flag? gizmo_flag # OPTIONAL: The flag of the gizmo.
 ---@return number  value # The value.
 ---@return boolean click # True on click, false otherwise.
-function window:toggle(shape, label, value, flag, call_back, call_data)
+function window:toggle(shape, label, value, flag)
     -- scroll.
     shape.y = shape.y + self.point
 
@@ -538,18 +538,14 @@ function window:toggle(shape, label, value, flag, call_back, call_data)
     end
 
     if window_check_draw(self, shape) then
-        if call_back then
-            call_back(call_data, self, shape, hover, index, focus, label, value)
-        else
-            -- draw a border, with a text off-set.
-            window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
+        -- draw a border, with a text off-set.
+        window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
 
-            -- if value is set on, draw a small box to indicate so.
-            if value then
-                quiver.draw_2d.draw_box_2_round(
-                    box_2:old(shape.x + 6.0, shape.y + 6.0, shape.width - 12.0, shape.height - 12.0),
-                    WINDOW_CARD_ROUND_SHAPE, WINDOW_CARD_ROUND_COUNT, WINDOW_COLOR_PRIMARY_SIDE)
-            end
+        -- if value is set on, draw a small box to indicate so.
+        if value then
+            quiver.draw_2d.draw_box_2_round(
+                box_2:old(shape.x + 6.0, shape.y + 6.0, shape.width - 12.0, shape.height - 12.0),
+                WINDOW_CARD_ROUND_SHAPE, WINDOW_CARD_ROUND_COUNT, WINDOW_COLOR_PRIMARY_SIDE)
         end
     end
 
@@ -567,7 +563,7 @@ end
 ---@param flag? gizmo_flag # OPTIONAL: The flag of the gizmo.
 ---@return number  value # The value.
 ---@return boolean click # True on click, false otherwise.
-function window:slider(shape, label, value, min, max, step, flag, call_back, call_data)
+function window:slider(shape, label, value, min, max, step, flag)
     -- scroll.
     shape.y = shape.y + self.point
 
@@ -613,29 +609,27 @@ function window:slider(shape, label, value, min, max, step, flag, call_back, cal
         -- get the percentage of the value within the minimum/maximum range.
         local percentage = math.clamp(0.0, 1.0, math.percentage_from_value(min, max, value))
 
-        if call_back then
-            call_back(call_data, self, shape, hover, index, focus, label, value, percentage)
-        else
-            -- draw a border, with a text off-set.
-            local gizmo = window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0),
-                function() window_glyph(self, "board", "mouse", "pad") end)
+        -- draw a border, with a text off-set.
+        local gizmo = window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0),
+            function() window_glyph(self, "board", "mouse", "pad") end)
 
-            -- if percentage is above 0.0...
-            if percentage > 0.0 then
-                quiver.draw_2d.draw_box_2_round(
-                    box_2:old(shape.x + 6.0, shape.y + 6.0, (shape.width - 12.0) * percentage, shape.height - 12.0),
-                    WINDOW_CARD_ROUND_SHAPE, WINDOW_CARD_ROUND_COUNT, gizmo:fade(self, WINDOW_COLOR_PRIMARY_SIDE))
-            end
-
-            -- measure text.
-            local measure = self.font:measure_text(value, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE)
-
-            -- draw value.
-            self.font:draw(value, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
-                WINDOW_FONT_SCALE,
-                WINDOW_FONT_SPACE,
-                gizmo:fade(self, color:white()))
+        -- if percentage is above 0.0...
+        if percentage > 0.0 then
+            quiver.draw_2d.draw_box_2_round(
+                box_2:old(shape.x + 6.0, shape.y + 6.0, (shape.width - 12.0) * percentage, shape.height - 12.0),
+                WINDOW_CARD_ROUND_SHAPE, WINDOW_CARD_ROUND_COUNT, gizmo:fade(self, WINDOW_COLOR_PRIMARY_SIDE))
         end
+
+        -- measure text.
+        local measure = self.font:measure_text(value, shape.height, WINDOW_FONT_SPACE)
+
+        -- draw value.
+        self.font:draw(value, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + WINDOW_SHIFT.y),
+            vector_2:zero(),
+            0.0,
+            shape.height,
+            WINDOW_FONT_SPACE,
+            gizmo:fade(self, color:white()))
     end
 
     -- return value, and click.
@@ -650,7 +644,7 @@ end
 ---@param flag? gizmo_flag # OPTIONAL: The flag of the gizmo.
 ---@return number  value # The value.
 ---@return boolean click # True on click, false otherwise.
-function window:switch(shape, label, value, pool, flag, call_back, call_data)
+function window:switch(shape, label, value, pool, flag)
     -- scroll.
     shape.y = shape.y + self.point
 
@@ -691,21 +685,20 @@ function window:switch(shape, label, value, pool, flag, call_back, call_data)
     end
 
     if window_check_draw(self, shape) then
-        if call_back then
-            call_back(call_data, self, shape, hover, index, focus, label, value_label)
-        else
-            -- draw a border, with a text off-set.
-            window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
+        -- draw a border, with a text off-set.
+        window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
 
-            -- measure text.
-            local measure = self.font:measure_text(value_label, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE)
+        -- measure text.
+        local measure = self.font:measure_text(value_label, shape.height, WINDOW_FONT_SPACE)
 
-            -- draw value.
-            self.font:draw(value_label, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
-                WINDOW_FONT_SCALE,
-                WINDOW_FONT_SPACE,
-                color:white())
-        end
+        -- draw value.
+        self.font:draw(value_label,
+            vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + WINDOW_SHIFT.y),
+            vector_2:zero(),
+            0.0,
+            shape.height,
+            WINDOW_FONT_SPACE,
+            color:white())
     end
 
     -- return value, and click.
@@ -719,7 +712,7 @@ end
 ---@param clamp?  number     # OPTIONAL: The maximum button count for the action. If nil, do not clamp.
 ---@param flag?   gizmo_flag # The flag of the gizmo.
 ---@return boolean click # True on click, false otherwise.
-function window:action(shape, label, value, clamp, flag, call_back, call_data)
+function window:action(shape, label, value, clamp, flag)
     -- scroll.
     shape.y = shape.y + self.point
 
@@ -781,30 +774,28 @@ function window:action(shape, label, value, clamp, flag, call_back, call_data)
     end
 
     if window_check_draw(self, shape) then
-        if call_back then
-            call_back(call_data, self, shape, hover, index, focus, label, value)
-        else
-            -- draw a border.
-            window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
+        -- draw a border.
+        window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
 
-            local label = #value.list > 0.0 and "" or "N/A"
+        local label = #value.list > 0.0 and "" or "N/A"
 
-            -- for every button in the action's list...
-            for i, button in ipairs(value.list) do
-                -- concatenate the button's name.
-                label = label .. (i > 1.0 and "/" or "")
-                    .. button:name()
-            end
-
-            -- measure text.
-            local measure = self.font:measure_text(label, WINDOW_FONT_SCALE, WINDOW_FONT_SPACE)
-
-            -- draw value.
-            self.font:draw(label, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + 4.0),
-                WINDOW_FONT_SCALE,
-                WINDOW_FONT_SPACE,
-                color:white())
+        -- for every button in the action's list...
+        for i, button in ipairs(value.list) do
+            -- concatenate the button's name.
+            label = label .. (i > 1.0 and "/" or "")
+                .. button:name()
         end
+
+        -- measure text.
+        local measure = self.font:measure_text(label, shape.height, WINDOW_FONT_SPACE)
+
+        -- draw value.
+        self.font:draw(label, vector_2:old(shape.x + (shape.width * 0.5) - (measure * 0.5), shape.y + WINDOW_SHIFT.y),
+            vector_2:zero(),
+            0.0,
+            shape.height,
+            WINDOW_FONT_SPACE,
+            color:white())
     end
 
     return click
@@ -893,7 +884,7 @@ function window:entry(shape, label, value, flag)
     window_border(self, shape, hover, index, focus, label, vector_2:old(shape.width, 0.0))
 
     if pick then
-        local measure = self.font:measure_text(string.sub(value, 0, gizmo.entry_cursor), WINDOW_FONT_SCALE,
+        local measure = self.font:measure_text(string.sub(value, 0, gizmo.entry_cursor), shape.height,
             WINDOW_FONT_SPACE)
 
         quiver.draw_2d.draw_box_2(box_2:old(shape.x + measure + 4.0, shape.y, 2.0, shape.height), vector_2:zero(),
@@ -901,8 +892,10 @@ function window:entry(shape, label, value, flag)
     end
 
     -- draw value.
-    self.font:draw(value, vector_2:old(shape.x + 4.0, shape.y + 4.0),
-        WINDOW_FONT_SCALE,
+    self.font:draw(value, vector_2:old(shape.x + 4.0, shape.y + WINDOW_SHIFT.y),
+        vector_2:zero(),
+        0.0,
+        shape.height,
         WINDOW_FONT_SPACE,
         color:white())
 
@@ -916,13 +909,7 @@ end
 ---@param call  function # The draw function.
 ---@return number value
 ---@return number frame
-function window:scroll(shape, call, call_back, call_data)
-    if call_back then
-        call_back(call_data, self, shape)
-        --else
-        --  quiver.draw_2d.draw_box_2_border(shape, true)
-    end
-
+function window:scroll(shape, call)
     local gizmo = window_gizmo(self, window.count)
 
     local view_size = math.min(0.0, shape.height - gizmo.scroll_frame)

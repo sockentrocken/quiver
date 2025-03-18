@@ -779,8 +779,6 @@ fn scan_path(
                     // remove the leading back-slash.
                     let path = &path[1..path.len()];
 
-                    println!("rust: {path}");
-
                     data.push(path.to_string());
                 }
             } else {

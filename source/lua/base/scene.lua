@@ -49,14 +49,16 @@
 --]]
 
 ---@class scene
-scene = {}
+scene = {
+    __meta = {}
+}
 
 ---Create a new scene.
 ---@param shader shader # The light shader.
 ---@return scene value # The scene.
 function scene:new(shader)
     local i = {}
-    setmetatable(i, self)
+    setmetatable(i, self.__meta)
     getmetatable(i).__index = self
 
     --[[]]
@@ -547,14 +549,16 @@ end
 local LIGHT_MAXIMUM = 32.0
 
 ---@class light_manager
-light_manager = {}
+light_manager = {
+    __meta = {}
+}
 
 ---Create a new light_manager.
 ---@param shader shader # The light_manager shader.
 ---@return light_manager value # The light_manager.
 function light_manager:new(shader)
     local i = {}
-    setmetatable(i, self)
+    setmetatable(i, self.__meta)
     getmetatable(i).__index = self
 
     --[[]]
@@ -632,13 +636,15 @@ function light_manager:light_focus(point, focus, color)
 end
 
 ---@class light_instance
-light_instance = {}
+light_instance = {
+    __meta = {}
+}
 
 ---Create a new light instance.
 ---@return light_instance value # The light_instance.
 function light_instance:new(light, index, point)
     local i = {}
-    setmetatable(i, self)
+    setmetatable(i, self.__meta)
     getmetatable(i).__index = self
 
     --[[]]

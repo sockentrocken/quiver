@@ -14,12 +14,12 @@ default = [
 	#"file_notify",
 	#"rapier3d",
 	#"rapier2d",
-	"zip",
+	#"zip",
 	#"request",
-	"steam",
+	#"steam",
 	#"discord",
-	"embed",
-	"video",
+	#"embed",
+	#"video",
 	# Only enable this if you want to write documentation out to "../quiver.wiki".
 	"documentation"
 ]

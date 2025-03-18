@@ -56,7 +56,9 @@ action_button = {
 }
 
 ---Create a new action button.
----@param device input_device #
+---@param device input_device # The device for which the button is for.
+---@param button input_device # The button for which the action is for.
+---@return action_button value # The action_button.
 function action_button:new(device, button)
     local i = {}
     setmetatable(i, self.__meta)
@@ -154,6 +156,8 @@ function action_button:press_repeat(active_device)
         else
             self.bounce = 0.0
         end
+
+        return quiver.input.mouse.get_press(self.button)
     end
     if check_device(self, active_device, INPUT_DEVICE.PAD) then
         if quiver.input.pad.get_down(0.0, self.button) then
@@ -168,6 +172,8 @@ function action_button:press_repeat(active_device)
         else
             self.bounce = 0.0
         end
+
+        return quiver.input.pad.get_press(0.0, self.button)
     end
 
     return false
