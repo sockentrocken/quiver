@@ -837,10 +837,13 @@ fn get_file_drop_list(lua: &Lua, _: ()) -> mlua::Result<LuaValue> {
     "info": "TO-DO"
 }
 */
-fn get_file_modification(lua: &Lua, path: String) -> mlua::Result<i64> {
+fn get_file_modification(lua: &Lua, path: String) -> mlua::Result<i32> {
     unsafe {
-        Ok(ffi::GetFileModTime(
+        let time: i32 = ffi::GetFileModTime(
             Script::rust_to_c_string(&ScriptData::get_path(lua, &path)?)?.as_ptr(),
-        ))
+        )
+        .try_into()
+        .unwrap();
+        Ok(time)
     }
 }

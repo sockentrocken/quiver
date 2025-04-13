@@ -105,47 +105,6 @@ fn write_documentation() {
     }
 }
 
-#[allow(dead_code)]
-fn compile_external_dependency() {
-    // Tell cargo to look for shared libraries in the specified directory
-    //println!("cargo:rustc-link-search=/path/to/lib");
-
-    // The bindgen::Builder is the main entry point
-    // to bindgen, and lets you build up options for
-    // the resulting bindings.
-    let bindings = bindgen::Builder::default()
-        // The input header we would like to generate
-        // bindings for.
-        .header("source/rust/base/external/raymedia.h")
-        // Tell cargo to invalidate the built crate whenever any of the
-        // included header files changed.
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
-        // Finish the builder and generate the bindings.
-        .generate()
-        // Unwrap the Result and panic on failure.
-        .expect("Unable to generate bindings");
-
-    // Write the bindings to the $OUT_DIR/bindings.rs file.
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
-
-    cc::Build::new()
-        .file("source/rust/base/external/rmedia.c")
-        .cargo_warnings(false)
-        .include("source/rust/base/external")
-        .compile("rmedia");
-
-    // Tell cargo to tell rustc to link the system bzip2
-    // shared library.
-    println!("cargo:rustc-link-lib=avcodec");
-    println!("cargo:rustc-link-lib=avformat");
-    println!("cargo:rustc-link-lib=avutil");
-    println!("cargo:rustc-link-lib=swresample");
-    println!("cargo:rustc-link-lib=swscale");
-}
-
 // this function is responsible for parsing the src/system/ folder and finding every special comment in the source code to then output it to the GitHub documentation and the Lua LSP definition file.
 fn main() {
     #[cfg(feature = "documentation")]
@@ -212,9 +171,6 @@ fn main() {
                 .expect("build.rs: Could not write ---@example file.");
         }
     }
-
-    #[cfg(feature = "video")]
-    compile_external_dependency();
 
     // where to search for for library linking.
     #[cfg(target_os = "linux")]

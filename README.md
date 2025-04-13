@@ -16,7 +16,6 @@ As part of the Rust standard library:
 * .ZIP creation/extraction
 * HTTP GET/POST, socket networking
 * Discord and Steam integration
-* Video playback
 
 As part of the Lua standard library:
 

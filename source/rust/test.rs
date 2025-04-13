@@ -104,9 +104,6 @@ mod test_main {
         // NOTE: you MUST have Discord running for this test.
         #[cfg(feature = "discord")]
         test_folder("discord").await;
-
-        #[cfg(feature = "video")]
-        test_folder("video").await;
         */
     }
 }

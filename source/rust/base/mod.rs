@@ -80,6 +80,3 @@ pub mod steam;
 
 #[cfg(feature = "discord")]
 pub mod discord;
-
-#[cfg(feature = "video")]
-pub mod video;

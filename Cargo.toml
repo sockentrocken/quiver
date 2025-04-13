@@ -19,7 +19,6 @@ default = [
 	#"steam",
 	#"discord",
 	#"embed",
-	#"video",
 	# Only enable this if you want to write documentation out to "../quiver.wiki".
 	"documentation"
 ]
@@ -33,7 +32,6 @@ request       = ["dep:reqwest"]
 steam         = ["dep:steamworks"]
 discord       = ["dep:discord-sdk"]
 embed         = ["dep:rust-embed"]
-video         = []
 documentation = []
 
 [dependencies]

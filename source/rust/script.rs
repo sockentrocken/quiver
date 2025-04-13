@@ -283,7 +283,6 @@ impl Script {
         #[cfg(feature = "request")]  request::set_global(lua, quiver, status_info, script_info)?;
         #[cfg(feature = "steam")]    steam::set_global  (lua, quiver, status_info, script_info)?;
         #[cfg(feature = "discord")]  discord::set_global(lua, quiver, status_info, script_info)?;
-        #[cfg(feature = "video")]    video::set_global  (lua, quiver, status_info, script_info)?;
 
         Ok(())
     }
@@ -450,7 +449,6 @@ pub struct Feature {
     steam: bool,
     discord: bool,
     embed: bool,
-    video: bool,
 }
 
 impl Feature {
@@ -466,7 +464,6 @@ impl Feature {
             steam: cfg!(feature = "steam"),
             discord: cfg!(feature = "discord"),
             embed: cfg!(feature = "embed"),
-            video: cfg!(feature = "video"),
         }
     }
 }
